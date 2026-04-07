@@ -1,0 +1,821 @@
+/* ===================================================================
+   こすくまくんのおみせ — CSS洗練パッチ
+   3モデル合意（Claude Opus 4.6 / Gemini 2.5 Flash / GPT-4o）
+   既存CSSの後に追記して上書き適用する
+   =================================================================== */
+
+/* ------------------------------------------------------------------
+   1. カラーパレット微調整
+   全3モデルが色の微調整を推奨。Claude/Geminiの方向性を基に、
+   世界観を壊さない範囲で洗練度を上げる。
+   ------------------------------------------------------------------ */
+:root {
+  /* 背景系: わずかに温かみを足す (Claude + Gemini 合意) */
+  --bg: #FAF8F5;
+  --bg-alt: #F5F1EB;
+
+  /* テキスト: 赤み方向に微調整、丸ゴシックに合う (Claude) */
+  --text: #4A4036;
+  --text-light: #9B9487;
+
+  /* ブラウン系: 彩度を少し落とし渋みを足す (Claude + Gemini 方向合意) */
+  --brown: #8B7355;
+  --brown-light: #B49A6C;
+  --brown-dark: #5A4833;
+
+  /* アクセント: テラコッタの彩度調整 (Claude) */
+  --terracotta: #C25540;
+
+  /* CTA用グリーン: 落ち着いた森のグリーン (Claude + Gemini) */
+  --green: #6B8F5E;
+
+  /* ボーダー: わずかに濃くしてセパレーション明確化 (Claude) */
+  --border: #E8E2D6;
+
+  /* クリーム: 黄みを少し抑え上品に (Claude) */
+  --cream: #FAF7D4;
+
+  /* 新設: shadow系CSS変数 (Gemini + Claude 合意) */
+  --shadow-color: rgba(74, 64, 54, 0.08);
+  --shadow-sm: 0 1px 3px rgba(74, 64, 54, 0.04);
+  --shadow-md: 0 4px 16px rgba(74, 64, 54, 0.06);
+  --shadow-lg: 0 8px 32px rgba(74, 64, 54, 0.10);
+
+  /* 新設: カスタムイージング (Claude) */
+  --ease-out-soft: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ------------------------------------------------------------------
+   2. タイポグラフィ
+   全3モデルがフォント階層の明確化を推奨。
+   Claude のスケール比 1.25 (Major Third) ベースを採用。
+   ------------------------------------------------------------------ */
+
+/* 本文: weight 500で「やさしいけど読みやすい」(Claude + GPT 合意) */
+body {
+  line-height: 1.75;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hero h1: 30→28pxでスケーリング滑らか化 (Claude) */
+.hero-text h1 {
+  font-size: 28px;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+}
+
+.hero-text .hero-subtitle {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+.hero-text .hero-desc {
+  font-size: 14px;
+  line-height: 1.75;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* セクション見出し: 字間を広げ装飾的ゆとり (Claude + Gemini 合意) */
+.section-heading h2 {
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+}
+
+.section-heading p {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* 商品名: 本文と同サイズ+700で差別化 (Claude) */
+.product-name {
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* 価格: Quicksand で映える字間 (Claude) */
+.product-price {
+  font-size: 20px;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+.product-oneliner {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.tax-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.about-text h2 {
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+
+.about-text p {
+  font-size: 14px;
+  line-height: 1.85;
+  font-weight: 500;
+}
+
+.faq-q {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.faq-a {
+  font-size: 14px;
+  line-height: 1.85;
+  font-weight: 500;
+}
+
+.footer-nav-col a {
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+.footer-nav-col h4 {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.footer-tagline {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+.footer-bottom {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+
+/* ------------------------------------------------------------------
+   3. フッターのコントラスト改善
+   Claude がWCAG AA基準未達を指摘。Geminiも色調整を推奨。
+   ------------------------------------------------------------------ */
+.footer {
+  background: #36302A;
+  color: #CBC4B6;
+}
+
+.footer-tagline {
+  color: #ADA596;
+}
+
+.footer-nav-col h4 {
+  color: #EAE2D4;
+}
+
+.footer-nav-col a {
+  color: #ADA596;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: #958D80;
+}
+
+
+/* ------------------------------------------------------------------
+   4. スペーシング — 8pxグリッド統一
+   全3モデルが余白の統一を推奨。Claude の分析が最も具体的。
+   ------------------------------------------------------------------ */
+
+/* Header: 10px→8px (Claude: 8px grid) */
+.header {
+  padding: 8px 32px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Hero text: 36px→32px (Claude: 8px grid) */
+.hero-text {
+  padding: 32px 48px;
+}
+
+.hero-text h1 {
+  margin-bottom: 4px;
+}
+
+.hero-text .hero-desc {
+  margin-bottom: 24px;
+}
+
+/* Products grid: 28→24px (Claude: 8px grid) */
+.product-grid {
+  gap: 24px;
+}
+
+/* Card: 20→24px (Claude + Gemini 合意) */
+.product-card {
+  padding: 24px;
+}
+
+.product-img {
+  margin-bottom: 16px;
+}
+
+.product-name {
+  margin-bottom: 8px;
+}
+
+.product-price {
+  margin-bottom: 12px;
+}
+
+/* Trust strip: 40→48px gap (Claude: 8px grid) */
+.trust-strip {
+  gap: 48px;
+}
+
+/* About/FAQ: 56→64px (Claude: section padding 統一) */
+.about {
+  padding: 64px 80px;
+  border-top: none; /* dividerがあるのでborder不要 (Claude) */
+}
+
+.about-content {
+  gap: 32px;
+}
+
+.faq {
+  padding: 64px 80px;
+}
+
+/* Section divider: 12→16px (Claude: 8px grid) */
+.section-divider {
+  padding: 16px 0;
+}
+
+
+/* ------------------------------------------------------------------
+   5. ビジュアルヒエラルキー
+   Claude: btn-cartをgreenに統一し「買う＝緑」の学習効果。
+   全3モデルがCTA強化を推奨。
+   ------------------------------------------------------------------ */
+
+/* CTAボタン: brown→green統一 (Claude) */
+.btn-cart {
+  background: var(--green);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.btn-cart:hover {
+  background: #5D7F52;
+}
+
+/* Hero CTA: 微調整 (Claude + Gemini 合意) */
+.hero-cta {
+  letter-spacing: 0.08em;
+  font-size: 15px;
+  padding: 12px 32px;
+}
+
+.hero-cta:hover {
+  background: #5D7F52;
+}
+
+/* Badge: 影を控えめに品よく (Claude) */
+.product-badge {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+}
+
+/* Trust strip: 視覚ウェイトを下げる (Claude) */
+.trust-strip-item {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.trust-free {
+  font-weight: 700;
+  color: var(--terracotta);
+}
+
+/* Header nav: CTAより控えめに (Claude) */
+.header-nav a {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.header-nav a:hover {
+  color: var(--brown-dark);
+}
+
+/* Checkout: green統一 (Claude) */
+.btn-checkout {
+  letter-spacing: 0.04em;
+}
+
+.btn-checkout:hover {
+  background: #5D7F52;
+}
+
+
+/* ------------------------------------------------------------------
+   6. テクスチャと奥行き
+   全3モデルがbox-shadow改善を推奨。Claude のレイヤードshadow +
+   border-radius階層を採用。
+   ------------------------------------------------------------------ */
+
+/* カード: 2層shadow (Claude) */
+.product-card {
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(74, 64, 54, 0.04),
+    0 4px 16px rgba(74, 64, 54, 0.06);
+}
+
+.product-card:hover {
+  box-shadow:
+    0 2px 4px rgba(74, 64, 54, 0.04),
+    0 8px 32px rgba(74, 64, 54, 0.10);
+}
+
+/* 商品画像エリア: border-radius階層 (Claude) */
+.product-img {
+  background: linear-gradient(145deg, #F8F5EF 0%, #F1ECE3 100%);
+  border-radius: 12px;
+}
+
+/* Hero すりガラス: 温かみのある半透明 (Claude) */
+.hero-text {
+  background: rgba(253, 250, 244, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 16px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+/* ボタンの影: 微調整 (Claude) */
+.btn-cart {
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+}
+
+.btn-cart:hover {
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.btn-cart:active {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.hero-cta {
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+}
+
+.hero-cta:hover {
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Cart drawer: 洗練された影 (Claude) */
+.cart-drawer {
+  border-radius: 16px 0 0 16px;
+  border-left: none;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Modal: 浮遊感のある影 (Claude) */
+.legal-modal {
+  border-radius: 16px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* Cart popup: ソフト (Claude) */
+.cart-added-popup {
+  border-radius: 12px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Sticky cart: 丸みと影 (Claude) */
+.sticky-cart {
+  border-radius: 48px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ハートボタン: ガラス効果 (Claude) */
+.product-heart {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* About引用ボーダー: dotted→solid (Claude) */
+.about-text p {
+  border-left: 2px solid var(--border);
+  padding-left: 16px;
+}
+
+/* Divider line: 少し長く (Claude + Gemini 合意) */
+.section-divider .divider-line {
+  width: 48px;
+}
+
+/* ===== SOLD OUT オーバーレイ ===== */
+.product-img {
+  position: relative; /* オーバーレイ用 */
+}
+
+.sold-out-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  z-index: 2;
+}
+
+.sold-out-label {
+  color: #fff;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 6px 18px;
+  border-radius: 8px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.product-img.is-sold-out img {
+  filter: grayscale(0.5);
+}
+
+/* ===== もうすこしまってね ===== */
+.price-coming-soon {
+  font-size: 13px !important;
+  color: var(--text-light) !important;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 400 !important;
+  letter-spacing: 0.05em;
+}
+
+
+/* ------------------------------------------------------------------
+   7. マイクロインタラクション
+   全3モデルが translateY(-8px) → -4px を推奨。
+   Claude のイージング設計を採用。
+   ------------------------------------------------------------------ */
+
+/* カードホバー: -8px → -4px (全3モデル合意) */
+.product-card {
+  transition:
+    box-shadow 0.25s var(--ease-out-soft),
+    transform 0.25s var(--ease-out-soft);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+/* 商品画像ズーム: ゆっくり、控えめ (Claude) */
+.product-img img {
+  transition: transform 0.5s var(--ease-out-soft);
+}
+
+.product-card:hover .product-img img {
+  transform: scale(1.04);
+}
+
+/* ワンライナー展開: スムーズに (Claude) */
+.product-oneliner {
+  transition: max-height 0.3s var(--ease-out-soft), opacity 0.25s ease 0.05s;
+}
+
+.product-card:hover .product-oneliner {
+  max-height: 24px;
+}
+
+/* ボタン: 統一されたプレス感 (Claude + GPT 合意) */
+.btn-cart {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+}
+
+.btn-cart:hover {
+  transform: translateY(-1px);
+}
+
+.btn-cart:active {
+  transform: translateY(1px);
+}
+
+.hero-cta {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+}
+
+.hero-cta:hover {
+  transform: translateY(-1px);
+}
+
+.hero-cta:active {
+  transform: translateY(1px);
+}
+
+/* ハートボタン: スプリングバウンス (Claude) */
+.product-heart {
+  transition: color 0.15s ease, transform 0.2s var(--ease-bounce);
+}
+
+.product-heart:hover {
+  transform: scale(1.1);
+}
+
+.product-heart:active {
+  transform: scale(0.95);
+}
+
+/* カートバウンス: スプリング (Claude) */
+@keyframes cartBounce {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-3px) scale(1.05); }
+  70% { transform: translateY(0) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* こすくまくんフロート: 少し大きく (Claude + Gemini 合意) */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Cart drawer: スムーズスライド (Claude) */
+.cart-drawer {
+  transition: right 0.3s var(--ease-out-soft);
+}
+
+/* Sticky cart: 穏やかなホバー (Claude) */
+.sticky-cart {
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s ease;
+}
+
+.sticky-cart:hover {
+  transform: scale(1.03);
+}
+
+/* パルスアニメ: 控えめに (Claude) */
+@keyframes stickyPulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.12); }
+  50% { box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 8px 28px rgba(139, 115, 85, 0.25); }
+}
+
+/* セクション見出しフェードイン: 少し長め (Claude) */
+.section-heading {
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* FAQ矢印: スムーズ回転 (Claude) */
+.faq-q::after {
+  transition: transform 0.25s var(--ease-out-soft);
+}
+
+/* カート追加アニメ: スプリング (Claude) */
+.btn-cart.added {
+  animation: cartAdded 0.3s var(--ease-bounce);
+}
+
+@keyframes cartAdded {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* Header nav transition (Claude + Gemini) */
+.header-nav a {
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* Footer link transition (Claude) */
+.footer-nav-col a {
+  transition: color 0.2s ease;
+}
+
+/* Header logo hover (Claude) */
+.header-logo:hover img {
+  transform: translateY(-1px);
+}
+
+/* Cart quantity button (Claude) */
+.cart-item-qty button {
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.cart-item-qty button:active {
+  transform: scale(0.95);
+}
+
+
+/* ------------------------------------------------------------------
+   8. ポリッシュ（細部の仕上げ）
+   全3モデルが ::selection, scrollbar, focus-visible を推奨。
+   ------------------------------------------------------------------ */
+
+/* テキスト選択: はちみつ/クリーム色 (Claude — 世界観に合う) */
+::selection {
+  background: rgba(250, 247, 212, 0.8);
+  color: var(--brown-dark);
+}
+
+::-moz-selection {
+  background: rgba(250, 247, 212, 0.8);
+  color: var(--brown-dark);
+}
+
+/* フォーカスリング: ブランドカラーで統一 (全3モデル合意) */
+*:focus-visible {
+  outline: 2px solid var(--brown-light);
+  outline-offset: 2px;
+}
+
+/* カスタムスクロールバー (全3モデル合意) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brown-light);
+}
+
+/* Firefox scrollbar (Claude) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--bg-alt);
+}
+
+/* Cart drawer scrollbar: 細め (Claude) */
+.cart-drawer-items::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cart-drawer-items::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* Legal modal scrollbar (Claude) */
+.legal-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.legal-modal::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* Hero: transparent overlay so 3D objects show through clearly (Claude) */
+.hero {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Hero kuma: グロウを控えめに (Claude) */
+.hero-kuma {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.08));
+}
+
+.hero-kuma::before {
+  background: radial-gradient(ellipse, rgba(252, 250, 210, 0.3) 0%, transparent 70%);
+}
+
+/* Footer utouto: ホバーで温かみ (Claude) */
+.footer-utouto {
+  transition: filter 0.3s ease;
+  opacity: 0.8;
+}
+
+.footer-utouto:hover {
+  opacity: 1;
+}
+
+/* Cart item image: 統一レンダリング (Claude) */
+.cart-item-img {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Checkout button shadow (Claude) */
+.btn-checkout {
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+}
+
+.btn-checkout:active {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+
+/* ------------------------------------------------------------------
+   9. アクセシビリティ
+   Claude + Gemini が prefers-reduced-motion / print を推奨。
+   ------------------------------------------------------------------ */
+
+/* Prefers reduced motion (Claude) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .hero-kuma { animation: none; }
+  .hero-butterfly { animation: none; }
+  .hero-star { animation: none; }
+  .sticky-cart.has-items { animation: none; }
+}
+
+/* Print styles (Claude) */
+@media print {
+  .header, .sticky-cart, .cart-drawer, .cart-drawer-overlay,
+  .cart-added-popup, .hero-butterfly, .hero-star {
+    display: none !important;
+  }
+  body { background: #fff; color: #333; }
+  .product-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+
+/* ------------------------------------------------------------------
+   10. レスポンシブ微調整
+   全3モデルの修正値を反映。
+   ------------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  .about { padding: 48px 24px; }
+  .faq { padding: 48px 24px; }
+  .trust-strip { gap: 24px; }
+}
+
+@media (max-width: 500px) {
+  .about { padding: 32px 16px; }
+  .faq { padding: 32px 16px; }
+  .product-card { padding: 12px; }
+  .product-grid { gap: 12px; }
+  .trust-strip { gap: 8px; }
+  .section-divider { padding: 8px 0; }
+
+  .hero-text { padding: 8px 14px 10px; }
+  .hero-text h1 { font-size: min(4.2vw, 17px); line-height: 1.2; white-space: nowrap; margin-bottom: 0; letter-spacing: 0.02em; }
+  .hero-text .hero-subtitle { font-size: min(2.4vw, 10px); margin-bottom: 2px; white-space: nowrap; letter-spacing: 0; }
+  .hero-text .hero-desc { font-size: min(2.6vw, 11px); line-height: 1.3; margin-bottom: 6px; }
+  .hero-cta { font-size: min(3vw, 12px); padding: 8px 20px; min-height: 36px; border-radius: 10px; letter-spacing: 1px; }
+}
+
+@media (max-width: 375px) {
+  .about { padding: 24px 12px; }
+  .faq { padding: 24px 12px; }
+  .product-card { padding: 8px; }
+  .product-grid { gap: 8px; }
+
+  .hero-text { padding: 6px 10px 8px; }
+  .hero-text .hero-desc { font-size: 9px; }
+  .hero-cta { padding: 7px 18px; min-height: 34px; font-size: 10px; }
+}

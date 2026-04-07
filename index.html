@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>こすくまくんのおみせ</title>
+<link rel="canonical" href="https://kosukuma-official-shop.pages.dev/">
+<meta property="og:title" content="こすくまくんのおみせ">
+<meta property="og:description" content="ほっとするグッズがならぶ、ちいさなおみせ">
+<meta property="og:url" content="https://kosukuma-official-shop.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://kosukuma-official-shop.pages.dev/assets/kosukuma/front.png">
+<meta name="description" content="こすくまくんのグッズ公式ショップ。ほっとするグッズがならぶ、ちいさなおみせ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #fcfad2;
+  --bg: #FDFBF9;
+  --bg-alt: #f7f3ed;
+  --card-bg: #ffffff;
+  --brown: #9c7a4a;
+  --brown-light: #b39a66;
+  --brown-dark: #5c4a30;
+  --text: #4A443E;
+  --text-light: #8a8278;
+  --accent: #993030;
+  --border: #ece6db;
+  --green: #7c9e6a;
+  --terracotta: #b64b32;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.pixel-art { image-rendering: pixelated; }
+.dot-icon { image-rendering: pixelated; vertical-align: middle; }
+
+/* ===== 3D HEADER WRAP ===== */
+#header-3d-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+#header-3d-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 8;
+}
+#header-3d-trail {
+  z-index: 9 !important;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background:
+    linear-gradient(180deg, rgba(252, 250, 210, 0.85), rgba(252, 250, 210, 0.8)),
+    url('https://kosukuma-official-shop.pages.dev/assets/dot-illust/maptile_wood_01.png');
+  background-size: 100% 100%, 64px 64px;
+  image-rendering: pixelated;
+  padding: 10px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-wrap: wrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+.header-logo {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s;
+}
+
+.header-logo:hover img {
+  transform: translateY(-2px);
+}
+
+.header-logo img {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+}
+
+.header-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.header-nav a:hover {
+  background: var(--cream);
+  color: var(--brown);
+}
+
+.header-cart {
+  background: var(--cream);
+  color: var(--brown-dark);
+  border: 1px solid var(--brown-light);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: background 0.15s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-cart .cart-treasure {
+  width: 14px;
+  height: 14px;
+}
+
+.header-cart .cart-count-num {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+}
+
+.header-cart:hover { background: #f5f0c0; }
+
+.header-cart.bounce {
+  animation: cartBounce 0.3s ease;
+}
+
+@keyframes cartBounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+/* ===== HERO ===== */
+.hero {
+  background: transparent;
+  padding: 48px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  position: relative;
+  z-index: auto;
+  max-height: 400px;
+  min-height: 300px;
+  overflow: visible;
+  border-top: none;
+  border-bottom: none;
+  pointer-events: none;
+}
+
+.hero-kuma {
+  position: absolute;
+  right: 12%;
+  bottom: 10px;
+  width: 180px;
+  height: 180px;
+  z-index: 9;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.1));
+}
+.hero-kuma::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(ellipse, rgba(252,250,210,0.4) 0%, transparent 70%);
+  z-index: -1;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.hero-text {
+  background: rgba(253, 251, 249, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 36px 48px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  max-width: 520px;
+  position: relative;
+  z-index: 9;
+  pointer-events: auto;
+}
+
+.hero-text h1 {
+  font-size: 30px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 2px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+}
+
+.hero-text .hero-subtitle {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.hero-text .hero-desc {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: #fff;
+  padding: 12px 36px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+.hero-cta:hover { background: #6b923f; transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.1); }
+.hero-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+
+.inline-kuma-anim {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* Butterfly in hero (max 1) */
+.hero-butterfly {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 25%;
+  right: 18%;
+  animation: butterfly 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Tiny star decorations in hero (max 2) */
+.hero-star {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: 0.7;
+  animation: starTwinkle 3s ease-in-out infinite;
+  z-index: 3;
+}
+
+.hero-star-1 { top: 18%; right: 12%; animation-delay: 0s; }
+.hero-star-2 { top: 35%; right: 25%; animation-delay: 1.5s; }
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.15); }
+}
+
+@keyframes butterfly {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(30px, -15px) rotate(5deg); }
+  50% { transform: translate(-20px, -30px) rotate(-3deg); }
+  75% { transform: translate(15px, -10px) rotate(4deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* ===== SECTION HEADINGS ===== */
+.section-heading {
+  text-align: center;
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.section-heading.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-heading h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  letter-spacing: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-heading h2 .heading-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.section-heading p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+/* ===== PRODUCTS ===== */
+.products {
+  padding: 64px 80px;
+  background: var(--bg);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.product-card {
+  background: var(--card-bg);
+  border: none;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(74, 68, 62, 0.06);
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(74, 68, 62, 0.12);
+}
+
+.product-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(145deg, #f8f5ee 0%, #f0ece2 100%);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.product-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.product-card:hover .product-img img {
+  transform: scale(1.06);
+}
+
+.product-heart {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 4;
+  transition: all 0.2s;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-heart:hover { color: #e55; transform: scale(1.15); }
+.product-heart.liked { color: #e55; }
+
+.tax-label {
+  font-size: 11px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  color: var(--text-light);
+  margin-left: 2px;
+  font-weight: 400;
+}
+
+.product-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: white;
+  z-index: 3;
+  transform: rotate(-8deg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.badge-best { background: linear-gradient(135deg, #b08000, #d4a020); }
+.badge-new { background: linear-gradient(135deg, #c01a1a, #e03030); }
+.badge-sold { background: #999; }
+
+.product-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 4px;
+}
+
+.product-oneliner {
+  font-size: 12px;
+  color: var(--text-light);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.product-card:hover .product-oneliner {
+  max-height: 20px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+.product-price {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--terracotta);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.btn-cart {
+  width: 100%;
+  padding: 10px;
+  background: var(--brown);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  cursor: pointer;
+  min-height: 44px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+  transition: all 0.15s;
+}
+
+.btn-cart:hover { transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.1); }
+.btn-cart:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+.btn-cart:disabled { background: #ccc; cursor: default; box-shadow: none; color: #999; }
+.product-card:has(.btn-cart:disabled) .product-img { opacity: 0.5; filter: grayscale(0.4); }
+
+.btn-cart.added {
+  transform: scale(1.05);
+  background: var(--green);
+}
+
+/* Cart added popup */
+.cart-added-popup {
+  position: fixed;
+  bottom: 80px;
+  right: 30px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-dark);
+}
+
+.cart-added-popup.show { display: flex; }
+.cart-added-popup .popup-anim { width: 40px; height: 40px; }
+
+/* ===== TRUST STRIP ===== */
+.trust-strip {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 80px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.trust-strip-item {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trust-strip-item .trust-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.trust-free {
+  color: var(--terracotta);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* ===== ABOUT ===== */
+.about {
+  padding: 56px 80px;
+  background: var(--bg-alt);
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.about-content {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.about-img {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.about-text {
+  text-align: left;
+  position: relative;
+}
+
+.about-text::before {
+  content: '\201C';
+  font-size: 48px;
+  color: var(--border);
+  position: absolute;
+  top: -20px;
+  left: -16px;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.about-text h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.about-text h2 .honey-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.about-text p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.9;
+  border-left: 3px dotted var(--border);
+  padding-left: 14px;
+}
+
+/* ===== FAQ ===== */
+.faq {
+  padding: 56px 80px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.faq-list {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-item:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.faq-q {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  padding: 16px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  user-select: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.faq-q:focus-visible {
+  outline: 2px solid var(--brown);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.faq-q::before {
+  content: 'Q.';
+  color: var(--terracotta);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.faq-q::after {
+  content: '\25BC';
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-light);
+  transition: transform 0.2s;
+}
+
+.faq-item.open .faq-q::after {
+  transform: rotate(180deg);
+}
+
+.faq-a {
+  font-size: 14px;
+  color: var(--text);
+  padding: 0 0 16px 24px;
+  display: none;
+  line-height: 1.8;
+}
+
+.faq-item.open .faq-a {
+  display: block;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: #3a3028;
+  color: #c8c0b0;
+}
+.footer-main {
+  display: flex;
+  justify-content: space-between;
+  padding: 48px 80px 32px;
+  gap: 48px;
+}
+.footer-brand { flex: 1; }
+.footer-logo { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.footer-tagline { font-size: 13px; color: #a09888; margin-bottom: 16px; }
+.footer-utouto { width: 56px; height: 56px; }
+.footer-nav { display: flex; gap: 48px; }
+.footer-nav-col { display: flex; flex-direction: column; gap: 8px; }
+.footer-nav-col h4 { font-size: 13px; font-weight: 700; color: #e8e0d0; margin-bottom: 4px; letter-spacing: 1px; }
+.footer-nav-col a { font-size: 13px; color: #a09888; text-decoration: none; transition: color 0.15s; }
+.footer-nav-col a:hover { color: #fff; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 80px;
+  text-align: center;
+  font-size: 11px;
+  color: #807868;
+}
+
+/* ===== CART DRAWER ===== */
+.cart-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 500;
+  display: none;
+}
+
+.cart-drawer-overlay.open { display: block; }
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100%;
+  background: var(--card-bg);
+  border-left: 1px solid var(--border);
+  border-radius: 20px 0 0 20px;
+  z-index: 501;
+  transition: right 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-drawer.open { right: 0; }
+
+.cart-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-drawer-header h3 {
+  font-size: 18px;
+  color: var(--brown-dark);
+}
+
+.cart-drawer-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-light);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-drawer-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item-img {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(145deg, #f8f5ee 0%, #f0ece2 100%);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 14px; font-weight: 700; color: var(--brown-dark); }
+.cart-item-price { font-size: 13px; color: var(--terracotta); font-family: 'Quicksand', sans-serif; font-weight: 600; }
+
+.cart-item-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-item-qty button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cart-item-qty button:hover { background: var(--bg); }
+.cart-item-qty span { font-size: 14px; font-weight: 700; }
+
+.cart-drawer-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 16px;
+}
+
+.cart-total-amount {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  color: var(--terracotta);
+}
+
+.btn-checkout {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  cursor: pointer;
+  min-height: 44px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+  transition: all 0.15s;
+}
+
+.btn-checkout:hover { background: #6b923f; transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.1); }
+.btn-checkout:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+
+.cart-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* ===== STICKY CART ===== */
+.sticky-cart {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 400;
+  background: var(--brown);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: transform 0.15s, opacity 0.15s;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.sticky-cart:hover { transform: scale(1.05); opacity: 0.9; }
+
+.sticky-cart.has-items {
+  animation: stickyPulse 2s ease-in-out infinite;
+}
+
+@keyframes stickyPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  50% { box-shadow: 0 4px 20px rgba(156, 122, 74, 0.4); }
+}
+
+.sticky-cart .sticky-cart-count {
+  background: var(--terracotta);
+  color: #fff;
+  font-size: 11px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ===== LEGAL MODAL ===== */
+.legal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 600;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+.legal-modal-overlay.open { display: flex; }
+
+.legal-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 32px 36px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.legal-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-light);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.legal-modal-close:hover { background: var(--bg-alt); }
+
+.legal-modal h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 20px;
+  padding-right: 40px;
+}
+
+.legal-modal h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.legal-modal p, .legal-modal li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.legal-modal ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.legal-modal table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.legal-modal th, .legal-modal td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.legal-modal th {
+  background: var(--bg-alt);
+  font-weight: 700;
+  color: var(--brown-dark);
+  white-space: nowrap;
+  width: 30%;
+}
+
+/* ===== SECTION DIVIDER (dot art decoration) ===== */
+.section-divider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  opacity: 0.5;
+}
+.section-divider img {
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+}
+.section-divider .divider-line {
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* ----- Tablet (max-width: 900px) ----- */
+@media (max-width: 900px) {
+  .header { padding: 10px 16px; }
+
+  .hero {
+    flex-direction: column;
+    padding: 28px 24px;
+    text-align: center;
+    max-height: none;
+    min-height: auto;
+  }
+  .hero-text { padding: 20px 24px; max-width: 100%; }
+  .hero-text h1 { font-size: 22px; }
+  .hero-text .hero-desc { font-size: 13px; }
+  .hero-butterfly { display: none; }
+  .hero-star { display: none; }
+  .inline-kuma-anim { width: 28px; height: 28px; }
+
+  .trust-strip { padding: 14px 24px; gap: 24px; }
+
+  .products { padding: 40px 24px; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .about { padding: 40px 24px; }
+  .about-content { flex-direction: column; text-align: center; }
+  .about-text { text-align: center; }
+  .about-text::before { display: none; }
+  .about-text p { border-left: none; padding-left: 0; }
+
+  .faq { padding: 40px 24px; }
+
+  .footer-main { flex-direction: column; padding: 32px 24px 24px; gap: 28px; }
+  .footer-nav { flex-wrap: wrap; gap: 24px; }
+  .footer-nav-col a { min-height: 44px; display: inline-flex; align-items: center; }
+  .footer-bottom { padding: 12px 24px; }
+
+  .legal-modal { padding: 24px 20px; }
+}
+
+/* ----- Mobile (max-width: 500px) ----- */
+@media (max-width: 500px) {
+  #header-3d-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  .header { padding: 8px 12px; }
+  .header-logo { font-size: 14px; min-height: 44px; display: flex; align-items: center; }
+  .header-nav a { padding: 10px 10px; font-size: 13px; min-height: 44px; display: inline-flex; align-items: center; }
+  .header-cart { padding: 10px 14px; font-size: 13px; min-height: 44px; }
+
+  .hero { padding: 10px 10px; }
+  .hero-text {
+    padding: 8px 14px 10px;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    border-radius: 14px;
+    background: rgba(253, 251, 249, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    max-width: calc(100vw - 24px);
+    overflow: hidden;
+  }
+  .hero-text h1 { font-size: min(4.2vw, 17px); line-height: 1.2; white-space: nowrap; margin-bottom: 0; letter-spacing: 0.02em; }
+  .hero-text .hero-subtitle { font-size: min(2.4vw, 10px); margin-bottom: 2px; white-space: nowrap; letter-spacing: 0; }
+  .hero-text .hero-desc { font-size: min(2.6vw, 11px); line-height: 1.3; margin-bottom: 6px; }
+  .hero-cta { font-size: min(3vw, 12px); padding: 8px 20px; min-height: 36px; border-radius: 10px; letter-spacing: 1px; }
+
+  .trust-strip {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 16px;
+    padding: 10px 12px;
+  }
+  .trust-strip-item { font-size: 12px; white-space: nowrap; }
+
+  .products { padding: 24px 16px; }
+  .section-heading h2 { font-size: 20px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-card { padding: 12px; }
+  .product-name {
+    font-size: 13px;
+    line-height: 1.35;
+    min-height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    word-break: keep-all;
+  }
+  .product-price { font-size: 18px; }
+  .btn-cart {
+    font-size: 13px;
+    padding: 12px 12px;
+    min-height: 48px;
+  }
+  .product-heart { width: 44px; height: 44px; font-size: 22px; }
+  .inline-kuma-anim { width: 20px; height: 20px; }
+
+  .about { padding: 28px 16px; }
+  .about-img { width: 80px; height: 80px; }
+  .about-text h2 { font-size: 16px; }
+  .about-text p { font-size: 13px; line-height: 1.8; }
+
+  .faq { padding: 28px 16px; }
+  .faq-q { font-size: 13px; min-height: 48px; padding: 14px 16px; }
+  .faq-a { font-size: 13px; line-height: 1.7; padding: 0 0 14px 20px; }
+
+  .footer-main { padding: 24px 16px 20px; gap: 24px; }
+  .footer-nav { gap: 20px; }
+  .footer-nav-col { gap: 10px; }
+  .footer-nav-col a { font-size: 12px; min-height: 44px; display: inline-flex; align-items: center; }
+  .footer-nav-col h4 { font-size: 12px; }
+  .footer-bottom { padding: 10px 16px; font-size: 11px; }
+
+  .cart-drawer { width: 100%; right: -100%; border-radius: 0; }
+
+  .section-divider { padding: 6px 0; }
+
+  .legal-modal { padding: 20px 16px; max-height: 85vh; }
+  .legal-modal h2 { font-size: 16px; }
+  .legal-modal th, .legal-modal td { padding: 8px 10px; font-size: 12px; }
+}
+
+/* ----- Small Mobile / iPhone SE (max-width: 375px) ----- */
+@media (max-width: 375px) {
+  .header { padding: 8px 10px; }
+  .header-logo { font-size: 13px; gap: 4px; }
+  .header-logo img { width: 16px; height: 16px; }
+  .header-cart { padding: 8px 10px; font-size: 12px; min-height: 44px; }
+
+  .hero { padding: 6px 6px; }
+  .hero-text { padding: 6px 10px 8px; }
+  .hero-text .hero-desc { font-size: 9px; }
+  .hero-cta { padding: 7px 18px; min-height: 34px; font-size: 10px; }
+
+  .trust-strip { padding: 8px 10px; gap: 2px 12px; }
+  .trust-strip-item { font-size: 12px; }
+  .trust-free { font-size: 11px; }
+
+  .products { padding: 24px 12px; }
+  .section-heading h2 { font-size: 18px; letter-spacing: 2px; }
+  .section-heading p { font-size: 12px; }
+  .product-grid { gap: 8px; }
+  .product-card { padding: 10px; border-radius: 14px; }
+  .product-name { font-size: 12px; min-height: 2.4em; }
+  .product-price { font-size: 15px; margin-bottom: 8px; }
+  .product-badge { top: 8px; right: 8px; padding: 3px 10px; font-size: 10px; }
+  .btn-cart { font-size: 12px; padding: 10px 8px; min-height: 44px; }
+  .inline-kuma-anim { width: 18px; height: 18px; }
+
+  .about { padding: 24px 12px; }
+  .about-img { width: 80px; height: 80px; }
+
+  .faq { padding: 24px 12px; }
+  .faq-q { font-size: 12px; }
+
+  .footer-main { padding: 20px 12px 16px; gap: 20px; }
+  .footer-nav { gap: 16px; }
+  .footer-nav-col a { font-size: 11px; }
+  .footer-nav-col h4 { font-size: 11px; }
+  .footer-bottom { font-size: 9px; padding: 8px 12px; }
+}
+</style>
+<link rel="stylesheet" href="css-refinement.css">
+</head>
+<body>
+
+<!-- Header + Hero with 3D -->
+<div id="header-3d-wrap">
+  <canvas id="header-3d-canvas"></canvas>
+  <header class="header">
+    <a href="#" class="header-logo">
+      <img class="pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/kosukuma/front.png" alt="">
+      こすくまくんのおみせ
+    </a>
+    <nav class="header-nav">
+      <a href="#products">グッズ</a>
+      <button class="header-cart" id="cart-toggle">
+        <img class="dot-icon cart-treasure pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/fantasy_treasure_gold.png" alt="">
+        カート(<span id="cart-count" class="cart-count-num">0</span>)
+      </button>
+    </nav>
+  </header>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <img class="gif-deco hero-butterfly" src="https://kosukuma-official-shop.pages.dev/assets/pixelgaro/animal_etc-butterfly.gif" alt="">
+  <img class="pixel-art hero-star hero-star-1" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/nature_star_yellow.png" alt="">
+  <img class="pixel-art hero-star hero-star-2" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/effect_kirakira_01_yellow.png" alt="">
+  <div class="hero-text">
+    <h1>こすくまくんのおみせ</h1>
+    <p class="hero-subtitle">ほっとするグッズがならぶ、ちいさなおみせ</p>
+    <p class="hero-desc">やぁ。こすくまくんだよ。グッズあるから見てって。<span class="inline-kuma-anim" id="hero-inline-dance"></span></p>
+    <a href="#products" class="hero-cta">グッズをみる</a>
+  </div>
+</section>
+</div><!-- /header-3d-wrap -->
+
+<!-- Trust Strip -->
+<div class="trust-strip">
+  <div class="trust-strip-item"><img class="dot-icon trust-icon pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/fantasy_treasure_gold.png" alt=""> 送料¥500 <span class="trust-free">5000円以上で無料！</span></div>
+  <div class="trust-strip-item"><img class="dot-icon trust-icon pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/animal_kuma_higuma.png" alt=""> 3日以内に発送</div>
+  <div class="trust-strip-item"><img class="dot-icon trust-icon pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/effect_kirakira_01_yellow.png" alt=""> 7日以内なら返品OK</div>
+</div>
+
+<!-- Products -->
+<section class="products" id="products">
+  <div class="section-heading">
+    <h2><img class="dot-icon heading-icon pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/fantasy_treasure_gold.png" alt=""> グッズ</h2>
+    <p>ぼくのグッズたち</p>
+  </div>
+  <div class="product-grid" id="product-grid">
+    <!-- JS generates -->
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about">
+  <div class="about-content">
+    <div class="about-img" id="about-kaikai">
+    </div>
+    <div class="about-text">
+      <h2>こすくまくんだよ</h2>
+      <p>25さい。にしおぎくぼに住んでる。はちみつとねることがすき。<br>むずかしいことはわかんないけど、まぁなんとかなるんじゃない。</p>
+      <p style="margin-top: 8px; font-size: 13px; color: var(--text-light);">グッズはぜんぶ、ぼくがすきなものばっかり。きにいるといいなぁ。</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-heading">
+    <h2><img class="dot-icon heading-icon pixel-art" src="https://kosukuma-official-shop.pages.dev/assets/dot-illust/mark_fukidashi_exclamation_yellow.png" alt=""> よくあるしつもん</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q">おくるのにいくらかかる？</button>
+      <p class="faq-a">500えん。5000えん以上なら送料いらない。</p>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">いつとどく？</button>
+      <p class="faq-a">3〜5にちくらい。たぶん。</p>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">へんぴんできる？</button>
+      <p class="faq-a">7にち以内ならいいよ。ちょっとさみしいけど。</p>
+    </div>
+    <div class="faq-item" id="contact">
+      <button class="faq-q">おといあわせしたい</button>
+      <p class="faq-a">メールでおくってね → <a href="mailto:shop@kosukuma.com" style="color: var(--brown); font-weight: 700;">shop@kosukuma.com</a><br>2〜3にちで返すよ。たぶん。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="footer-logo">こすくまくんのおみせ</div>
+      <p class="footer-tagline">ほっとするグッズがならぶ、ちいさなおみせ</p>
+      <div class="footer-utouto" id="utouto-container"></div>
+    </div>
+    <div class="footer-nav">
+      <div class="footer-nav-col">
+        <h4>ショップ</h4>
+        <a href="#products">グッズ一覧</a>
+        <a href="#about">こすくまくんについて</a>
+      </div>
+      <div class="footer-nav-col">
+        <h4>サポート</h4>
+        <a href="#faq">よくあるしつもん</a>
+        <a href="#contact">おといあわせ</a>
+      </div>
+      <div class="footer-nav-col">
+        <h4>法的情報</h4>
+        <a href="#" data-modal="tokushoho-modal">特定商取引法に基づく表記</a>
+        <a href="#" data-modal="privacy-modal">プライバシーポリシー</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 (株)こす.くま All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- Cart Drawer -->
+<div class="cart-drawer-overlay" id="cart-overlay"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-drawer-header">
+    <h3>カート</h3>
+    <button class="cart-drawer-close" id="cart-close">&times;</button>
+  </div>
+  <div class="cart-drawer-items" id="cart-items">
+    <div class="cart-empty">まだなにも入ってないよ</div>
+  </div>
+  <div class="cart-drawer-footer">
+    <div class="cart-total">
+      <span>ごうけい</span>
+      <span class="cart-total-amount" id="cart-total-price">&yen;0</span>
+    </div>
+    <button class="btn-checkout" id="btn-checkout">レジにすすむ</button>
+  </div>
+</div>
+
+<!-- Cart Added Popup -->
+<div class="cart-added-popup" id="cart-popup">
+  <div class="popup-anim" id="popup-anim-container"></div>
+  <span>カゴに入れたよ</span>
+</div>
+
+<!-- Sticky Cart Button -->
+<button class="sticky-cart" id="sticky-cart" style="display:none;">
+  カート
+  <span class="sticky-cart-count" id="sticky-cart-count">0</span>
+</button>
+
+<!-- Legal Modals -->
+<div class="legal-modal-overlay" id="tokushoho-modal">
+  <div class="legal-modal">
+    <button class="legal-modal-close">&times;</button>
+    <h2>特定商取引法に基づく表記</h2>
+    <table>
+      <tr><th>販売業者</th><td>(株)こす.くま</td></tr>
+      <tr><th>代表者</th><td>こすくまくん</td></tr>
+      <tr><th>所在地</th><td>東京都杉並区西荻窪（こすくまくんのおうち）</td></tr>
+      <tr><th>連絡先</th><td>shop@kosukuma.com</td></tr>
+      <tr><th>商品代金以外の費用</th><td>送料500円（税込5,000円以上で無料）</td></tr>
+      <tr><th>お届け時期</th><td>ご注文から3〜5営業日以内に発送</td></tr>
+      <tr><th>お支払い方法</th><td>クレジットカード</td></tr>
+      <tr><th>返品・交換</th><td>商品到着後7日以内、未使用品に限り返品可。送料はお客様負担。不良品の場合は着払いで返送。</td></tr>
+      <tr><th>引き渡し時期</th><td>代金決済完了後、3〜5営業日以内に発送</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="legal-modal-overlay" id="privacy-modal">
+  <div class="legal-modal">
+    <button class="legal-modal-close">&times;</button>
+    <h2>プライバシーポリシー</h2>
+    <p>(株)こす.くま（以下「当社」）は、お客様の個人情報を以下のとおり取り扱います。</p>
+
+    <h3>1. 収集する情報</h3>
+    <ul>
+      <li>お名前、ご住所、メールアドレス、電話番号（ご注文時）</li>
+      <li>お支払い情報（決済代行会社を通じて処理）</li>
+      <li>サイト閲覧情報（Cookie等）</li>
+    </ul>
+
+    <h3>2. 利用目的</h3>
+    <ul>
+      <li>商品の発送・お届け</li>
+      <li>お問い合わせへの対応</li>
+      <li>サービスの改善・新商品のご案内</li>
+    </ul>
+
+    <h3>3. 第三者提供</h3>
+    <p>法令に基づく場合を除き、お客様の同意なく第三者に個人情報を提供することはありません。</p>
+
+    <h3>4. 安全管理</h3>
+    <p>個人情報の漏えい・紛失を防止するため、適切な安全管理措置を講じます。</p>
+
+    <h3>5. お問い合わせ</h3>
+    <p>個人情報に関するお問い合わせは <a href="mailto:shop@kosukuma.com" style="color: var(--brown); font-weight: 700;">shop@kosukuma.com</a> までご連絡ください。</p>
+
+  </div>
+</div>
+
+
+<script type="module" src="js/main.js"></script>
+<script type="module">
+  import { initHeader3D } from './js/header-3d.js';
+  initHeader3D();
+</script>
+</body>
+</html>
