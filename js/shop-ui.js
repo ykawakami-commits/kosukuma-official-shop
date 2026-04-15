@@ -298,7 +298,7 @@ export function refreshProducts(shopifyProducts) {
     if (!variant) continue;
 
     const local = PRODUCTS.find(p => sp.title.includes(p.name) || p.name.includes(sp.title));
-    if (local && local.status === 'on-sale') {
+    if (local && local.status === 'on-sale' && !local.currency) {
       local.price     = parseFloat(variant.price.amount ?? variant.price);
       local.variantId = String(variant.id);
       // Shopify画像があればローカル画像を上書き（任意）
