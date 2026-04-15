@@ -6,9 +6,6 @@ import { IS_CONFIGURED, addToShopifyCart, getCheckoutUrl } from './shopify.js';
 // ===== 商品データ =====
 // status: 'on-sale' | 'sold-out' | 'coming-soon'
 const FALLBACK_PRODUCTS = [
-  // テスト商品ここから
-  { id: 'test',     name: 'テスト商品',                    price: 1,          status: 'on-sale',     oneliner: 'てすとだよ',        img: 'assets/kosukuma-product.png' },
-  // テスト商品ここまで
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-product.png' },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', currency: 'USD' },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png' },
@@ -23,6 +20,9 @@ const FALLBACK_PRODUCTS = [
   { id: 'cushion',  name: 'こすくまくんブーブークッション', price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
   { id: 'bousai',   name: 'デコ防災グッズセット⭐️', price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
   { id: 'mu',       name: '無',                            price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
+  // テスト商品ここから
+  { id: 'test',     name: 'テスト商品',                    price: 1,          status: 'on-sale',     oneliner: 'てすとだよ',        img: 'assets/kosukuma-product.png' },
+  // テスト商品ここまで
 ];
 
 let PRODUCTS = FALLBACK_PRODUCTS;
