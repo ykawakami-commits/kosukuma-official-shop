@@ -60,7 +60,7 @@ function mapShopifyProduct(p) {
 function formatPrice(price, currency) {
   if (price === null || price === undefined) return '';
   if (currency === 'USD') {
-    return '$' + Number(price).toLocaleString();
+    return '$' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
   }
   return '\u00a5' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
 }
