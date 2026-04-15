@@ -10,8 +10,9 @@ const FALLBACK_PRODUCTS = [
   { id: 'test',     name: 'テスト商品',                    price: 1,          status: 'on-sale',     oneliner: 'てすとだよ',        img: 'assets/kosukuma-product.png' },
   // テスト商品ここまで
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker.jpg' },
-  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: 2980,       status: 'on-sale',     oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png' },
+  { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', currency: 'USD' },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special.png' },
+  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'sold-out',    oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png' },
   { id: 'plush',    name: 'こすくまくんぬいぐるみ',        price: null,       status: 'sold-out',    oneliner: 'もふもふ',          img: 'assets/kosukuma-product.png' },
   { id: 'socks',    name: 'こすくまくん靴下',              price: null,       status: 'sold-out',    oneliner: 'あしにはくやつ',    img: 'assets/kosukuma-socks.png' },
   { id: 'yoyo',     name: 'こすくまくんヨーヨー',          price: null,       status: 'sold-out',    oneliner: 'あそべるやつ',      img: 'assets/kosukuma-product.png' },
@@ -56,8 +57,11 @@ function mapShopifyProduct(p) {
 }
 
 // ===== 価格フォーマット =====
-function formatPrice(price) {
+function formatPrice(price, currency) {
   if (price === null || price === undefined) return '';
+  if (currency === 'USD') {
+    return '$' + Number(price).toLocaleString();
+  }
   return '\u00a5' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
 }
 
@@ -143,7 +147,7 @@ function updateCartUI() {
         <div class="cart-item-img"><img src="${img}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;"></div>
         <div class="cart-item-info">
           <p class="cart-item-name">${p.name}</p>
-          <p class="cart-item-price">${formatPrice(subtotal)}</p>
+          <p class="cart-item-price">${formatPrice(subtotal, p.currency)}</p>
         </div>
         <div class="cart-item-qty">
           <button data-id="${p.id}" data-delta="-1">\u2212</button>
@@ -210,7 +214,7 @@ function renderGrid() {
     // ---- 価格 ----
     let priceHtml;
     if (p.status === 'on-sale' && p.price !== null) {
-      priceHtml = `<p class="product-price">${formatPrice(p.price)}</p>`;
+      priceHtml = `<p class="product-price">${formatPrice(p.price, p.currency)}</p>`;
     } else if (p.status === 'sold-out') {
       priceHtml = `<p class="product-price price-coming-soon">\u2014</p>`;
     } else {
