@@ -6,7 +6,7 @@ import { IS_CONFIGURED, addToShopifyCart, getCheckoutUrl } from './shopify.js';
 // ===== 商品データ =====
 // status: 'on-sale' | 'sold-out' | 'coming-soon'
 const FALLBACK_PRODUCTS = [
-  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-product.png' },
+  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-new.jpg' },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', currency: 'USD' },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png' },
   { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'sold-out',    oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png' },
