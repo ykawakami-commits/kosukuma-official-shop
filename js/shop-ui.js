@@ -3,19 +3,13 @@
 // ===== 商品データ =====
 // status: 'on-sale' | 'sold-out' | 'coming-soon'
 const FALLBACK_PRODUCTS = [
+  // テスト商品ここから
+  { id: 'test',     name: 'テスト商品',                    price: 1,          status: 'on-sale',     oneliner: 'てすとだよ',        img: 'assets/kosukuma-product.png' },
+  // テスト商品ここまで
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-new.jpg' },
-  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: 3980,       status: 'on-sale',     oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png' },
-  { id: 'plush',    name: 'こすくまくんぬいぐるみ',        price: null,       status: 'sold-out',    oneliner: 'もふもふ',          img: 'assets/kosukuma-product.png' },
-  { id: 'socks',    name: 'こすくまくん靴下',              price: null,       status: 'sold-out',    oneliner: 'あしにはくやつ',    img: 'assets/kosukuma-socks.png' },
-  { id: 'yoyo',     name: 'こすくまくんヨーヨー',          price: null,       status: 'sold-out',    oneliner: 'あそべるやつ',      img: 'assets/kosukuma-product.png' },
-  { id: 'notebook', name: 'こすくまくん自由帳',            price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'tote',     name: 'こすくまくんトートバッグ',      price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'pouch',    name: 'こすくまくんポーチ',            price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'jersey',   name: 'こすくまくん上下ジャージ',      price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'cushion',  name: 'こすくまくんブーブークッション', price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'elon',     name: 'イーロンマスク様専用',          price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'bousai',   name: '防災デコグッズ⭐️（一点もの）', price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
-  { id: 'mu',       name: '無',                            price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-product.png' },
+  { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', currency: 'USD' },
+  { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special.png' },
+  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png' },
 ];
 
 let PRODUCTS = FALLBACK_PRODUCTS;
@@ -35,8 +29,11 @@ function makePlaceholder(name) {
 }
 
 // ===== 価格フォーマット =====
-function formatPrice(price) {
+function formatPrice(price, currency) {
   if (price === null || price === undefined) return '';
+  if (currency === 'USD') {
+    return '$' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
+  }
   return '\u00a5' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
 }
 
@@ -67,7 +64,7 @@ function renderGrid() {
     // ---- 価格 ----
     let priceHtml;
     if (p.status === 'on-sale' && p.price !== null) {
-      priceHtml = `<p class="product-price">${formatPrice(p.price)}</p>`;
+      priceHtml = `<p class="product-price">${formatPrice(p.price, p.currency)}</p>`;
     } else if (p.status === 'sold-out') {
       priceHtml = `<p class="product-price price-coming-soon">\u2014</p>`;
     } else {
@@ -122,7 +119,7 @@ export function refreshProducts(shopifyProducts) {
     if (!variant) continue;
 
     const local = PRODUCTS.find(p => sp.title.includes(p.name) || p.name.includes(sp.title));
-    if (local && local.status === 'on-sale') {
+    if (local && local.status === 'on-sale' && !local.currency) {
       local.price     = parseFloat(variant.price.amount ?? variant.price);
       local.variantId = String(variant.id);
     }
