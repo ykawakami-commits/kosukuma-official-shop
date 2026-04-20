@@ -1,11 +1,12 @@
 // main.js — こすくまくんのおみせ エントリポイント
 
 import { KumaAnim } from './kuma-anim.js';
-import { initProductGrid, refreshProducts } from './shop-ui.js';
+import { initProductGrid, initCartDrawer, refreshProducts } from './shop-ui.js';
 import { initShopify, fetchShopifyProducts } from './shopify.js';
 
 // ===== Phase 1: 商品・カート初期化（フォールバックデータで即時描画） =====
 initProductGrid();
+initCartDrawer();
 
 // ===== Phase 2: Shopify 接続 → 商品差し替え =====
 (async () => {
@@ -44,6 +45,11 @@ if (utoutoContainer) {
   const utouto = new KumaAnim(utoutoContainer, 'utouto', { style: animStyle });
   observeAnim(utoutoContainer, utouto);
 }
+
+// ===== Sticky Cart =====
+document.getElementById('sticky-cart')?.addEventListener('click', () => {
+  document.getElementById('cart-toggle')?.click();
+});
 
 // ===== FAQ Accordion =====
 document.querySelectorAll('.faq-q').forEach(q => {
