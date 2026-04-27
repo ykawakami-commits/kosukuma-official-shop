@@ -255,21 +255,85 @@ function setupGridListeners() {
     if (!btn || btn.disabled) return;
 
     const id = btn.dataset.id;
-    addToCart(id);
 
-    // ボタンフィードバック
-    const origText = btn.textContent;
-    btn.textContent = 'いれたよ！';
-    btn.classList.add('added');
-    setTimeout(() => { btn.textContent = origText; btn.classList.remove('added'); }, 1000);
-
-    // ヘッダーカートバウンス
-    const headerCart = document.getElementById('cart-toggle');
-    if (headerCart) {
-      headerCart.classList.add('bounce');
-      setTimeout(() => headerCart.classList.remove('bounce'), 300);
+    // イーロンマスク様専用は本人確認フローへ
+    if (id === 'elon') {
+      openElonVerify(btn);
+      return;
     }
+
+    doAddToCart(id, btn);
   });
+}
+
+// ===== カート追加ヘルパー =====
+function doAddToCart(id, btn) {
+  addToCart(id);
+
+  const origText = btn.textContent;
+  btn.textContent = 'いれたよ！';
+  btn.classList.add('added');
+  setTimeout(() => { btn.textContent = origText; btn.classList.remove('added'); }, 1000);
+
+  const headerCart = document.getElementById('cart-toggle');
+  if (headerCart) {
+    headerCart.classList.add('bounce');
+    setTimeout(() => headerCart.classList.remove('bounce'), 300);
+  }
+}
+
+// ===== イーロンマスク様 本人確認 =====
+function openElonVerify(cartBtn) {
+  const overlay = document.getElementById('elon-verify-overlay');
+  const content = document.getElementById('elon-verify-content');
+  if (!overlay || !content) return;
+
+  // 初期状態にリセット
+  content.innerHTML = `
+    <p class="elon-verify-question">イーロンマスク様ですか？</p>
+    <div class="elon-verify-buttons">
+      <button class="elon-verify-btn elon-verify-yes" id="elon-verify-yes">はい</button>
+      <button class="elon-verify-btn elon-verify-no" id="elon-verify-no">いいえ</button>
+    </div>
+  `;
+  overlay.classList.add('open');
+
+  const closeOverlay = () => overlay.classList.remove('open');
+
+  document.getElementById('elon-verify-close').onclick = closeOverlay;
+  overlay.onclick = (e) => { if (e.target === overlay) closeOverlay(); };
+
+  document.getElementById('elon-verify-no').onclick = () => {
+    content.innerHTML = '<p class="elon-verify-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
+    setTimeout(closeOverlay, 2500);
+  };
+
+  document.getElementById('elon-verify-yes').onclick = () => {
+    content.innerHTML = `
+      <div class="elon-verify-input-group">
+        <label>おなまえをおしえてね</label>
+        <input type="text" id="elon-name-input" placeholder="おなまえ" autocomplete="off">
+        <button id="elon-name-submit">かくにん</button>
+      </div>
+    `;
+    const input = document.getElementById('elon-name-input');
+    input.focus();
+
+    const submit = () => {
+      const val = input.value.trim();
+      if (val === 'Elon Musk') {
+        content.innerHTML = '<p class="elon-verify-message success">かくにんできたよ！カゴにいれるね。</p>';
+        doAddToCart('elon', cartBtn);
+        setTimeout(closeOverlay, 2000);
+      } else {
+        content.innerHTML = '<p class="elon-verify-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
+        setTimeout(closeOverlay, 2500);
+      }
+    };
+
+    document.getElementById('elon-name-submit').onclick = submit;
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+  };
 }
 
 // ===== 外部公開 API =====
