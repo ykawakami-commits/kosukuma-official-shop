@@ -6,14 +6,11 @@ import { IS_CONFIGURED, addToShopifyCart, getCheckoutUrl } from './shopify.js';
 // ===== 商品データ =====
 // status: 'on-sale' | 'sold-out' | 'coming-soon'
 const FALLBACK_PRODUCTS = [
-  // テスト商品ここから
-  { id: 'test',     name: 'テスト商品',                    price: 1,          status: 'on-sale',     oneliner: 'てすとだよ',        img: 'assets/kosukuma-product.png' },
-  // テスト商品ここまで
-  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-street.png' },
-  { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', currency: 'USD', cartPrice: 150000 },
-  { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png' },
-  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png' },
-  { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png' },
+  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-street.png',          images: ['assets/kosukuma-sticker-street.png'] },
+  { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-premium-tshirt.jpg', images: ['assets/kosukuma-ultra-premium-tshirt.jpg'], currency: 'USD', cartPrice: 150000 },
+  { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'] },
+  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png',                  images: ['assets/kosukuma-tshirt.png'] },
+  { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png',               images: ['assets/kosukuma-taketombo.png'] },
 ];
 
 let PRODUCTS = FALLBACK_PRODUCTS;
@@ -223,6 +220,7 @@ function renderGrid() {
       btnHtml = `<button class="btn-cart" disabled>もうすこしまってね</button>`;
     }
 
+    card.dataset.id = p.id;
     card.innerHTML = `
       <button class="product-heart" aria-label="お気に入り">\u2661</button>
       ${imgHtml}
@@ -264,6 +262,15 @@ function setupGridListeners() {
     }
 
     doAddToCart(id, btn);
+  });
+
+  // 商品カードクリックで詳細モーダル（ボタン・ハート以外）
+  grid.addEventListener('click', (e) => {
+    if (e.target.closest('.btn-cart')) return;
+    if (e.target.closest('.product-heart')) return;
+    const card = e.target.closest('.product-card');
+    if (!card) return;
+    openProductModal(card.dataset.id);
   });
 }
 
@@ -323,9 +330,7 @@ function openElonVerify(cartBtn) {
     const submit = () => {
       const val = input.value.trim();
       if (val === 'Elon Musk') {
-        content.innerHTML = '<p class="elon-verify-message success">かくにんできたよ！カゴにいれるね。</p>';
-        doAddToCart('elon', cartBtn);
-        setTimeout(closeOverlay, 2000);
+        askDogName();
       } else {
         content.innerHTML = '<p class="elon-verify-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
         setTimeout(closeOverlay, 2500);
@@ -335,6 +340,149 @@ function openElonVerify(cartBtn) {
     document.getElementById('elon-name-submit').onclick = submit;
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
   };
+
+  function askDogName() {
+    content.innerHTML = `
+      <div class="elon-verify-input-group">
+        <label>かいいぬのなまえは？</label>
+        <input type="text" id="elon-dog-input" placeholder="" autocomplete="off">
+        <button id="elon-dog-submit">かくにん</button>
+      </div>
+    `;
+    const dogInput = document.getElementById('elon-dog-input');
+    dogInput.focus();
+
+    const dogSubmit = () => {
+      const val = dogInput.value.trim();
+      if (val === 'Floki') {
+        content.innerHTML = '<p class="elon-verify-message success">かくにんできたよ！カゴにいれるね。</p>';
+        doAddToCart('elon', cartBtn);
+        setTimeout(closeOverlay, 2000);
+      } else {
+        content.innerHTML = '<p class="elon-verify-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
+        setTimeout(closeOverlay, 2500);
+      }
+    };
+
+    document.getElementById('elon-dog-submit').onclick = dogSubmit;
+    dogInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') dogSubmit(); });
+  }
+}
+
+// ===== 商品詳細モーダル =====
+let modalState = { productId: null, index: 0 };
+
+function openProductModal(productId) {
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+
+  const overlay = document.getElementById('product-modal-overlay');
+  if (!overlay) return;
+
+  modalState.productId = productId;
+  modalState.index = 0;
+
+  document.getElementById('product-modal-name').textContent = product.name;
+
+  const priceEl = document.getElementById('product-modal-price');
+  if (product.status === 'on-sale' && product.price !== null) {
+    priceEl.innerHTML = formatPrice(product.price, product.currency);
+  } else if (product.status === 'sold-out') {
+    priceEl.textContent = 'SOLD OUT';
+  } else {
+    priceEl.textContent = 'もうすこしまってね';
+  }
+
+  const addBtn = document.getElementById('product-modal-add');
+  addBtn.dataset.id = product.id;
+  addBtn.disabled = product.status !== 'on-sale';
+  if (product.status === 'on-sale') {
+    addBtn.textContent = 'カゴに入れる';
+  } else if (product.status === 'sold-out') {
+    addBtn.textContent = 'SOLD OUT';
+  } else {
+    addBtn.textContent = 'もうすこしまってね';
+  }
+
+  renderModalGallery();
+  overlay.classList.add('open');
+}
+
+function renderModalGallery() {
+  const product = PRODUCTS.find(p => p.id === modalState.productId);
+  if (!product) return;
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : [product.img ?? makePlaceholder(product.name)];
+
+  const idx = ((modalState.index % images.length) + images.length) % images.length;
+  modalState.index = idx;
+
+  const mainImg = document.getElementById('product-modal-image');
+  mainImg.src = images[idx];
+  mainImg.alt = product.name;
+
+  const prev = document.getElementById('product-modal-prev');
+  const next = document.getElementById('product-modal-next');
+  const showArrows = images.length > 1;
+  if (prev) prev.style.display = showArrows ? '' : 'none';
+  if (next) next.style.display = showArrows ? '' : 'none';
+
+  const thumbsEl = document.getElementById('product-modal-thumbs');
+  if (thumbsEl) {
+    thumbsEl.innerHTML = '';
+    if (images.length > 1) {
+      images.forEach((src, i) => {
+        const t = document.createElement('button');
+        t.className = 'product-modal-thumb' + (i === idx ? ' active' : '');
+        t.dataset.index = String(i);
+        t.innerHTML = `<img src="${src}" alt="">`;
+        thumbsEl.appendChild(t);
+      });
+    }
+  }
+}
+
+function initProductModal() {
+  const overlay = document.getElementById('product-modal-overlay');
+  if (!overlay) return;
+  const close = () => overlay.classList.remove('open');
+
+  document.getElementById('product-modal-close')?.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  { modalState.index--; renderModalGallery(); }
+    if (e.key === 'ArrowRight') { modalState.index++; renderModalGallery(); }
+  });
+
+  document.getElementById('product-modal-prev')?.addEventListener('click', () => {
+    modalState.index--; renderModalGallery();
+  });
+  document.getElementById('product-modal-next')?.addEventListener('click', () => {
+    modalState.index++; renderModalGallery();
+  });
+
+  document.getElementById('product-modal-thumbs')?.addEventListener('click', (e) => {
+    const t = e.target.closest('.product-modal-thumb');
+    if (!t) return;
+    modalState.index = parseInt(t.dataset.index, 10) || 0;
+    renderModalGallery();
+  });
+
+  document.getElementById('product-modal-add')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    if (btn.disabled) return;
+    const id = btn.dataset.id;
+    if (id === 'elon') {
+      close();
+      openElonVerify(btn);
+      return;
+    }
+    doAddToCart(id, btn);
+    setTimeout(close, 600);
+  });
 }
 
 // ===== 外部公開 API =====
@@ -342,6 +490,7 @@ function openElonVerify(cartBtn) {
 export function initProductGrid() {
   renderGrid();
   setupGridListeners();
+  initProductModal();
   if (cart.length > 0) updateCartUI();
 }
 

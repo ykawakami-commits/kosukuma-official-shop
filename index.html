@@ -655,6 +655,164 @@ body {
 }
 .elon-verify-input-group button:hover { background: #7a5a1a; }
 
+/* ===== PRODUCT DETAIL MODAL ===== */
+.product-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.product-modal-overlay.open { display: flex; }
+
+.product-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  max-width: 840px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  position: relative;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+
+.product-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: var(--text-light);
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.product-modal-close:hover { background: var(--bg-alt); color: var(--brown); }
+
+.product-modal-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.product-modal-main {
+  position: relative;
+  background: linear-gradient(145deg, #f8f5ee 0%, #f0ece2 100%);
+  border-radius: 14px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-modal-main img {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 24px;
+}
+
+.product-modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  color: var(--brown-dark);
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.15s, transform 0.15s;
+  z-index: 2;
+}
+.product-modal-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.05); }
+.product-modal-arrow-prev { left: 12px; }
+.product-modal-arrow-next { right: 12px; }
+
+.product-modal-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.product-modal-thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: linear-gradient(145deg, #f8f5ee 0%, #f0ece2 100%);
+  padding: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.product-modal-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.product-modal-thumb:hover { transform: translateY(-2px); }
+.product-modal-thumb.active { border-color: var(--brown); }
+
+.product-modal-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.product-modal-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  line-height: 1.4;
+}
+
+.product-modal-price {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--terracotta);
+  letter-spacing: 0.5px;
+}
+
+.product-modal-info .btn-cart {
+  margin-top: 8px;
+}
+
+@media (max-width: 700px) {
+  .product-modal {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 24px 20px;
+    max-height: 92vh;
+  }
+  .product-modal-name { font-size: 18px; }
+  .product-modal-price { font-size: 22px; }
+  .product-modal-arrow { width: 36px; height: 36px; font-size: 20px; }
+}
+
+.product-card { cursor: pointer; }
+
 /* ===== TRUST STRIP ===== */
 .trust-strip {
   background: var(--bg-alt);
@@ -1495,6 +1653,26 @@ body {
   カート
   <span class="sticky-cart-count" id="sticky-cart-count">0</span>
 </button>
+
+<!-- Product Detail Modal -->
+<div class="product-modal-overlay" id="product-modal-overlay">
+  <div class="product-modal">
+    <button class="product-modal-close" id="product-modal-close" aria-label="閉じる">&times;</button>
+    <div class="product-modal-gallery">
+      <div class="product-modal-main">
+        <button class="product-modal-arrow product-modal-arrow-prev" id="product-modal-prev" aria-label="前の画像">&lsaquo;</button>
+        <img id="product-modal-image" src="" alt="">
+        <button class="product-modal-arrow product-modal-arrow-next" id="product-modal-next" aria-label="次の画像">&rsaquo;</button>
+      </div>
+      <div class="product-modal-thumbs" id="product-modal-thumbs"></div>
+    </div>
+    <div class="product-modal-info">
+      <h3 class="product-modal-name" id="product-modal-name"></h3>
+      <p class="product-modal-price" id="product-modal-price"></p>
+      <button class="btn-cart" id="product-modal-add">カゴに入れる</button>
+    </div>
+  </div>
+</div>
 
 <!-- Elon Identity Verification Modal -->
 <div class="elon-verify-overlay" id="elon-verify-overlay">
