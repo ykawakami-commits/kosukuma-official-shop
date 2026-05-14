@@ -242,11 +242,6 @@ body {
   margin-bottom: 12px;
 }
 
-/* Trust strip: 40→48px gap (Claude: 8px grid) */
-.trust-strip {
-  gap: 48px;
-}
-
 /* About/FAQ: 56→64px (Claude: section padding 統一) */
 .about {
   padding: 64px 80px;
@@ -301,18 +296,6 @@ body {
   font-size: 10px;
   letter-spacing: 0.08em;
   padding: 4px 12px;
-}
-
-/* Trust strip: 視覚ウェイトを下げる (Claude) */
-.trust-strip-item {
-  font-weight: 500;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.trust-free {
-  font-weight: 700;
-  color: var(--terracotta);
 }
 
 /* Header nav: CTAより控えめに (Claude) */
@@ -791,7 +774,6 @@ html {
 @media (max-width: 900px) {
   .about { padding: 48px 24px; }
   .faq { padding: 48px 24px; }
-  .trust-strip { gap: 24px; }
 }
 
 @media (max-width: 500px) {
@@ -799,7 +781,6 @@ html {
   .faq { padding: 32px 16px; }
   .product-card { padding: 12px; }
   .product-grid { gap: 12px; }
-  .trust-strip { gap: 8px; }
   .section-divider { padding: 8px 0; }
 
   .hero-text { padding: 8px 14px 10px; }
