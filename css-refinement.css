@@ -411,13 +411,6 @@ body {
     0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* ハートボタン: ガラス効果 (Claude) */
-.product-heart {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
 /* About引用ボーダー: dotted→solid (Claude) */
 .about-text p {
   border-left: 2px solid var(--border);
@@ -529,19 +522,6 @@ body {
 
 .hero-cta:active {
   transform: translateY(1px);
-}
-
-/* ハートボタン: スプリングバウンス (Claude) */
-.product-heart {
-  transition: color 0.15s ease, transform 0.2s var(--ease-bounce);
-}
-
-.product-heart:hover {
-  transform: scale(1.1);
-}
-
-.product-heart:active {
-  transform: scale(0.95);
 }
 
 /* カートバウンス: スプリング (Claude) */

@@ -9,7 +9,7 @@ const FALLBACK_PRODUCTS = [
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-main.jpg',            images: ['assets/kosukuma-sticker-main.jpg', 'assets/kosukuma-sticker-street.png'] },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-tshirt-1.jpg', images: ['assets/kosukuma-ultra-tshirt-1.jpg', 'assets/kosukuma-ultra-tshirt-2.jpg'], currency: 'USD', cartPrice: 150000 },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'] },
-  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-tshirt.png',                  images: ['assets/kosukuma-tshirt.png'] },
+  { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png',                 images: ['assets/kosukuma-product.png'] },
   { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png',               images: ['assets/kosukuma-taketombo.png'] },
 ];
 
@@ -222,7 +222,6 @@ function renderGrid() {
 
     card.dataset.id = p.id;
     card.innerHTML = `
-      <button class="product-heart" aria-label="お気に入り">\u2661</button>
       ${imgHtml}
       <p class="product-name">${p.name}</p>
       ${p.oneliner ? `<p class="product-oneliner" >${p.oneliner}</p>` : ''}
@@ -240,14 +239,6 @@ function setupGridListeners() {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
-  // お気に入りトグル
-  grid.addEventListener('click', (e) => {
-    const heart = e.target.closest('.product-heart');
-    if (!heart) return;
-    heart.classList.toggle('liked');
-    heart.textContent = heart.classList.contains('liked') ? '\u2665' : '\u2661';
-  });
-
   // カゴに入れる
   grid.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-cart');
@@ -264,10 +255,9 @@ function setupGridListeners() {
     doAddToCart(id, btn);
   });
 
-  // 商品カードクリックで詳細モーダル（ボタン・ハート以外）
+  // 商品カードクリックで詳細モーダル（ボタン以外）
   grid.addEventListener('click', (e) => {
     if (e.target.closest('.btn-cart')) return;
-    if (e.target.closest('.product-heart')) return;
     const card = e.target.closest('.product-card');
     if (!card) return;
     openProductModal(card.dataset.id);
