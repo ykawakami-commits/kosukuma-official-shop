@@ -122,6 +122,33 @@ body {
   font-weight: 500;
 }
 
+/* 割引価格表示: 定価(取り消し線) + セール価格 + OFFバッジ (Claude) */
+.price-original {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.72em;
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.price-sale {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.price-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
 .about-text h2 {
   font-size: 18px;
   line-height: 1.4;

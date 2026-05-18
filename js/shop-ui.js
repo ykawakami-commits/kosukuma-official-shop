@@ -8,7 +8,8 @@ import { IS_CONFIGURED, addToShopifyCart, getCheckoutUrl } from './shopify.js';
 const FALLBACK_PRODUCTS = [
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-pack.png',            images: ['assets/kosukuma-sticker-pack.png', 'assets/kosukuma-sticker-main.jpg', 'assets/kosukuma-sticker-street.png'] },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-tshirt-1.jpg', images: ['assets/kosukuma-ultra-tshirt-1.jpg', 'assets/kosukuma-ultra-tshirt-2.jpg'], currency: 'USD', cartPrice: 150000 },
-  { id: 'elon',     name: 'イーロンマスク様専用',          price: 4200000000, status: 'on-sale',     oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'] },
+  { id: 'elon',     name: 'イーロンマスク様専用',          price: 420000000,  originalPrice: 500000000, status: 'on-sale', oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'], currency: 'USD' },
+  { id: 'deco-helmet', name: 'こすくまデコヘルメット',      price: 109000,     status: 'on-sale',     oneliner: '一点ものだよ',      img: 'assets/kosukuma-deco-helmet.png',             images: ['assets/kosukuma-deco-helmet.png'] },
   { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png',                 images: ['assets/kosukuma-product.png'] },
   { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png',               images: ['assets/kosukuma-taketombo.png'] },
 ];
@@ -51,6 +52,20 @@ function formatPrice(price, currency) {
     return '$' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
   }
   return '\u00a5' + Number(price).toLocaleString() + '<span class="tax-label">(税込)</span>';
+}
+
+// ===== 割引価格の表示マークアップ =====
+// originalPrice を持つ商品は「取り消し線つき定価 + セール価格 + OFFバッジ」で表示
+function priceMarkup(price, currency, originalPrice) {
+  if (originalPrice === null || originalPrice === undefined) {
+    return formatPrice(price, currency);
+  }
+  const symbol = currency === 'USD' ? '$' : '¥';
+  const orig   = symbol + Number(originalPrice).toLocaleString();
+  const off    = Math.round((1 - price / originalPrice) * 100);
+  return `<span class="price-original">${orig}</span>`
+       + `<span class="price-sale">${formatPrice(price, currency)}</span>`
+       + `<span class="price-badge">${off}% OFF</span>`;
 }
 
 // ===== カート =====
@@ -136,7 +151,7 @@ function updateCartUI() {
         <div class="cart-item-img"><img src="${img}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;"></div>
         <div class="cart-item-info">
           <p class="cart-item-name">${p.name}</p>
-          <p class="cart-item-price">${formatPrice(displaySubtotal, p.currency)}</p>
+          <p class="cart-item-price">${priceMarkup(displaySubtotal, p.currency, p.originalPrice ? p.originalPrice * c.qty : null)}</p>
         </div>
         <div class="cart-item-qty">
           <button data-id="${p.id}" data-delta="-1">\u2212</button>
@@ -203,7 +218,7 @@ function renderGrid() {
     // ---- 価格 ----
     let priceHtml;
     if (p.status === 'on-sale' && p.price !== null) {
-      priceHtml = `<p class="product-price">${formatPrice(p.price, p.currency)}</p>`;
+      priceHtml = `<p class="product-price">${priceMarkup(p.price, p.currency, p.originalPrice)}</p>`;
     } else if (p.status === 'sold-out') {
       priceHtml = `<p class="product-price price-coming-soon">\u2014</p>`;
     } else {
@@ -376,7 +391,7 @@ function openProductModal(productId) {
 
   const priceEl = document.getElementById('product-modal-price');
   if (product.status === 'on-sale' && product.price !== null) {
-    priceEl.innerHTML = formatPrice(product.price, product.currency);
+    priceEl.innerHTML = priceMarkup(product.price, product.currency, product.originalPrice);
   } else if (product.status === 'sold-out') {
     priceEl.textContent = 'SOLD OUT';
   } else {
