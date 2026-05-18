@@ -6,7 +6,7 @@ import { IS_CONFIGURED, addToShopifyCart, getCheckoutUrl } from './shopify.js';
 // ===== 商品データ =====
 // status: 'on-sale' | 'sold-out' | 'coming-soon'
 const FALLBACK_PRODUCTS = [
-  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-pack.png',            images: ['assets/kosukuma-sticker-pack.png'] },
+  { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-pack.png',            images: ['assets/kosukuma-sticker-pack.png', 'assets/kosukuma-sticker-street.png'] },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-tshirt-1.jpg', images: ['assets/kosukuma-ultra-tshirt-1.jpg', 'assets/kosukuma-ultra-tshirt-2.jpg'], currency: 'USD', cartPrice: 150000 },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 420000000,  originalPrice: 500000000, status: 'on-sale', oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'], currency: 'USD' },
   { id: 'deco-helmet', name: 'こすくまデコヘルメット',      price: 109000,     status: 'on-sale',     oneliner: '一点ものだよ',      img: 'assets/kosukuma-deco-helmet.png',             images: ['assets/kosukuma-deco-helmet.png'] },
