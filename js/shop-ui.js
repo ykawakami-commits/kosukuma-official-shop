@@ -9,7 +9,7 @@ const FALLBACK_PRODUCTS = [
   { id: 'sticker',  name: 'こすくまくんステッカー',        price: 780,        status: 'on-sale',     oneliner: 'どこにでも貼れる',  img: 'assets/kosukuma-sticker-pack.png',            images: ['assets/kosukuma-sticker-pack.png', 'assets/kosukuma-sticker-street.png'] },
   { id: 'ultra-premium-tshirt', name: 'こすくまウルトラプレミアムTシャツ', price: 1000, status: 'on-sale', oneliner: 'いちばんいいやつ', img: 'assets/kosukuma-ultra-tshirt-1.jpg', images: ['assets/kosukuma-ultra-tshirt-1.jpg', 'assets/kosukuma-ultra-tshirt-2.jpg'], currency: 'USD', cartPrice: 150000 },
   { id: 'elon',     name: 'イーロンマスク様専用',          price: 420000000,  originalPrice: 500000000, status: 'on-sale', oneliner: 'いっしょにあそぼ',  img: 'assets/elon-special-new.png',                 images: ['assets/elon-special-new.png'], currency: 'USD' },
-  { id: 'deco-helmet', name: 'こすくまデコヘルメット',      price: 109000,     status: 'on-sale',     oneliner: '一点ものだよ',      img: 'assets/kosukuma-deco-helmet.png',             images: ['assets/kosukuma-deco-helmet.png'] },
+  { id: 'deco-helmet', name: 'こすくまデコヘルメット',      price: 109000,     status: 'on-sale',     oneliner: '一点ものだよ',      img: 'assets/kosukuma-deco-helmet.png',             images: ['assets/kosukuma-deco-helmet.png'], imgFit: 'contain', imgBg: '#fff' },
   { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png',                 images: ['assets/kosukuma-product.png'] },
   { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png',               images: ['assets/kosukuma-taketombo.png'] },
 ];
@@ -204,7 +204,10 @@ function renderGrid() {
 
     // ---- 画像 ----
     let imgHtml;
-    const imgStyle = p.img ? 'style="object-fit:cover;width:100%;height:100%;"' : '';
+    // 商品ごとに object-fit / 背景色を上書き可能（デコヘルメットなど見切れ防止用）
+    const fit = p.imgFit ?? 'cover';
+    const bg  = p.imgBg ? `background:${p.imgBg};` : '';
+    const imgStyle = p.img ? `style="object-fit:${fit};width:100%;height:100%;${bg}"` : '';
     if (p.status === 'sold-out') {
       imgHtml = `
         <div class="product-img is-sold-out">
