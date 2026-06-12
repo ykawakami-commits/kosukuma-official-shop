@@ -3,6 +3,7 @@ import { Renderer } from './render'
 import { debugState } from './debug'
 import { audio } from './audio'
 import { gameRef } from './gameRef'
+import { tuning } from './tuning'
 
 // =============================================================================
 // engine.ts — rAF ループ
@@ -25,6 +26,10 @@ export class Engine {
   private fpsAccum = 0
   private fpsFrames = 0
 
+  // 下スワイプ判定（タップ＝ジャンプは pointerdown 即時。下スワイプ＝急降下）
+  private pointerStartY = 0
+  private dived = false
+
   constructor(
     private canvas: HTMLCanvasElement,
     emit: Emit,
@@ -34,6 +39,8 @@ export class Engine {
     gameRef.world = this.world
 
     this.onPointerDown = this.onPointerDown.bind(this)
+    this.onPointerMove = this.onPointerMove.bind(this)
+    this.onPointerUp = this.onPointerUp.bind(this)
     this.onResize = this.onResize.bind(this)
     this.loop = this.loop.bind(this)
   }
@@ -43,6 +50,9 @@ export class Engine {
     this.running = true
     this.lastTime = performance.now()
     this.canvas.addEventListener('pointerdown', this.onPointerDown)
+    this.canvas.addEventListener('pointermove', this.onPointerMove)
+    this.canvas.addEventListener('pointerup', this.onPointerUp)
+    this.canvas.addEventListener('pointercancel', this.onPointerUp)
     window.addEventListener('resize', this.onResize)
     this.rafId = requestAnimationFrame(this.loop)
   }
@@ -51,6 +61,9 @@ export class Engine {
     this.running = false
     cancelAnimationFrame(this.rafId)
     this.canvas.removeEventListener('pointerdown', this.onPointerDown)
+    this.canvas.removeEventListener('pointermove', this.onPointerMove)
+    this.canvas.removeEventListener('pointerup', this.onPointerUp)
+    this.canvas.removeEventListener('pointercancel', this.onPointerUp)
     window.removeEventListener('resize', this.onResize)
     if (gameRef.world === this.world) gameRef.world = null
   }
@@ -58,7 +71,22 @@ export class Engine {
   private onPointerDown(e: PointerEvent) {
     e.preventDefault()
     audio.unlock() // 最初のタップで AudioContext を解放
+    this.pointerStartY = e.clientY
+    this.dived = false
     this.world.press()
+  }
+
+  private onPointerMove(e: PointerEvent) {
+    if (this.dived) return
+    // 下方向へ swipeMinPx 以上で急降下（誤発動防止）
+    if (e.clientY - this.pointerStartY >= tuning.swipeMinPx) {
+      this.dived = true
+      this.world.dive()
+    }
+  }
+
+  private onPointerUp() {
+    this.dived = false
   }
 
   private onResize() {

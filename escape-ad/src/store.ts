@@ -11,6 +11,9 @@ export interface EmitState {
   gaugeReady: boolean // 満タン（手動発動待ち）
   adblockActive: boolean
   adblockRemaining: number // s
+  cookies: number // 取得した通常+ゴールデン合計
+  golden: number // 取得したゴールデン
+  goldenTotal: number // コースのゴールデン総数
 }
 
 interface UIState extends EmitState {
@@ -28,6 +31,9 @@ export const useUIStore = create<UIState>((set) => ({
   gaugeReady: false,
   adblockActive: false,
   adblockRemaining: 0,
+  cookies: 0,
+  golden: 0,
+  goldenTotal: 0,
   muted: false,
   set: (s) => set(s),
   toggleMute: () => set((st) => ({ muted: !st.muted })),

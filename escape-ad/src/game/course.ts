@@ -1,10 +1,11 @@
 import { DESIGN_HEIGHT } from './tuning'
-import type { Course, GroundSpan, Obstacle } from './types'
+import type { AdType, Cookie, Course, GroundSpan, Obstacle } from './types'
 
 // =============================================================================
-// テストコース（30秒程度）
-// 平地 → 穴 → 広告バナー、加えて「✕踏み継ぎの空中ルート」を 1 区間。
-// 走行速度 330px/s なら ~10000px で約30秒。
+// テストコース（30〜35秒）
+// カジュアル＝避けてゴール / 上級＝✕踏み継ぎ・JUST・Cookie収集の深み。
+// 各広告タイプの確認区間と、踏み継ぎの空中ルートを用意する。
+// Cookie はジャンプ弧・踏み継ぎラインに沿わせてルートの道標を兼ねる。
 // =============================================================================
 
 const GROUND_Y = Math.round(DESIGN_HEIGHT * 0.78) // 562 付近
@@ -12,7 +13,10 @@ const GROUND_Y = Math.round(DESIGN_HEIGHT * 0.78) // 562 付近
 export function buildTestCourse(): Course {
   const spans: GroundSpan[] = []
   const obstacles: Obstacle[] = []
+  const cookies: Cookie[] = []
   let obstacleId = 0
+  let cookieId = 0
+  let goldenTotal = 0
 
   let x = 0
 
@@ -23,83 +27,124 @@ export function buildTestCourse(): Course {
   const hole = (gap: number) => {
     x += gap
   }
-  const push = (o: Omit<Obstacle, 'id' | 'closed' | 'closeAnim'>) => {
-    obstacles.push({ ...o, id: obstacleId++, closed: false, closeAnim: 0 })
+
+  const ad = (
+    type: AdType,
+    cx: number,
+    h: number,
+    opts: { w?: number; label?: string; floating?: boolean; topY?: number } = {},
+  ) => {
+    const w = opts.w ?? (type === 'noclose' ? 74 : 70)
+    const floating = opts.floating ?? false
+    const y = opts.topY ?? GROUND_Y - h
+    obstacles.push({
+      id: obstacleId++,
+      x: cx - w / 2,
+      y,
+      w,
+      h,
+      label: opts.label ?? 'AD',
+      type,
+      floating,
+      hits: 0,
+      closed: false,
+      closeAnim: 0,
+      muted: false,
+      fleeTimer: 0,
+    })
   }
-  /** 地面の上に立つ広告（中心 cx, 高さ h） */
-  const banner = (cx: number, h: number, w = 70, label = 'AD') => {
-    push({ x: cx - w / 2, y: GROUND_Y - h, w, h, label, floating: false })
+  const banner = (cx: number, h: number) => ad('popup', cx, h)
+  const floatBanner = (cx: number, topY: number) =>
+    ad('popup', cx, 92, { floating: true, topY, w: 52 })
+
+  const cookie = (cx: number, cy: number, golden = false) => {
+    cookies.push({ id: cookieId++, x: cx, y: cy, golden, collected: false })
+    if (golden) goldenTotal++
   }
-  /** 空中に浮かぶ広告（中心 cx, 上端 topY, 高さ h）＝✕踏みの足場。
-   *  幅を狭めて天面ほぼ全体が✕踏み判定に収まるようにし、踏み継ぎを成立させる。 */
-  const floatBanner = (cx: number, topY: number, h = 92, w = 52, label = 'AD') => {
-    push({ x: cx - w / 2, y: topY, w, h, label, floating: true })
+  /** 水平なCookie列（道標）*/
+  const cookieRow = (x0: number, y: number, n: number, gap = 64) => {
+    for (let i = 0; i < n; i++) cookie(x0 + i * gap, y)
+  }
+  /** ジャンプ弧に沿ったCookie（穴越えのヒント）*/
+  const cookieArc = (x0: number, span: number, n: number, height: number) => {
+    for (let i = 0; i < n; i++) {
+      const t = n === 1 ? 0.5 : i / (n - 1)
+      const cx = x0 + t * span
+      const cy = GROUND_Y - 70 - Math.sin(t * Math.PI) * height
+      cookie(cx, cy)
+    }
   }
 
-  // --- 導入：たっぷり助走 ----------------------------------------------
-  flat(1400)
+  // --- 導入：助走＋道標Cookie -------------------------------------------
+  flat(1200)
+  cookieRow(420, GROUND_Y - 70, 6)
 
-  // --- 小さい穴ひとつ --------------------------------------------------
+  // --- 小さい穴：弧Cookieで「跳べ」を示唆 -------------------------------
+  cookieArc(x - 60, 190 + 120, 5, 150)
   hole(190)
-  flat(900)
+  flat(820)
 
-  // --- 低いバナー ------------------------------------------------------
-  banner(x - 500, 90)
-  flat(700)
+  // === 広告タイプ確認区間 ==============================================
+  // ① ポップアップ（基本：1踏みで閉じる）
+  cookie(x - 360, GROUND_Y - 250, false)
+  ad('popup', x - 360, 120, { label: 'AD' })
+  flat(640)
 
-  // --- 連続バナー（リズムジャンプ）-------------------------------------
-  banner(x - 350, 110)
-  banner(x + 250, 130)
-  flat(1000)
+  // ② 動画広告（1踏みミュート→2踏みで閉じる）
+  ad('video', x - 360, 140, { label: '▶' })
+  flat(680)
 
-  // --- 広い穴（2段ジャンプ推奨）----------------------------------------
-  hole(300)
-  flat(700)
+  // ③ リタゲ広告（追尾・踏むと逃走→2踏みで成仏）
+  ad('retarget', x - 360, 120, { label: '👁', floating: true, topY: GROUND_Y - 220 })
+  flat(720)
 
-  // --- 穴＋直後にバナー（入力バッファの見せ場）-------------------------
-  hole(210)
-  banner(x + 120, 120)
-  flat(900)
+  // ④ ✕なし広告（踏めない・避けるのみ）
+  ad('noclose', x - 380, 150, { label: '広告' })
+  flat(820)
 
-  // =====================================================================
-  // ★ 並走ルート区間：地上＝安全 / 空中＝✕踏み継ぎ（上級・高スコア）
-  //   地面はずっと続く（安全）。その上空に踏み台となる✕広告を 4 連で配置。
-  //   踏むたび2段ジャンプが復活するので、空中を渡り切れる。
-  // =====================================================================
+  // === 並走ルート：空中踏み継ぎ（Cookieライン＋頂点にゴールデン）======
   flat(120)
   {
-    const top = GROUND_Y - 205 // 踏み台の上端（地上ジャンプ＋2段で届く高さ）
+    const top = GROUND_Y - 205
     const step = 340
     const base = x + 220
     for (let i = 0; i < 4; i++) {
-      floatBanner(base + i * step, top - (i % 2 === 0 ? 0 : 26))
+      const ty = top - (i % 2 === 0 ? 0 : 26)
+      floatBanner(base + i * step, ty)
+      cookie(base + i * step, ty - 46) // 踏み継ぎラインの上にCookie
     }
-    flat(step * 4 + 380) // 下は安全な地面（並走ルート）
+    // 危険な空中ルートの最奥にゴールデン①
+    cookie(base + 3 * step + 60, top - 90, true)
+    flat(step * 4 + 380)
   }
 
-  // --- 高いバナー2連（2段ジャンプで越える）-----------------------------
+  // --- 高いバナー2連 ---------------------------------------------------
   banner(x - 500, 170)
   banner(x + 200, 190)
   flat(1100)
 
-  // --- 連続穴（コヨーテ＆リズム）---------------------------------------
+  // --- 連続穴：広い穴の上にゴールデン② --------------------------------
+  cookieArc(x - 40, 170 + 80, 4, 120)
   hole(170)
   flat(360)
+  cookie(x + 85, GROUND_Y - 250, true) // ゴールデン②（穴の縁の高所）
   hole(170)
   flat(360)
   hole(200)
-  flat(1000)
+  flat(900)
 
-  // --- 最後の山場：穴→高バナー→穴 -------------------------------------
+  // --- 最後の山場：穴→高バナー→穴（最奥にゴールデン③）----------------
   banner(x - 600, 150)
   hole(240)
+  cookie(x - 120, GROUND_Y - 260, true) // ゴールデン③
   flat(500)
   banner(x + 60, 160)
   flat(1200)
+  cookieRow(x - 900, GROUND_Y - 70, 6)
 
   const length = x
 
-  return { length, groundY: GROUND_Y, spans, obstacles }
+  return { length, groundY: GROUND_Y, spans, obstacles, cookies, goldenTotal }
 }
 
 /** x に地面があるか（穴判定） */

@@ -87,8 +87,34 @@ export const audio = {
     tone({ freq: 1320, dur: 0.09, type: 'triangle', vol: 0.45 })
     tone({ freq: 1980, dur: 0.07, type: 'triangle', vol: 0.3 })
   },
-  stomp() {
-    tone({ freq: 880, to: 1500, dur: 0.1, type: 'square', vol: 0.55 })
+  /** ✕踏み。コンボ数に応じて半音ずつピッチ上昇 */
+  stomp(combo = 0) {
+    const semis = Math.min(combo, 12)
+    const mul = Math.pow(2, semis / 12)
+    tone({ freq: 880 * mul, to: 1500 * mul, dur: 0.1, type: 'square', vol: 0.55 })
+  },
+  /** JUST CLOSE：きらびやかな上昇 */
+  justClose() {
+    tone({ freq: 1320, to: 2640, dur: 0.16, type: 'triangle', vol: 0.5 })
+    tone({ freq: 1980, dur: 0.1, type: 'sine', vol: 0.35 })
+  },
+  /** コンボ途切れ：控えめな「シュン」 */
+  comboBreak() {
+    tone({ freq: 600, to: 240, dur: 0.16, type: 'sine', vol: 0.32 })
+  },
+  /** retarget の悲鳴 */
+  scream() {
+    tone({ freq: 700, to: 1500, dur: 0.18, type: 'sawtooth', vol: 0.4 })
+  },
+  /** video のミュート化（低くこもる） */
+  videoMute() {
+    tone({ freq: 320, to: 160, dur: 0.14, type: 'sine', vol: 0.4 })
+  },
+  /** Cookie 取得。連続取得で streak ぶんピッチ上昇 */
+  cookie(streak = 0, golden = false) {
+    const mul = Math.pow(2, Math.min(streak, 12) / 12)
+    const base = golden ? 1040 : 880
+    tone({ freq: base * mul, to: base * 1.5 * mul, dur: 0.1, type: 'triangle', vol: golden ? 0.55 : 0.4 })
   },
   death() {
     tone({ freq: 600, to: 90, dur: 0.5, type: 'sawtooth', vol: 0.55 })

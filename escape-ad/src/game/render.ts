@@ -82,6 +82,7 @@ export class Renderer {
 
     this.drawBackground(left, right)
     this.drawGround(world, left, right)
+    this.drawCookies(world, left, right)
     this.drawObstacles(world, left, right)
     this.drawShadow(world, px)
     this.drawPlayer(world, px, py)
@@ -92,6 +93,7 @@ export class Renderer {
     // --- 画面固定（screen px）---
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     if (world.adblockActive) this.drawAdblockOverlay(world)
+    this.drawCombo(world)
     this.drawTelop(world)
     if (debugState.enabled) this.drawDebugText(world)
   }
@@ -134,6 +136,20 @@ export class Renderer {
     }
   }
 
+  private adColor(o: Obstacle): string {
+    // タイプ別ベース色（ミュート済みvideoはくすませる）
+    switch (o.type) {
+      case 'video':
+        return o.muted ? '#7d6f86' : '#7b3ff2'
+      case 'retarget':
+        return '#ff8a3d'
+      case 'noclose':
+        return '#1c1f26'
+      default:
+        return '#ff4d4d'
+    }
+  }
+
   private drawObstacles(world: World, left: number, right: number) {
     const ctx = this.ctx
     const gray = world.adblockActive
@@ -141,7 +157,6 @@ export class Renderer {
       if (o.x + o.w < left || o.x > right) continue
       if (o.closed && o.closeAnim >= 1) continue
 
-      // 閉じる演出：縮みながらポン
       const s = o.closed ? 1 - o.closeAnim : 1
       if (s <= 0.02) continue
 
@@ -152,7 +167,7 @@ export class Renderer {
       // 支柱 / ハンガー
       ctx.fillStyle = gray ? '#5b6070' : '#3a3f4d'
       if (o.floating) {
-        ctx.fillRect(cx - 3, o.y - 18, 6, 18) // 上に短いハンガー
+        ctx.fillRect(cx - 3, o.y - 18, 6, 18)
       } else {
         ctx.fillRect(cx - 4, o.y, 8, o.h)
       }
@@ -162,19 +177,77 @@ export class Renderer {
       ctx.scale(s, s)
 
       // 看板本体
-      ctx.fillStyle = gray ? '#888d99' : '#ff4d4d'
+      ctx.fillStyle = gray ? '#888d99' : this.adColor(o)
       roundRect(ctx, -o.w / 2, -signH / 2, o.w, signH, 8)
       ctx.fill()
+      // noclose は黒枠＋白フチで「閉じられない」を明示
+      if (o.type === 'noclose') {
+        ctx.strokeStyle = gray ? '#aab' : '#ffffff'
+        ctx.lineWidth = 3
+        roundRect(ctx, -o.w / 2, -signH / 2, o.w, signH, 8)
+        ctx.stroke()
+      }
       ctx.fillStyle = gray ? '#c8ccd4' : '#ffffff'
-      ctx.font = 'bold 26px system-ui, sans-serif'
+      ctx.font = 'bold 24px system-ui, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(o.label, 0, 0)
       ctx.restore()
 
-      // ✕ボタン（右上・別判定。閉じてない時のみ）
-      if (!o.closed && !gray) this.drawCloseButton(o)
+      // ✕ボタン（stomp可能タイプのみ・閉じてない時）
+      if (!o.closed && !gray && o.type !== 'noclose') this.drawCloseButton(o)
     }
+  }
+
+  private drawCookies(world: World, left: number, right: number) {
+    const ctx = this.ctx
+    for (const ck of world.course.cookies) {
+      if (ck.collected) continue
+      if (ck.x < left || ck.x > right) continue
+      const r = ck.golden ? 15 : 11
+      ctx.fillStyle = ck.golden ? '#ffd23f' : '#caa46a'
+      ctx.beginPath()
+      ctx.arc(ck.x, ck.y, r, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = ck.golden ? '#fff3b0' : '#a8814f'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      // チョコチップ
+      ctx.fillStyle = ck.golden ? '#a87b1f' : '#5a4632'
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2 + ck.id
+        ctx.beginPath()
+        ctx.arc(ck.x + Math.cos(a) * r * 0.4, ck.y + Math.sin(a) * r * 0.4, 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+  }
+
+  private drawCombo(world: World) {
+    if (world.combo < 2 || world.phase !== 'playing') return
+    const ctx = this.ctx
+    const big = world.combo >= 5
+    ctx.save()
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    const cxp = this.cssW / 2
+    const yp = this.cssH * 0.2
+    ctx.font = `bold ${big ? 52 : 34}px system-ui, sans-serif`
+    ctx.lineWidth = 6
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)'
+    ctx.fillStyle = big ? '#ffd23f' : '#fff7e6'
+    const txt = `${world.combo} COMBO`
+    if (big) {
+      const wobble = 1 + 0.05 * Math.sin(world.combo * 1.7)
+      ctx.translate(cxp, yp)
+      ctx.scale(wobble, wobble)
+      ctx.strokeText(txt, 0, 0)
+      ctx.fillText(txt, 0, 0)
+    } else {
+      ctx.strokeText(txt, cxp, yp)
+      ctx.fillText(txt, cxp, yp)
+    }
+    ctx.restore()
   }
 
   private drawCloseButton(o: Obstacle) {
@@ -330,20 +403,35 @@ export class Renderer {
 
   private drawDebugText(world: World) {
     const ctx = this.ctx
-    ctx.fillStyle = 'rgba(0,0,0,0.55)'
-    ctx.fillRect(8, 8, 176, 110)
+    const d = world.gaugeDbg
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'
+    ctx.fillRect(8, 8, 210, 156)
     ctx.fillStyle = '#9bffd6'
     ctx.font = '12px ui-monospace, monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'top'
-    ctx.fillText(`FPS  ${debugState.fps.toFixed(0)}`, 16, 14)
+    ctx.fillText(`FPS   ${debugState.fps.toFixed(0)}`, 16, 14)
     ctx.fillText(`phase ${world.phase}`, 16, 32)
     ctx.fillText(`prog  ${world.progress.toFixed(1)}%`, 16, 50)
-    ctx.fillText(`graze ${world.grazeScore}  sc ${world.score}`, 16, 68)
+    ctx.fillText(`score ${world.score}  graze ${world.grazeScore}`, 16, 68)
+    ctx.fillText(`combo ${world.combo}  x${Math.min(world.combo, 99)}`, 16, 86)
     ctx.fillText(
-      `gauge ${world.gauge.toFixed(0)}${world.adblockActive ? ' AB' : ''}`,
+      `gauge ${world.gauge.toFixed(0)}${world.adblockActive ? ' [AB]' : ''}`,
       16,
-      86,
+      104,
+    )
+    // ゲージ増加の内訳
+    ctx.fillStyle = '#ffd23f'
+    ctx.fillText(
+      `+${d.gain.toFixed(0)} = ${d.base}${d.just ? '+just' : ''}${d.comboBoost ? ' x1.5' : ''}`,
+      16,
+      122,
+    )
+    ctx.fillStyle = '#caa46a'
+    ctx.fillText(
+      `cookie ${world.cookiesCollected}  gold ${world.goldenCollected}/${world.course.goldenTotal}`,
+      16,
+      140,
     )
   }
 }

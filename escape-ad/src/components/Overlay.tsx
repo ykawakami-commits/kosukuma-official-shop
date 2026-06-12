@@ -12,6 +12,9 @@ export function Overlay() {
   const gauge = useUIStore((s) => s.gauge)
   const gaugeReady = useUIStore((s) => s.gaugeReady)
   const adblockActive = useUIStore((s) => s.adblockActive)
+  const cookies = useUIStore((s) => s.cookies)
+  const golden = useUIStore((s) => s.golden)
+  const goldenTotal = useUIStore((s) => s.goldenTotal)
   const muted = useUIStore((s) => s.muted)
   const toggleMute = useUIStore((s) => s.toggleMute)
 
@@ -68,7 +71,8 @@ export function Overlay() {
         <div className="panel">
           <h1>escape AD</h1>
           <p className="lead">タップでジャンプ / 空中でもう一度＝2段ジャンプ</p>
-          <p className="lead">広告の ✕ を上から踏むと閉じられる！</p>
+          <p className="lead">広告の ✕ を上から踏むと閉じられる！ 下スワイプで急降下</p>
+          <p className="golden-line">🍪 ゴールデン 0/{goldenTotal}</p>
           <p className="cta blink">タップでスタート</p>
         </div>
       )}
@@ -76,6 +80,9 @@ export function Overlay() {
       {phase === 'dead' && (
         <div className="panel dead">
           <p className="result">{Math.floor(progress)}% で広告に興味を持ちました</p>
+          <p className="sub">SCORE {score + grazeScore}</p>
+          <p className="sub">Cookieを{cookies}枚収集しました（同意した覚えはない）</p>
+          <p className="golden-line">🍪 ゴールデン {golden}/{goldenTotal}</p>
           <p className="cta blink">タップでリトライ</p>
         </div>
       )}
@@ -84,6 +91,8 @@ export function Overlay() {
         <div className="panel clear">
           <h1>ゴール！</h1>
           <p className="result">完走 / SCORE {score + grazeScore}</p>
+          <p className="sub">Cookieを{cookies}枚収集しました（同意した覚えはない）</p>
+          <p className="golden-line">🍪 ゴールデン {golden}/{goldenTotal}</p>
           <p className="cta blink">タップでもう一回</p>
         </div>
       )}

@@ -103,6 +103,42 @@ export interface Tuning {
   /** 満タンで自動発動(1)か手動発動(0)か */
   adblockAuto: number
 
+  // --- Phase2: コンボ --------------------------------------------------
+  /** スコア倍率の上限（x1→x2→…→comboMax） */
+  comboMax: number
+  /** コンボ中（2以上）のゲージ増加倍率 */
+  comboGaugeMult: number
+
+  // --- Phase2: JUST CLOSE（精度判定）----------------------------------
+  /** ✕判定ボックス中心の何割を JUST 扱いにするか（0.5=中心50%） */
+  justCloseFraction: number
+  /** JUST 時のバウンド倍率 */
+  justBounceMult: number
+  /** JUST 時のゲージボーナス */
+  justGaugeBonus: number
+
+  // --- Phase2: 広告タイプ ---------------------------------------------
+  /** video を閉じるのに必要な踏み回数 */
+  videoHits: number
+  /** retarget を成仏させるのに必要な踏み回数 */
+  retargetHits: number
+  /** retarget の追尾速度 (px/s)。runSpeed 未満なら走り続ければ逃げ切れる */
+  retargetSpeed: number
+
+  // --- Phase2: 下スワイプ急降下 ---------------------------------------
+  /** 急降下時の落下速度 (px/s) */
+  diveSpeed: number
+  /** 急降下中に踏んだ時のバウンド倍率 */
+  diveBounceMult: number
+  /** 下スワイプ判定の最小縦移動 (px) */
+  swipeMinPx: number
+
+  // --- 3Dプロト：耳のスプリング物理（model-test で使用）---------------
+  /** 耳ばねの剛性（大きいほど速く追従） */
+  earSpringK: number
+  /** 耳ばねの減衰（大きいほど揺れが早く止まる） */
+  earSpringDamp: number
+
   // --- オーディオ ------------------------------------------------------
   /** SFX 音量 (0〜1) */
   sfxVolume: number
@@ -156,6 +192,24 @@ export const tuning: Tuning = {
   gaugeMax: 100,
   adblockDurationSec: 4,
   adblockAuto: 1,
+
+  comboMax: 8,
+  comboGaugeMult: 1.5,
+
+  justCloseFraction: 0.5,
+  justBounceMult: 1.3,
+  justGaugeBonus: 10,
+
+  videoHits: 2,
+  retargetHits: 2,
+  retargetSpeed: 300,
+
+  diveSpeed: 1700,
+  diveBounceMult: 1.25,
+  swipeMinPx: 40,
+
+  earSpringK: 140,
+  earSpringDamp: 11,
 
   sfxVolume: 0.5,
 }
@@ -238,6 +292,16 @@ export const SLIDERS: SliderSpec[] = [
   { key: 'stompGaugeGain', label: 'ゲージ/踏み', min: 0, max: 40, step: 1 },
   { key: 'adblockDurationSec', label: 'AdBlock秒', min: 1, max: 8, step: 0.5 },
   { key: 'adblockAuto', label: 'AdBlock自動', min: 0, max: 1, step: 1 },
+  { key: 'comboMax', label: 'コンボ倍率上限', min: 2, max: 16, step: 1 },
+  { key: 'comboGaugeMult', label: 'コンボゲージ倍', min: 1, max: 3, step: 0.1 },
+  { key: 'justCloseFraction', label: 'JUST判定幅', min: 0.2, max: 1, step: 0.05 },
+  { key: 'justBounceMult', label: 'JUSTバウンド倍', min: 1, max: 2, step: 0.05 },
+  { key: 'videoHits', label: '動画 必要踏み', min: 1, max: 4, step: 1 },
+  { key: 'retargetHits', label: 'リタゲ 必要踏み', min: 1, max: 4, step: 1 },
+  { key: 'retargetSpeed', label: 'リタゲ追尾速度', min: 0, max: 500, step: 10 },
+  { key: 'diveSpeed', label: '急降下速度', min: 800, max: 3000, step: 50 },
+  { key: 'diveBounceMult', label: '急降下バウンド倍', min: 1, max: 2, step: 0.05 },
+  { key: 'swipeMinPx', label: 'スワイプ最小px', min: 20, max: 80, step: 5 },
   { key: 'shakeMagnitude', label: 'シェイク量', min: 0, max: 60, step: 1 },
   { key: 'cameraOffsetX', label: 'カメラ前距離', min: 80, max: 480, step: 10 },
   { key: 'sfxVolume', label: 'SFX音量', min: 0, max: 1, step: 0.05 },

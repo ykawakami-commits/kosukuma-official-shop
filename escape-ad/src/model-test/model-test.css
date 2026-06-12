@@ -1,0 +1,98 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #e9e3d2;
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mt-stage {
+  position: fixed;
+  inset: 0;
+}
+
+.mt-canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+
+/* 参考画像を中央に重ねて比較 */
+.mt-ref {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.mt-panel {
+  position: absolute;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(440px, 94vw);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(4px);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.mt-row {
+  display: flex;
+  gap: 6px;
+}
+
+.mt-btn {
+  flex: 1;
+  padding: 9px 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9px;
+  background: #fff;
+  color: #4a4233;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mt-btn.on {
+  background: #4a4233;
+  color: #f2eac2;
+  border-color: #4a4233;
+}
+
+.mt-slider {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6a5f49;
+  gap: 2px;
+}
+
+.mt-slider input {
+  width: 100%;
+  accent-color: #b89b5a;
+}
+
+.mt-note {
+  font-size: 11px;
+  color: #8a7d5e;
+}

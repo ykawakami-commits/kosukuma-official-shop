@@ -89,6 +89,27 @@ export class Particles {
     this.ring(x, y, 60, '#ffffff', 4)
   }
 
+  /** JUST CLOSE の金パーティクル */
+  gold(x: number, y: number) {
+    const palette = ['#ffd700', '#fff3b0', '#ffb800']
+    for (let i = 0; i < 16; i++) {
+      const ang = Math.random() * Math.PI * 2
+      const spd = 160 + Math.random() * 260
+      this.spawn({
+        x,
+        y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 120,
+        life: 0.4 + Math.random() * 0.3,
+        maxLife: 0.7,
+        size: 4 + Math.random() * 5,
+        color: palette[i % palette.length],
+        gravity: 600,
+      })
+    }
+    this.ring(x, y, 70, 'rgba(255,215,0,0.9)', 4)
+  }
+
   /** 広がって消えるリング */
   ring(x: number, y: number, maxR = 54, color = 'rgba(255,255,255,0.9)', width = 3) {
     this.rings.push({ x, y, r: 8, maxR, life: 0.32, maxLife: 0.32, color, width })
