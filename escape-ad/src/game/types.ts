@@ -8,7 +8,8 @@ export interface GroundSpan {
   x1: number
 }
 
-/** 静的バナー障害物（地面の上に立つ矩形） */
+/** 広告バナー障害物。地面の上 or 空中（floating）に立つ矩形。
+ *  右上に「✕ボタン」を持ち、上から踏むと閉じられる。 */
 export interface Obstacle {
   id: number
   x: number // 左端 (world px)
@@ -16,6 +17,13 @@ export interface Obstacle {
   w: number
   h: number
   label: string
+  /** 空中広告（地面から生えていない＝下に支柱を描かない） */
+  floating: boolean
+  // --- ランタイム状態（reanal: コースは reset 毎に再生成）---
+  /** ✕踏みで閉じられた */
+  closed: boolean
+  /** 閉じる演出の進行 0→1 */
+  closeAnim: number
 }
 
 export interface Course {
@@ -25,12 +33,6 @@ export interface Course {
   groundY: number
   spans: GroundSpan[]
   obstacles: Obstacle[]
-}
-
-/** 補間レンダリング用に prev/curr 2 状態を持つ値 */
-export interface Interpolated {
-  prev: number
-  curr: number
 }
 
 export interface Particle {
@@ -43,4 +45,16 @@ export interface Particle {
   size: number
   color: string
   gravity: number
+}
+
+/** 広がって消えるリング（2段ジャンプの空気リング等） */
+export interface Ring {
+  x: number
+  y: number
+  r: number
+  maxR: number
+  life: number
+  maxLife: number
+  color: string
+  width: number
 }

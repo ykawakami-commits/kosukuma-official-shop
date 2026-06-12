@@ -1,6 +1,8 @@
 import { World, type Emit } from './world'
 import { Renderer } from './render'
 import { debugState } from './debug'
+import { audio } from './audio'
+import { gameRef } from './gameRef'
 
 // =============================================================================
 // engine.ts — rAF ループ
@@ -29,6 +31,7 @@ export class Engine {
   ) {
     this.world = new World(emit)
     this.renderer = new Renderer(canvas)
+    gameRef.world = this.world
 
     this.onPointerDown = this.onPointerDown.bind(this)
     this.onResize = this.onResize.bind(this)
@@ -49,10 +52,12 @@ export class Engine {
     cancelAnimationFrame(this.rafId)
     this.canvas.removeEventListener('pointerdown', this.onPointerDown)
     window.removeEventListener('resize', this.onResize)
+    if (gameRef.world === this.world) gameRef.world = null
   }
 
   private onPointerDown(e: PointerEvent) {
     e.preventDefault()
+    audio.unlock() // 最初のタップで AudioContext を解放
     this.world.press()
   }
 

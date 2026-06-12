@@ -1,19 +1,18 @@
 // =============================================================================
-// tuning.ts — 全調整パラメータの集約点
+// tuning.ts — 全調整パラメータの集約点（Phase 1.5）
 // -----------------------------------------------------------------------------
-// 物理・操作感に関わる数値はすべてここに置く。エンジンは毎フレームこのオブジェクト
-// を直接読むので、?debug=1 のスライダーから書き換えれば実機でライブ調整できる。
+// 物理・操作感・ジュース・SFX・✕踏み・AdBlock すべての数値をここに置く。
+// エンジンは毎フレーム直接読むので ?debug=1 のスライダーでライブ調整できる。
 //
-// 単位系：
-//   - 距離は「デザイン座標」px（仮想高さ DESIGN_HEIGHT 基準。端末解像度に依らず一定）
-//   - 速度は px/秒、加速度は px/秒^2
-//   - 時間は ms（ミリ秒）で持ち、エンジン側で秒へ変換する
+// ★ジャンプは「高さH」と「頂点到達時間t」で指定する（もっさり解消の本丸）。
+//   上昇重力 g_up = 2H / t² , 初速 v = √(2 · g_up · H) = 2H/t
+//   下降重力 = g_up × fallMultiplier
+//   → もっさりの原因は高さではなく t が長いこと。高さ維持で t を縮める。
 // =============================================================================
 
 export const DESIGN_HEIGHT = 720
 
 export interface SliderSpec {
-  /** tuning 上のキー */
   key: keyof Tuning
   label: string
   min: number
@@ -23,76 +22,120 @@ export interface SliderSpec {
 
 export interface Tuning {
   // --- 走行 -------------------------------------------------------------
-  /** 自動で右に進む速度 (px/s)。コース距離もこれ基準で決める */
   runSpeed: number
 
-  // --- ジャンプ / 重力 --------------------------------------------------
-  /** 上昇中の重力 (px/s^2) */
-  gravityUp: number
-  /** 下降中の重力倍率。1 より大きいほどキビキビ落ちる */
-  fallMultiplier: number
-  /** 1段ジャンプの初速 (px/s, 上向き) */
-  jumpVelocity: number
-  /** 2段ジャンプの初速倍率（1段目に対する比） */
+  // --- ジャンプ（H/t 方式）---------------------------------------------
+  /** 1段ジャンプの頂点高さ H (px)。初期=キャラ高さ72×2.2≈158 */
+  jumpHeight1: number
+  /** 1段ジャンプの頂点到達時間 t (s)。小さいほどキビキビ */
+  jumpTime1: number
+  /** 2段ジャンプの高さ比（1段目Hに対する割合） */
   doubleJumpFactor: number
-  /** 使えるジャンプ回数（2 = 2段ジャンプ） */
+  /** 下降重力の倍率（上昇重力に対して）。1.8でキビキビ */
+  fallMultiplier: number
+  /** 落下速度の上限 (px/s) */
+  terminalVelocity: number
+  /** 使えるジャンプ回数 */
   maxJumps: number
-  /** 落下中の最大速度クランプ (px/s)。0 で無効 */
-  maxFallSpeed: number
 
-  // --- 入力補助（このPhaseの本体）-------------------------------------
-  /** 入力バッファ：着地直前のタップを着地時に発火 (ms) */
+  // --- 入力補助 --------------------------------------------------------
   jumpBufferMs: number
-  /** コヨーテタイム：足場を離れた直後でもジャンプ可 (ms) */
   coyoteMs: number
 
-  // --- スクワッシュ&ストレッチ -----------------------------------------
-  /** ジャンプ時の伸び量（0.18 = 縦+18%/横-） */
+  // --- スクワッシュ&ストレッチ（見た目のみ。物理に影響しない）---------
+  /** ジャンプ時の伸び量 */
   stretchAmount: number
-  /** 着地時の潰れ量 */
-  squashAmount: number
-  /** 変形からの復帰時間 (s) */
+  /** 着地スクワッシュ：低速時の潰れ量 */
+  squashMin: number
+  /** 着地スクワッシュ：高速時の潰れ量（横1.25/縦0.75目安=0.25） */
+  squashMax: number
+  /** squashMax に達する落下速度 (px/s) */
+  squashSpeedRef: number
+  /** 変形からの復帰時間 (s)。着地は0.08想定 */
   squashRecover: number
 
+  // --- 着地ジュース ----------------------------------------------------
+  /** 土埃の基本数（低速） */
+  dustBaseCount: number
+  /** 土埃の最大数（高速） */
+  dustMaxCount: number
+  /** カメラ・マイクロディップの最大沈み込み (px) */
+  cameraDipMax: number
+  /** ディップの所要時間 (ms) */
+  cameraDipMs: number
+  /** 2段ジャンプ時の空気リング（1=出す/0=出さない） */
+  airRingEnabled: number
+  /** 高所着地のみの極小ヒットストップ (ms, 0〜40) */
+  highFallHitstopMs: number
+  /** ヒットストップが発生する落下速度のしきい値 (px/s) */
+  highFallThreshold: number
+
   // --- 当たり / かすり -------------------------------------------------
-  /** 当たり判定サイズ比（見た目スプライトに対する割合） */
   hitboxScale: number
-  /** グレイズ判定リングの外側マージン (px) */
   grazeMargin: number
-  /** かすり1回のスコア */
   grazeScore: number
 
   // --- 死亡演出 --------------------------------------------------------
-  /** ヒットストップ時間 (ms) */
   hitstopMs: number
-  /** 画面シェイクの初期振幅 (px) */
   shakeMagnitude: number
-  /** 画面シェイクの持続 (ms) */
   shakeDurationMs: number
 
   // --- カメラ ----------------------------------------------------------
-  /** 画面左端からプレイヤーまでの距離（デザインpx）。小さいほど前が見える */
   cameraOffsetX: number
-  /** 縦方向のカメラ追従の緩さ（0=固定, 大きいほど追う） */
-  cameraFollowY: number
+
+  // --- ✕踏み（広告クローズ）-------------------------------------------
+  /** ✕判定ボックスの見た目に対する倍率（甘め＝1.5） */
+  xHitboxScale: number
+  /** 踏んだ時の小バウンド初速 (px/s, 上向き) */
+  stompBounceVel: number
+  /** ✕踏みスコア */
+  stompScore: number
+
+  // --- グレイズ→AdBlockゲージ -----------------------------------------
+  /** グレイズ1回のゲージ増加量 */
+  grazeGaugeGain: number
+  /** ✕踏み1回のゲージ増加量 */
+  stompGaugeGain: number
+  /** ゲージ満タン値 */
+  gaugeMax: number
+  /** AdBlockモードの持続 (s) */
+  adblockDurationSec: number
+  /** 満タンで自動発動(1)か手動発動(0)か */
+  adblockAuto: number
+
+  // --- オーディオ ------------------------------------------------------
+  /** SFX 音量 (0〜1) */
+  sfxVolume: number
 }
 
+// C＝現状値（Phase1で実機検証した“もっさり”を H/t に換算して保存：比較用）
+//   旧: jumpVelocity 880 / gravityUp 2300 → t=v/g=0.38s, H=v²/2g≈168px
 export const tuning: Tuning = {
   runSpeed: 330,
 
-  gravityUp: 2300,
-  fallMultiplier: 1.8,
-  jumpVelocity: 880,
+  jumpHeight1: 160,
+  jumpTime1: 0.3,
   doubleJumpFactor: 0.85,
+  fallMultiplier: 1.8,
+  terminalVelocity: 1700,
   maxJumps: 2,
-  maxFallSpeed: 1600,
 
   jumpBufferMs: 100,
   coyoteMs: 90,
 
   stretchAmount: 0.2,
-  squashAmount: 0.28,
-  squashRecover: 0.1,
+  squashMin: 0.12,
+  squashMax: 0.25,
+  squashSpeedRef: 1000,
+  squashRecover: 0.08,
+
+  dustBaseCount: 6,
+  dustMaxCount: 18,
+  cameraDipMax: 4,
+  cameraDipMs: 70,
+  airRingEnabled: 1,
+  highFallHitstopMs: 20,
+  highFallThreshold: 1100,
 
   hitboxScale: 0.75,
   grazeMargin: 16,
@@ -103,23 +146,99 @@ export const tuning: Tuning = {
   shakeDurationMs: 320,
 
   cameraOffsetX: 240,
-  cameraFollowY: 0,
+
+  xHitboxScale: 1.5,
+  stompBounceVel: 560,
+  stompScore: 120,
+
+  grazeGaugeGain: 12,
+  stompGaugeGain: 8,
+  gaugeMax: 100,
+  adblockDurationSec: 4,
+  adblockAuto: 1,
+
+  sfxVolume: 0.5,
 }
 
-// デバッグパネルに出すスライダー定義（順番＝表示順）
+// =============================================================================
+// プリセット（A/B/C を一括切替）。feel に効く部分だけを上書きする。
+// =============================================================================
+export type PresetName = 'A' | 'B' | 'C'
+
+type FeelKeys =
+  | 'jumpHeight1'
+  | 'jumpTime1'
+  | 'doubleJumpFactor'
+  | 'fallMultiplier'
+  | 'squashMax'
+  | 'cameraDipMax'
+  | 'airRingEnabled'
+  | 'highFallHitstopMs'
+
+export const PRESETS: Record<PresetName, Pick<Tuning, FeelKeys>> = {
+  // A キビキビ（t=0.26s、ジュース強め）
+  A: {
+    jumpHeight1: 160,
+    jumpTime1: 0.26,
+    doubleJumpFactor: 0.85,
+    fallMultiplier: 2.0,
+    squashMax: 0.3,
+    cameraDipMax: 5,
+    airRingEnabled: 1,
+    highFallHitstopMs: 26,
+  },
+  // B スタンダード（t=0.32s）
+  B: {
+    jumpHeight1: 160,
+    jumpTime1: 0.32,
+    doubleJumpFactor: 0.85,
+    fallMultiplier: 1.8,
+    squashMax: 0.25,
+    cameraDipMax: 4,
+    airRingEnabled: 1,
+    highFallHitstopMs: 20,
+  },
+  // C 現状値（もっさり。比較用）
+  C: {
+    jumpHeight1: 168,
+    jumpTime1: 0.38,
+    doubleJumpFactor: 0.85,
+    fallMultiplier: 1.8,
+    squashMax: 0.2,
+    cameraDipMax: 0,
+    airRingEnabled: 0,
+    highFallHitstopMs: 0,
+  },
+}
+
+export function applyPreset(name: PresetName) {
+  Object.assign(tuning, PRESETS[name])
+}
+
+// デバッグパネルのスライダー（順＝表示順）
 export const SLIDERS: SliderSpec[] = [
   { key: 'runSpeed', label: '走行速度', min: 120, max: 600, step: 10 },
-  { key: 'jumpVelocity', label: 'ジャンプ初速', min: 400, max: 1400, step: 10 },
-  { key: 'gravityUp', label: '重力(上昇)', min: 800, max: 4000, step: 50 },
+  { key: 'jumpHeight1', label: 'ジャンプ高さH', min: 60, max: 320, step: 4 },
+  { key: 'jumpTime1', label: '頂点到達t(s)', min: 0.18, max: 0.5, step: 0.01 },
+  { key: 'doubleJumpFactor', label: '2段高さ比', min: 0.4, max: 1.2, step: 0.05 },
   { key: 'fallMultiplier', label: '下降重力倍率', min: 1, max: 3, step: 0.05 },
-  { key: 'doubleJumpFactor', label: '2段ジャンプ比', min: 0.4, max: 1.2, step: 0.05 },
+  { key: 'terminalVelocity', label: '落下上限', min: 800, max: 3000, step: 50 },
   { key: 'jumpBufferMs', label: '入力バッファms', min: 0, max: 250, step: 5 },
   { key: 'coyoteMs', label: 'コヨーテms', min: 0, max: 250, step: 5 },
-  { key: 'stretchAmount', label: 'ストレッチ量', min: 0, max: 0.5, step: 0.01 },
-  { key: 'squashAmount', label: 'スクワッシュ量', min: 0, max: 0.5, step: 0.01 },
+  { key: 'squashMax', label: '着地潰れ量', min: 0, max: 0.5, step: 0.01 },
+  { key: 'squashRecover', label: '潰れ復帰s', min: 0.04, max: 0.2, step: 0.01 },
+  { key: 'cameraDipMax', label: 'カメラ沈み', min: 0, max: 12, step: 1 },
+  { key: 'airRingEnabled', label: '空気リング', min: 0, max: 1, step: 1 },
+  { key: 'highFallHitstopMs', label: '着地HS ms', min: 0, max: 40, step: 2 },
   { key: 'hitboxScale', label: '判定サイズ比', min: 0.4, max: 1, step: 0.01 },
   { key: 'grazeMargin', label: 'グレイズ幅', min: 0, max: 60, step: 1 },
-  { key: 'hitstopMs', label: 'ヒットストップms', min: 0, max: 300, step: 10 },
+  { key: 'xHitboxScale', label: '✕判定倍率', min: 1, max: 2.5, step: 0.1 },
+  { key: 'stompBounceVel', label: '踏みバウンド', min: 200, max: 1000, step: 20 },
+  { key: 'grazeGaugeGain', label: 'ゲージ/グレイズ', min: 0, max: 40, step: 1 },
+  { key: 'stompGaugeGain', label: 'ゲージ/踏み', min: 0, max: 40, step: 1 },
+  { key: 'adblockDurationSec', label: 'AdBlock秒', min: 1, max: 8, step: 0.5 },
+  { key: 'adblockAuto', label: 'AdBlock自動', min: 0, max: 1, step: 1 },
   { key: 'shakeMagnitude', label: 'シェイク量', min: 0, max: 60, step: 1 },
   { key: 'cameraOffsetX', label: 'カメラ前距離', min: 80, max: 480, step: 10 },
+  { key: 'sfxVolume', label: 'SFX音量', min: 0, max: 1, step: 0.05 },
 ]
