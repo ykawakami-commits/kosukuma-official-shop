@@ -3,5 +3,8 @@
   "buildCommand": "cd escape-ad && npm install && npm run build",
   "outputDirectory": "escape-ad/dist",
   "framework": null,
-  "rewrites": [{ "source": "/model-test", "destination": "/model-test.html" }]
+  "rewrites": [
+    { "source": "/model-test", "destination": "/model-test.html" },
+    { "source": "/3d", "destination": "/game3d.html" }
+  ]
 }

@@ -1,0 +1,315 @@
+/* escape-ad-3d プロトタイプの HUD/オーバーレイ CSS を移植（id→class） */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #171428;
+}
+.g3-wrap {
+  position: fixed;
+  inset: 0;
+  background: #171428;
+  font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  color: #fff;
+}
+.g3-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ---------- HUD ---------- */
+.g3-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: #fff;
+}
+.g3-adcount {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 10px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 5px 9px;
+  border-radius: 4px;
+  border: 1px solid #ffffff22;
+  letter-spacing: 0.04em;
+}
+.g3-adcount b {
+  color: #ffd400;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.g3-seek {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(46vw, 240px);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #ffffff22;
+  border-radius: 4px;
+  padding: 6px 9px;
+  text-align: center;
+}
+.g3-seeklabel {
+  font-size: 10px;
+  color: #ddd;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+.g3-seekbar {
+  height: 5px;
+  background: #444;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.g3-seekfill {
+  height: 100%;
+  width: 0%;
+  background: #ffd400;
+}
+.g3-gaugebox {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  right: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #ffffff22;
+  border-radius: 4px;
+  padding: 6px 9px;
+  width: 104px;
+}
+.g3-gaugelabel {
+  font-size: 10px;
+  color: #21e6c1;
+  margin-bottom: 4px;
+  letter-spacing: 0.06em;
+}
+.g3-gaugebar {
+  height: 5px;
+  background: #444;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.g3-gaugefill {
+  height: 100%;
+  width: 0%;
+  background: #21e6c1;
+}
+.g3-combo {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 900;
+  font-size: 26px;
+  color: #fff;
+  text-shadow: 0 2px 0 #000a;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.g3-combo small {
+  font-size: 13px;
+  color: #ffd400;
+}
+.g3-toast {
+  position: fixed;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 12px;
+  border-radius: 14px;
+  opacity: 0;
+  transition: opacity 0.25s;
+  white-space: nowrap;
+}
+.g3-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #fff0, #bfe8ff55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* ---------- ボタン ---------- */
+.g3-btn {
+  position: fixed;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: 1px solid #ffffff33;
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+.g3-fpv {
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: 10px;
+}
+.g3-mute {
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: 86px;
+}
+
+/* ---------- オーバーレイ ---------- */
+.g3-ovl {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 20;
+}
+.g3-title {
+  background: linear-gradient(#171428dd, #171428f5);
+}
+.g3-title h1 {
+  color: #fff;
+  font-size: clamp(22px, 7vw, 40px);
+  font-weight: 900;
+  line-height: 1.3;
+  text-shadow: 0 0 18px #ff2e6388, 0 0 40px #b026ff66;
+}
+.g3-title h1 span {
+  color: #ffd400;
+}
+.g3-sub {
+  color: #cbc6e2;
+  font-size: 12px;
+  margin-top: 10px;
+  line-height: 1.9;
+}
+.g3-start {
+  margin-top: 26px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  border: 2px solid #ffd400;
+  border-radius: 30px;
+  padding: 12px 34px;
+  animation: g3pulse 1.2s infinite;
+}
+.g3-pr {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 10px;
+  color: #999;
+  border: 1px solid #555;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.g3-corp {
+  position: absolute;
+  bottom: 14px;
+  font-size: 10px;
+  color: #777;
+}
+@keyframes g3pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+/* 死亡画面＝うさんくさいLP */
+.g3-lp {
+  background: #f4f4f4;
+  color: #222;
+}
+.g3-lpcard {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px #0003;
+  padding: 26px 22px;
+  width: min(86vw, 340px);
+}
+.g3-badge {
+  display: inline-block;
+  background: #ff2e63;
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.g3-lpcard h2 {
+  font-size: 21px;
+  margin: 12px 0 6px;
+  color: #d4145a;
+  font-weight: 900;
+}
+.g3-pct {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.8;
+}
+.g3-pct b {
+  font-size: 26px;
+  color: #111;
+  font-variant-numeric: tabular-nums;
+}
+.g3-fakebtn {
+  margin-top: 16px;
+  background: linear-gradient(#ffd23f, #f7971e);
+  border-radius: 8px;
+  padding: 13px;
+  font-weight: 900;
+  font-size: 14px;
+  color: #5b3a00;
+  box-shadow: 0 4px 0 #c97b12;
+}
+.g3-note {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 10px;
+}
+.g3-clear {
+  background: #0e0c1ce8;
+  color: #fff;
+}
+.g3-clear h2 {
+  font-size: 30px;
+  font-weight: 900;
+  color: #ffd400;
+  text-shadow: 0 0 24px #ffd40088;
+}
+.g3-stats {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 2;
+  color: #ddd;
+}
+.g3-again {
+  margin-top: 22px;
+  border: 2px solid #fff;
+  border-radius: 30px;
+  padding: 11px 30px;
+  font-weight: 700;
+  font-size: 14px;
+}

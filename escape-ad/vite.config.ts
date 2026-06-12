@@ -16,6 +16,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         modelTest: resolve(__dirname, 'model-test.html'),
+        game3d: resolve(__dirname, 'game3d.html'),
       },
     },
   },
