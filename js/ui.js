@@ -1,0 +1,512 @@
+// ui.js — 画面の配線
+//
+// 原則:
+// - カートの数字・合計・チェックアウトURLは cart.js（=Shopify）だけを見る
+// - CATALOGは「見せ方」だけを持つ演出レイヤー。価格と在庫は必ずShopifyで上書き
+// - 失敗は黙殺しない。全部こすくまくんの声でトーストする
+
+import { fetchProductsByHandles, formatMoney } from './storefront.js';
+import * as cart from './cart.js';
+import { PRODUCT_HANDLES } from './config.js';
+import { KumaAnim } from './kuma-anim.js';
+
+// ===== 表示カタログ（演出レイヤー） =====
+const CATALOG = {
+  'こすくまくんステッカー': {
+    no: 'NO. 001',
+    story: 'どこにでも貼れる。まちのどこかで見かけたら、それはたぶん、なかまのしわざ。',
+    images: [
+      '/assets/img/kosukuma-sticker-street-800.webp',
+      '/assets/img/kosukuma-sticker-pack-800.webp',
+      '/assets/img/kosukuma-sticker-main-800.webp',
+    ],
+  },
+  'tシャツ': {
+    no: 'NO. 002',
+    story: 'いちばんいいやつ。なにがいいかは、きたひとだけわかる。',
+    images: [
+      '/assets/img/kosukuma-ultra-tshirt-1-800.webp',
+      '/assets/img/kosukuma-ultra-tshirt-2-800.webp',
+    ],
+  },
+  'こすくまデコヘルメット': {
+    no: 'NO. 003',
+    story: 'せかいに1こだけだった、デコレーションヘルメット。あたらしいおうちに たびだっていったよ。',
+    images: ['/assets/img/kosukuma-deco-helmet-800.webp'],
+    imgFit: 'contain',
+  },
+};
+
+const SOLDOUT_LABELS = {
+  'こすくまデコヘルメット': 'たびだっていったよ',
+  default: 'うりきれちゃった',
+};
+
+// handle → Shopify商品（hydrate後に入る）
+const products = new Map();
+
+// ===== トースト =====
+export function toast(message, ms = 3200) {
+  const region = document.getElementById('toast-region');
+  if (!region) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = message;
+  region.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 350);
+  }, ms);
+}
+
+const VOICE = {
+  netError: 'ごめん、おみせとつながらないみたい。ちょっとまってもういちどためして。',
+  noStock: 'ごめん、いまざいこがないみたい。',
+  partialStock: 'ざいこがすこししかなくて、いれられるだけいれたよ。',
+  checkoutError: 'レジのちょうしがわるいみたい。すこしまってから、もういちどおしてみて。',
+};
+
+// ===== ダイアログ共通 =====
+function wireDialog(dialog) {
+  dialog.querySelectorAll('[data-close]').forEach((btn) =>
+    btn.addEventListener('click', () => dialog.close()),
+  );
+  // 背景クリックで閉じる
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+}
+
+function initDialogs() {
+  document.querySelectorAll('dialog').forEach(wireDialog);
+  // フッターの法務リンク等
+  document.querySelectorAll('[data-dialog]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById(link.dataset.dialog)?.showModal();
+    });
+  });
+}
+
+// ===== 商品のhydration（静的HTML → Shopify実データで上書き） =====
+async function hydrateProducts() {
+  let fetched;
+  try {
+    fetched = await fetchProductsByHandles(PRODUCT_HANDLES);
+  } catch {
+    // 静的HTMLに正しい直近データが焼いてあるので、表示はそのまま生かす。
+    // ただし購入操作は variantId が無いとできないため、ボタン押下時に改めて伝える
+    return;
+  }
+  fetched.forEach((p) => p && products.set(p.handle, p));
+
+  document.querySelectorAll('[data-handle]').forEach((card) => {
+    const p = products.get(card.dataset.handle);
+    if (p) applyProductState(card, p);
+  });
+}
+
+function applyProductState(card, p) {
+  const priceEl = card.querySelector('[data-price]');
+  if (priceEl && p.price) {
+    priceEl.innerHTML = `${formatMoney(p.price)}<span class="tax-label">(税込)</span>`;
+  }
+  const btn = card.querySelector('[data-add-to-cart]');
+  if (!btn) return;
+
+  if (p.availableForSale && p.variantId) {
+    btn.disabled = false;
+    btn.textContent = 'カゴに入れる';
+    card.classList.remove('is-soldout');
+    card.querySelector('[data-soldout-stamp]')?.remove();
+  } else {
+    btn.disabled = true;
+    btn.textContent = SOLDOUT_LABELS[p.handle] ?? SOLDOUT_LABELS.default;
+    card.classList.add('is-soldout');
+    if (!card.querySelector('[data-soldout-stamp]')) {
+      const stamp = document.createElement('span');
+      stamp.className = 'soldout-stamp';
+      stamp.dataset.soldoutStamp = '';
+      stamp.innerHTML = 'うりきれ<small>SOLD OUT</small>';
+      card.querySelector('.product-media, .feature-media')?.appendChild(stamp);
+    }
+    card.querySelector('[data-stock-note]')?.remove();
+  }
+}
+
+// ===== カート表示（cart.jsのShopifyミラーを描くだけ） =====
+let mutating = false; // 連打による多重mutation防止
+
+function renderCart(c) {
+  const count = c?.totalQuantity ?? 0;
+
+  const countEl = document.getElementById('cart-count');
+  if (countEl) countEl.textContent = count;
+
+  const sticky = document.getElementById('sticky-cart');
+  const stickyCount = document.getElementById('sticky-cart-count');
+  if (stickyCount) stickyCount.textContent = count;
+  sticky?.classList.toggle('show', count > 0);
+
+  const itemsEl = document.getElementById('cart-items');
+  const totalEl = document.getElementById('cart-total-price');
+  const checkoutBtn = document.getElementById('btn-checkout');
+  if (!itemsEl) return;
+
+  const lines = c?.lines.nodes ?? [];
+  if (lines.length === 0) {
+    itemsEl.innerHTML = `
+      <div class="cart-empty">
+        <img class="pixel-art" src="/assets/kosukuma/front.png" alt="">
+        まだなにも入ってないよ
+      </div>`;
+    if (totalEl) totalEl.textContent = '¥0';
+    if (checkoutBtn) checkoutBtn.disabled = true;
+    return;
+  }
+
+  itemsEl.innerHTML = '';
+  for (const line of lines) {
+    const m = line.merchandise;
+    const item = document.createElement('div');
+    item.className = 'cart-item';
+    item.innerHTML = `
+      <div class="cart-item-img">${m.image ? `<img src="${m.image.url}&width=128" alt="">` : ''}</div>
+      <div>
+        <p class="cart-item-name"></p>
+        <p class="cart-item-price">${formatMoney(line.cost.totalAmount)}</p>
+      </div>
+      <div class="cart-item-qty">
+        <button data-line="${line.id}" data-delta="-1" aria-label="へらす">−</button>
+        <span class="qty-num">${line.quantity}</span>
+        <button data-line="${line.id}" data-delta="1" aria-label="ふやす">＋</button>
+      </div>`;
+    item.querySelector('.cart-item-name').textContent = m.product.title;
+    itemsEl.appendChild(item);
+  }
+
+  if (totalEl) totalEl.textContent = formatMoney(c.cost.subtotalAmount);
+  if (checkoutBtn) checkoutBtn.disabled = false;
+}
+
+async function changeQty(lineId, delta) {
+  if (mutating) return;
+  const c = cart.getCart();
+  const line = c?.lines.nodes.find((l) => l.id === lineId);
+  if (!line) return;
+  mutating = true;
+  document.querySelectorAll('.cart-item-qty button').forEach((b) => (b.disabled = true));
+  try {
+    const next = line.quantity + delta;
+    const res = await cart.updateLineQuantity(lineId, next);
+    if (res?.applied !== undefined && next > line.quantity && res.applied < next) {
+      toast(VOICE.partialStock);
+    }
+  } catch {
+    toast(VOICE.netError);
+  } finally {
+    mutating = false;
+    renderCart(cart.getCart()); // ボタン再生成でdisabled解除
+  }
+}
+
+function initCartDrawer() {
+  const drawer = document.getElementById('cart-drawer');
+  if (!drawer) return;
+
+  const open = () => drawer.showModal();
+  document.getElementById('cart-toggle')?.addEventListener('click', open);
+  document.getElementById('sticky-cart')?.addEventListener('click', open);
+
+  document.getElementById('cart-items')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-line]');
+    if (!btn) return;
+    changeQty(btn.dataset.line, parseInt(btn.dataset.delta, 10));
+  });
+
+  document.getElementById('btn-checkout')?.addEventListener('click', () => {
+    const url = cart.getCheckoutUrl();
+    const c = cart.getCart();
+    if (!c || c.totalQuantity === 0) return;
+    if (url) {
+      window.location.href = url;
+    } else {
+      toast(VOICE.checkoutError);
+    }
+  });
+
+  cart.onCartChange(renderCart);
+}
+
+// ===== カゴ追加（おしりふりふり付き） =====
+let popupTimer = null;
+let popupAnim = null;
+
+function showAddedPopup() {
+  const popup = document.getElementById('cart-popup');
+  if (!popup) return;
+  popup.classList.add('show');
+  const container = document.getElementById('popup-anim-container');
+  if (container && !popupAnim) {
+    popupAnim = new KumaAnim(container, 'osirihurihuri', {
+      style: { width: '100%', height: '100%', objectFit: 'contain' },
+    });
+  }
+  popupAnim?.play();
+  clearTimeout(popupTimer);
+  popupTimer = setTimeout(() => {
+    popup.classList.remove('show');
+    popupAnim?.stop();
+  }, 2500);
+}
+
+async function addToCart(handle, btn) {
+  const p = products.get(handle);
+  if (!p?.variantId || !p.availableForSale) {
+    toast(products.size === 0 ? VOICE.netError : VOICE.noStock);
+    return;
+  }
+  if (mutating) return;
+  mutating = true;
+  const origText = btn.textContent;
+  btn.disabled = true;
+  try {
+    const res = await cart.addLine(p.variantId, 1);
+    if (res.applied === 0) {
+      toast(VOICE.noStock);
+      return;
+    }
+    if (res.applied < res.requested) toast(VOICE.partialStock);
+    btn.textContent = 'いれたよ！';
+    btn.classList.add('added');
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.classList.remove('added');
+    }, 1000);
+    showAddedPopup();
+    const headerCart = document.getElementById('cart-toggle');
+    headerCart?.classList.add('bounce');
+    setTimeout(() => headerCart?.classList.remove('bounce'), 320);
+  } catch {
+    toast(VOICE.netError);
+  } finally {
+    mutating = false;
+    btn.disabled = false;
+  }
+}
+
+function initAddButtons() {
+  document.querySelectorAll('[data-add-to-cart]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (btn.disabled) return;
+      const handle = btn.closest('[data-handle]')?.dataset.handle;
+      if (handle) addToCart(handle, btn);
+    });
+  });
+}
+
+// ===== 商品詳細ダイアログ =====
+const pd = { handle: null, index: 0 };
+
+function renderGallery() {
+  const meta = CATALOG[pd.handle] ?? {};
+  const images = meta.images ?? [];
+  const idx = ((pd.index % images.length) + images.length) % images.length;
+  pd.index = idx;
+
+  const main = document.getElementById('pd-main');
+  const img = document.getElementById('pd-image');
+  img.src = images[idx] ?? '';
+  main.classList.toggle('fit-contain', meta.imgFit === 'contain');
+
+  const multi = images.length > 1;
+  document.getElementById('pd-prev').style.display = multi ? '' : 'none';
+  document.getElementById('pd-next').style.display = multi ? '' : 'none';
+
+  const thumbs = document.getElementById('pd-thumbs');
+  thumbs.innerHTML = '';
+  if (multi) {
+    images.forEach((src, i) => {
+      const t = document.createElement('button');
+      t.className = 'pd-thumb' + (i === idx ? ' active' : '');
+      t.innerHTML = `<img src="${src}" alt="">`;
+      t.addEventListener('click', () => {
+        pd.index = i;
+        renderGallery();
+      });
+      thumbs.appendChild(t);
+    });
+  }
+}
+
+function openProductDialog(card) {
+  const handle = card.dataset.handle;
+  const dialog = document.getElementById('product-dialog');
+  if (!handle || !dialog) return;
+
+  pd.handle = handle;
+  pd.index = 0;
+
+  const meta = CATALOG[handle] ?? {};
+  const name = card.querySelector('h3, .product-name')?.textContent ?? '';
+  const img = document.getElementById('pd-image');
+  img.alt = name;
+  document.getElementById('pd-no').textContent = meta.no ?? '';
+  document.getElementById('pd-name').textContent = name;
+  document.getElementById('pd-story').textContent = meta.story ?? '';
+
+  const p = products.get(handle);
+  const priceEl = document.getElementById('pd-price');
+  const priceText = card.querySelector('[data-price]')?.textContent ?? '';
+  priceEl.innerHTML = p?.price
+    ? `${formatMoney(p.price)}<span class="tax-label">(税込)</span>`
+    : priceText;
+
+  const addBtn = document.getElementById('pd-add');
+  const srcBtn = card.querySelector('[data-add-to-cart]');
+  addBtn.disabled = srcBtn?.disabled ?? true;
+  addBtn.textContent = srcBtn?.textContent ?? 'カゴに入れる';
+  addBtn.dataset.handle = handle;
+
+  renderGallery();
+  dialog.showModal();
+}
+
+function initProductDialog() {
+  const dialog = document.getElementById('product-dialog');
+  if (!dialog) return;
+
+  document.querySelectorAll('[data-handle]').forEach((card) => {
+    // カード ⇒ キーボードでも開ける
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-haspopup', 'dialog');
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('button, a')) return;
+      openProductDialog(card);
+    });
+    card.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, a')) {
+        e.preventDefault();
+        openProductDialog(card);
+      }
+    });
+  });
+
+  document.getElementById('pd-prev')?.addEventListener('click', () => {
+    pd.index--;
+    renderGallery();
+  });
+  document.getElementById('pd-next')?.addEventListener('click', () => {
+    pd.index++;
+    renderGallery();
+  });
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { pd.index--; renderGallery(); }
+    if (e.key === 'ArrowRight') { pd.index++; renderGallery(); }
+  });
+
+  document.getElementById('pd-add')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    if (btn.disabled) return;
+    addToCart(btn.dataset.handle, btn);
+    setTimeout(() => dialog.close(), 700);
+  });
+}
+
+// ===== イーロンマスク様 ほんにんかくにん =====
+// 2段階クイズ（名前 → かいいぬ）。この店の名物なので一言一句大切に扱う。
+function initElon() {
+  const dialog = document.getElementById('elon-dialog');
+  const content = document.getElementById('elon-dialog-content');
+  const openBtn = document.getElementById('elon-buy-btn');
+  if (!dialog || !content || !openBtn) return;
+
+  const fail = () => {
+    content.innerHTML = '<p class="elon-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
+    setTimeout(() => dialog.close(), 2500);
+  };
+
+  const success = () => {
+    content.innerHTML = `
+      <p class="elon-message success">かくにんできたよ！ほんものだ。</p>
+      <p class="elon-q">けっこう おおきなおかいものだから、<br>メールでそうだんしよ。</p>
+      <div class="elon-buttons">
+        <a class="elon-btn primary" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none"
+           href="mailto:info@kosukuma.com?subject=%E3%82%A4%E3%83%BC%E3%83%AD%E3%83%B3%E3%83%9E%E3%82%B9%E3%82%AF%E6%A7%98%E5%B0%82%E7%94%A8%E3%81%AE%E4%BB%B6">そうだんする</a>
+      </div>`;
+  };
+
+  const askDog = () => {
+    content.innerHTML = `
+      <div class="elon-input-group">
+        <label for="elon-dog-input">かいいぬのなまえは？</label>
+        <input type="text" id="elon-dog-input" autocomplete="off">
+        <button class="elon-btn primary" id="elon-dog-submit">かくにん</button>
+      </div>`;
+    const input = document.getElementById('elon-dog-input');
+    input.focus();
+    const submit = () => (input.value.trim() === 'Floki' ? success() : fail());
+    document.getElementById('elon-dog-submit').addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => e.key === 'Enter' && submit());
+  };
+
+  const askName = () => {
+    content.innerHTML = `
+      <div class="elon-input-group">
+        <label for="elon-name-input">おなまえをおしえてね</label>
+        <input type="text" id="elon-name-input" placeholder="おなまえ" autocomplete="off">
+        <button class="elon-btn primary" id="elon-name-submit">かくにん</button>
+      </div>`;
+    const input = document.getElementById('elon-name-input');
+    input.focus();
+    const submit = () => (input.value.trim() === 'Elon Musk' ? askDog() : fail());
+    document.getElementById('elon-name-submit').addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => e.key === 'Enter' && submit());
+  };
+
+  openBtn.addEventListener('click', () => {
+    content.innerHTML = `
+      <p class="elon-q">イーロンマスク様ですか？</p>
+      <div class="elon-buttons">
+        <button class="elon-btn primary" id="elon-yes">はい</button>
+        <button class="elon-btn" id="elon-no">いいえ</button>
+      </div>`;
+    dialog.showModal();
+    document.getElementById('elon-yes').addEventListener('click', askName);
+    document.getElementById('elon-no').addEventListener('click', fail);
+  });
+}
+
+// ===== スクロール出現 =====
+function initReveal() {
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.12 },
+  );
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+}
+
+// ===== 起動 =====
+export async function initUI() {
+  initDialogs();
+  initCartDrawer();
+  initAddButtons();
+  initProductDialog();
+  initElon();
+  initReveal();
+
+  // カート復元と商品hydrationは並行（どちらも失敗してもページは生きる）
+  await Promise.allSettled([
+    cart.restoreCart().then(() => renderCart(cart.getCart())),
+    hydrateProducts(),
+  ]);
+}

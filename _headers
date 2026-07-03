@@ -1,0 +1,26 @@
+# Cloudflare Pages ヘッダー設定
+# 方針:
+# - HTML/CSS/JS はハッシュ名でないため max-age=0（デプロイ即反映・正しさ優先）
+# - 画像/アニメフレーム/3D は長期キャッシュ（リピート訪問の再検証190リクエスト事故の解消）
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/assets/kosukuma/anim/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/img/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+/assets/dot-illust/*
+  Cache-Control: public, max-age=2592000
+
+/assets/kosukuma/*
+  Cache-Control: public, max-age=604800
+
+/assets/3d/*
+  Cache-Control: public, max-age=604800
+  Content-Type: model/gltf-binary

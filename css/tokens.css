@@ -1,0 +1,93 @@
+/* ==========================================================================
+   tokens.css — デザイントークン（唯一の真実）
+   --------------------------------------------------------------------------
+   ルール:
+   - 色・余白・字・z-index はすべてここの変数を使う。生値のハードコード禁止
+   - テキスト系の色は WCAG AA (4.5:1) を満たす組で定義済み。
+     「やわらかさ」は明度を下げて出さない — 形・余白・動きで出す
+   - z-index は必ずこの階層表から取る。演出がUIより上に来る事故を構造で防ぐ
+   ========================================================================== */
+
+:root {
+  /* ---- 色: ベース ---- */
+  --paper: #fffdf6;        /* ページ地 */
+  --cream: #fcfad2;        /* こすくまくんの体色 = ブランドサーフェス */
+  --cream-deep: #f5f0bd;   /* creamの一段濃い面（カード枠・ホバー） */
+  --ink: #3a3126;          /* 見出し・本文 (on paper 10.5:1) */
+  --ink-sub: #6f6759;      /* 補足テキスト (on paper 4.9:1) */
+
+  /* ---- 色: ブランドアクセント ---- */
+  --honey: #d99a2b;        /* はちみつ。装飾・アイコン・強調面 */
+  --honey-deep: #8a5f14;   /* はちみつの文字用 (on paper 4.6:1) */
+  --green: #5d7f4c;        /* 「カゴに入れる」。white文字で4.5:1 */
+  --green-deep: #4c6a3e;   /* greenのhover/active */
+  --brown: #7d5f37;        /* リンク・枠 (on paper 4.7:1) */
+  --brown-dark: #4a3a22;   /* フッター地・強い枠 */
+  --terracotta: #b0492f;   /* 価格・注意 (on paper 5.0:1) */
+
+  /* ---- 色: イーロンマスク様専用売り場（サイト唯一のダーク面） ---- */
+  --elon-bg: #16120c;
+  --elon-bg-2: #241d12;
+  --elon-gold: #e3b34c;    /* on elon-bg 8.6:1 */
+  --elon-text: #f2ead8;    /* on elon-bg 13:1 */
+
+  /* ---- 字 ---- */
+  --font-body: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-num: "Quicksand", "Zen Maru Gothic", sans-serif;
+
+  /* 流体タイプスケール */
+  --fs-hero: clamp(2.6rem, 1.2rem + 6vw, 5.4rem);
+  --fs-h2: clamp(1.7rem, 1.1rem + 2.4vw, 2.8rem);
+  --fs-h3: clamp(1.15rem, 1rem + 0.8vw, 1.5rem);
+  --fs-body: 1rem;
+  --fs-small: 0.85rem;
+  --fs-label: 0.72rem;      /* Quicksandの英字ラベル用 */
+  --fs-price: clamp(1.2rem, 1rem + 1vw, 1.6rem);
+
+  /* ---- 余白（ハイエンドECの文法 = 余白をケチらない） ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --space-6: 64px;
+  --space-7: clamp(72px, 6vw + 40px, 140px);   /* セクション間 */
+  --gutter: clamp(20px, 4vw, 64px);            /* 左右ページ余白 */
+  --content-max: 1160px;
+
+  /* ---- 角丸・影 ---- */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --shadow-card: 0 2px 0 rgba(58, 49, 38, 0.06), 0 12px 32px -12px rgba(58, 49, 38, 0.18);
+  --shadow-pop: 0 8px 40px -8px rgba(58, 49, 38, 0.35);
+  /* 駄菓子屋ボタンの押し込み影（:activeで沈む） */
+  --press-shadow: 0 4px 0;
+  --press-shadow-down: 0 1px 0;
+
+  /* ---- z-index 階層表（この順番を絶対に崩さない） ----
+     fx      : 3D/パーティクル等の演出。コンテンツより必ず下
+     content : 通常フロー
+     header  : 追従ヘッダー
+     sticky  : スティッキーカート等の浮きUI
+     drawer  : カートドロワー+そのオーバーレイ
+     modal   : ダイアログ（商品詳細/イーロン/法務）
+     toast   : 通知。何よりも上（購入導線の聖域） */
+  --z-fx: 1;
+  --z-content: 10;
+  --z-header: 100;
+  --z-sticky: 200;
+  --z-drawer: 500;
+  --z-modal: 600;
+  --z-toast: 700;
+
+  /* ---- ブレークポイント（単一情報源） ----
+     CSSのメディアクエリとJS(matchMedia)は必ずこの値を使う。
+     JS側: js/fx/breakpoints.js が同値を持つ（501-768px帯で3Dが消えた事故の再発防止） */
+  /* --bp-mobile: 640px; --bp-tablet: 900px; （コメント参照用。@mediaは変数不可） */
+
+  /* ---- モーション ---- */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-quick: 160ms;
+  --dur-base: 280ms;
+}
