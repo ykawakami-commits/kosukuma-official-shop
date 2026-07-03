@@ -15,7 +15,10 @@
 <meta property="og:image" content="https://kosukuma-official-shop.pages.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image:alt" content="こすくまくんのおみせ — 公式グッズショップ">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Kosu_dot_kuma">
 <meta name="twitter:title" content="こすくまくんのおみせ — 公式グッズ">
 <meta name="twitter:description" content="ほっとするグッズがならぶ、ちいさなおみせ。">
 <meta name="twitter:image" content="https://kosukuma-official-shop.pages.dev/assets/og.png">
@@ -29,17 +32,27 @@
 
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/main.css">
-<script>document.documentElement.classList.add('js');</script>
+<script>
+document.documentElement.classList.add('js');
+// main.jsのロード失敗時にコンテンツが隠れたままにならない保険。
+// initReveal(ui.js)が起動したらこのタイマーは解除される
+window.__kosuRevealFallback = setTimeout(function () {
+  document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('visible'); });
+}, 4000);
+</script>
 
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+    "three": "/assets/vendor/three.module.js",
+    "three/addons/": "/assets/vendor/addons/"
   }
 }
 </script>
 
+<!-- 注意: このJSON-LDと本文の静的価格/在庫はhydrationでは更新されない。
+     Shopifyで価格・在庫を変えたら (1)ここのprice/availability (2)本文の¥表示 を
+     手動で更新すること。tools/e2e.mjs が実データとの乖離を検出する -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -54,6 +67,7 @@
     {
       "@type": "Product",
       "name": "こすくまくんステッカー",
+      "brand": { "@type": "Brand", "name": "こすくまくん" },
       "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-sticker-pack-800.webp",
       "description": "どこにでも貼れる、こすくまくんの公式ステッカー。",
       "offers": {
@@ -61,12 +75,30 @@
         "price": "780",
         "priceCurrency": "JPY",
         "availability": "https://schema.org/InStock",
-        "url": "https://kosukuma-official-shop.pages.dev/#p-sticker"
+        "url": "https://kosukuma-official-shop.pages.dev/#p-sticker",
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": { "@type": "MonetaryAmount", "value": 500, "currency": "JPY" },
+          "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "JP" },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": { "@type": "QuantitativeValue", "minValue": 3, "maxValue": 5, "unitCode": "DAY" }
+          }
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "JP",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 7,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/ReturnShippingFees"
+        }
       }
     },
     {
       "@type": "Product",
       "name": "こすくまウルトラプレミアムTシャツ",
+      "brand": { "@type": "Brand", "name": "こすくまくん" },
       "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-ultra-tshirt-1-800.webp",
       "description": "いちばんいいやつ。こすくまくんのウルトラプレミアムTシャツ。",
       "offers": {
@@ -80,6 +112,7 @@
     {
       "@type": "Product",
       "name": "こすくまデコヘルメット",
+      "brand": { "@type": "Brand", "name": "こすくまくん" },
       "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-deco-helmet-800.webp",
       "description": "せかいに1こだけの、デコレーションヘルメット。",
       "offers": {
@@ -162,7 +195,7 @@
       </div>
       <div class="feature-info">
         <span class="product-no">NO. 001</span>
-        <h3>こすくまくんステッカー</h3>
+        <h3><button class="card-detail-btn" data-open-detail>こすくまくんステッカー</button></h3>
         <p class="product-oneliner">どこにでも貼れる</p>
         <p class="product-price" data-price>¥780<span class="tax-label">(税込)</span></p>
         <p class="stock-note" data-stock-note>のこりすこしだけ</p>
@@ -182,7 +215,7 @@
         </div>
         <div class="product-body">
           <span class="product-no">NO. 002</span>
-          <h3 class="product-name">こすくまウルトラプレミアムTシャツ</h3>
+          <h3 class="product-name"><button class="card-detail-btn" data-open-detail>こすくまウルトラプレミアムTシャツ</button></h3>
           <p class="product-oneliner">いちばんいいやつ</p>
           <p class="product-price" data-price>¥150,000<span class="tax-label">(税込)</span></p>
           <button class="btn-cart" data-add-to-cart disabled>うりきれちゃった</button>
@@ -200,7 +233,7 @@
         </div>
         <div class="product-body">
           <span class="product-no">NO. 003</span>
-          <h3 class="product-name">こすくまデコヘルメット</h3>
+          <h3 class="product-name"><button class="card-detail-btn" data-open-detail>こすくまデコヘルメット</button></h3>
           <p class="product-oneliner">一点ものだよ。せかいに1こだけだった</p>
           <p class="product-price" data-price>¥109,000<span class="tax-label">(税込)</span></p>
           <button class="btn-cart" data-add-to-cart disabled>たびだっていったよ</button>
@@ -380,7 +413,7 @@
   <button class="dialog-close" data-close aria-label="とじる">&times;</button>
   <div class="elon-dialog-icon" aria-hidden="true">🔐</div>
   <h2 id="elon-dialog-title">ほんにんかくにん</h2>
-  <div id="elon-dialog-content"></div>
+  <div id="elon-dialog-content" aria-live="polite"></div>
 </dialog>
 
 <!-- ===== 特定商取引法 ===== -->

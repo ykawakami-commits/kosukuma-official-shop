@@ -66,20 +66,26 @@ function readUserErrors(payload) {
 
 // ===== 復元 / 生成 =====
 
-// 起動時: 保存済みcartIdがあれば復元（期限切れ・購入済みならnullが返るので破棄）
+// 起動時: 保存済みcartIdがあれば復元。
+// IDを捨ててよいのは「Shopifyが確定的に cart:null を返した」時（購入完了・期限切れ）だけ。
+// 一過性のネットワークエラーで捨てると、電波の悪い環境で開いただけで
+// 顧客のカートが永久に失われる（レビュー指摘 — 実装バグだった）。
 export async function restoreCart() {
   const savedId = localStorage.getItem(CART_ID_KEY);
   if (!savedId) return null;
   try {
     const data = await gql(`query($id: ID!) { cart(id: $id) { ${CART_FIELDS} } }`, { id: savedId });
     if (data.cart) {
+      // 復元応答が遅い間にユーザー操作で新カートができていたら、そちらが勝ち
+      if (cart?.id) return cart;
       setCart(data.cart);
       return cart;
     }
+    // cart:null 確定 = このIDはもう使えない
+    localStorage.removeItem(CART_ID_KEY);
   } catch {
-    // 復元失敗は致命ではない（新しいカートを作ればよい）。IDだけ捨てる
+    // 一過性エラー: IDは保持して次回ロードで再試行
   }
-  localStorage.removeItem(CART_ID_KEY);
   return null;
 }
 
@@ -92,17 +98,28 @@ async function ensureCart() {
   return cart;
 }
 
-// カート期限切れ（mutation対象が消えている）時に一度だけ作り直してリトライする
+// カート期限切れ（mutation対象が消えている）時に一度だけ作り直してリトライする。
+// 判定は userErrors の code/field で行う — メッセージ文字列はストアのロケールで
+// 変わる（この店は日本語で「指定されたカートは存在しません。」が返ることを実測済み）ため、
+// 文字列マッチは言語非依存のフォールバックとしてのみ使う。
+function isCartGone(err) {
+  if (!(err instanceof StorefrontError)) return false;
+  if (err.kind === 'userError') {
+    const first = err.detail?.[0];
+    if (first?.code === 'INVALID' && (first.field ?? []).includes('cartId')) return true;
+  }
+  if (err.kind === 'graphql' || err.kind === 'userError') {
+    return /cart/i.test(err.message) && /(not exist|not found|invalid)/i.test(err.message);
+  }
+  return false;
+}
+
 async function withCartRetry(fn) {
   await ensureCart();
   try {
     return await fn();
   } catch (err) {
-    const gone =
-      err instanceof StorefrontError &&
-      (err.kind === 'graphql' || err.kind === 'userError') &&
-      /cart/i.test(err.message) && /(not exist|not found|invalid)/i.test(err.message);
-    if (!gone) throw err;
+    if (!isCartGone(err)) throw err;
     localStorage.removeItem(CART_ID_KEY);
     cart = null;
     await ensureCart();
@@ -130,7 +147,7 @@ export async function addLine(variantId, quantity = 1) {
       `mutation($cartId: ID!, $lines: [CartLineInput!]!) {
         cartLinesAdd(cartId: $cartId, lines: $lines) {
           cart { ${CART_FIELDS} }
-          userErrors { field message }
+          userErrors { field message code }
         }
       }`,
       { cartId: cart.id, lines: [{ merchandiseId: variantId, quantity }] },
@@ -149,7 +166,7 @@ export async function updateLineQuantity(lineId, quantity) {
       `mutation($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
         cartLinesUpdate(cartId: $cartId, lines: $lines) {
           cart { ${CART_FIELDS} }
-          userErrors { field message }
+          userErrors { field message code }
         }
       }`,
       { cartId: cart.id, lines: [{ id: lineId, quantity }] },
@@ -167,7 +184,7 @@ export async function removeLine(lineId) {
       `mutation($cartId: ID!, $lineIds: [ID!]!) {
         cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
           cart { ${CART_FIELDS} }
-          userErrors { field message }
+          userErrors { field message code }
         }
       }`,
       { cartId: cart.id, lineIds: [lineId] },

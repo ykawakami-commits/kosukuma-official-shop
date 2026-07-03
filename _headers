@@ -1,15 +1,30 @@
 # Cloudflare Pages ヘッダー設定
 # 方針:
 # - HTML/CSS/JS はハッシュ名でないため max-age=0（デプロイ即反映・正しさ優先）
-# - 画像/アニメフレーム/3D は長期キャッシュ（リピート訪問の再検証190リクエスト事故の解消）
+# - 画像/アニメフレーム/3D/vendor は長期キャッシュ
+# - CSP: スクリプトは self のみ（three/Rapierはセルフホスト済み）。
+#   inline scriptが2つ（js-class付与+importmap）あるため script-src に 'unsafe-inline'。
+#   XSS防御としては弱いが、外部オリジンのスクリプト実行（サプライチェーン侵害）を
+#   確実に遮断することを優先した設計。connect-srcはShopifyのみ。
+#   ※ 'wasm-unsafe-eval' はRapier(WASM)に必要
+# - 独自ドメインへ移行する時は Strict-Transport-Security を追加すること
+#   （pages.devはプリロード済みなので現状不要）
 
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; connect-src 'self' https://xdhx4j-1y.myshopify.com; img-src 'self' https://cdn.shopify.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+
+# 注意: 広い /assets/kosukuma/* を先に、狭い anim/* を後に置き、
+# anim/* 側で ! Cache-Control デタッチ→再定義する（両方マッチして
+# Cache-Controlがカンマ結合され無効化されるのを防ぐCloudflare公式の書き方）
+/assets/kosukuma/*
+  Cache-Control: public, max-age=604800
 
 /assets/kosukuma/anim/*
+  ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
 
 /assets/img/*
@@ -18,7 +33,7 @@
 /assets/dot-illust/*
   Cache-Control: public, max-age=2592000
 
-/assets/kosukuma/*
+/assets/vendor/*
   Cache-Control: public, max-age=604800
 
 /assets/3d/*

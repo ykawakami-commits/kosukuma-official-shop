@@ -102,7 +102,8 @@ await page.click('#elon-no');
 await new Promise((r) => setTimeout(r, 300));
 const failMsg = await page.$eval('#elon-dialog-content', (el) => el.textContent);
 ok('E1: いいえ → 拒否メッセージ', failMsg.includes('ちがうみたい'));
-await new Promise((r) => setTimeout(r, 2600)); // 自動クローズ待ち
+await page.click('#elon-fail-close'); // 自動クローズは廃止（a11y）— とじるボタンで閉じる
+await new Promise((r) => setTimeout(r, 400));
 
 await page.click('#elon-buy-btn');
 await page.waitForSelector('#elon-dialog[open]');
@@ -163,6 +164,31 @@ for (const w of [402, 640, 768, 900, 1280]) {
   );
   ok(`F: ${w}px 横スクロールなし`, !h);
 }
+
+// ---- G: JSON-LD/静的表示とShopify実データの同期ガード ----
+step = 'G-jsonld';
+const sync = await page.evaluate(async () => {
+  const ld = JSON.parse(document.querySelector('script[type="application/ld+json"]').textContent);
+  const products = ld['@graph'].filter((n) => n['@type'] === 'Product');
+  const sf = await import('/js/storefront.js');
+  const { PRODUCT_HANDLES } = await import('/js/config.js');
+  const live = await sf.fetchProductsByHandles(PRODUCT_HANDLES);
+  const issues = [];
+  const map = { 'こすくまくんステッカー': 'こすくまくんステッカー', 'こすくまウルトラプレミアムTシャツ': 'tシャツ', 'こすくまデコヘルメット': 'こすくまデコヘルメット' };
+  for (const p of products) {
+    const lp = live.find((x) => x && x.handle === map[p.name]);
+    if (!lp) { issues.push(`${p.name}: Shopifyに見つからない`); continue; }
+    if (Number(p.offers.price) !== lp.price.amount) {
+      issues.push(`${p.name}: JSON-LD価格${p.offers.price} ≠ Shopify実価格${lp.price.amount}`);
+    }
+    const ldAvail = p.offers.availability.includes('InStock');
+    if (ldAvail !== lp.availableForSale) {
+      issues.push(`${p.name}: JSON-LD在庫${ldAvail} ≠ Shopify実在庫${lp.availableForSale}`);
+    }
+  }
+  return issues;
+});
+ok('G: JSON-LDとShopify実データが同期', sync.length === 0, sync.join(' / '));
 
 // ---- A: JSエラー0 ----
 const realErrors = jsErrors.filter((e) => !e.includes('hero-3d'));

@@ -23,9 +23,11 @@ export class StorefrontError extends Error {
 export async function gql(query, variables = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  let res;
+  let json;
   try {
-    res = await fetch(ENDPOINT, {
+    // res.json()（ボディ読込）もタイムアウトの傘の下に置く — ボディがストールすると
+    // 呼び出し側のmutatingフラグが永久にtrueのまま沈黙する（レビュー指摘）
+    const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,21 +36,20 @@ export async function gql(query, variables = {}) {
       body: JSON.stringify({ query, variables }),
       signal: controller.signal,
     });
+    if (!res.ok) {
+      throw new StorefrontError(`Storefront API HTTP ${res.status}`, {
+        kind: 'http',
+        detail: res.status,
+      });
+    }
+    json = await res.json();
   } catch (err) {
+    if (err instanceof StorefrontError) throw err;
     const kind = err.name === 'AbortError' ? 'timeout' : 'network';
     throw new StorefrontError('Storefront APIに届かなかった', { kind, detail: err });
   } finally {
     clearTimeout(timer);
   }
-
-  if (!res.ok) {
-    throw new StorefrontError(`Storefront API HTTP ${res.status}`, {
-      kind: 'http',
-      detail: res.status,
-    });
-  }
-
-  const json = await res.json();
   if (json.errors?.length) {
     throw new StorefrontError(json.errors[0].message, { kind: 'graphql', detail: json.errors });
   }
@@ -110,6 +111,10 @@ const formatters = new Map();
 export function formatMoney(money) {
   if (!money) return '';
   const { amount, currencyCode } = money;
+  // JPYはIntlが全角￥(U+FFE5)を返し静的HTMLの半角¥と混在するため明示フォーマット
+  if (currencyCode === 'JPY') {
+    return '¥' + Math.round(Number(amount)).toLocaleString('ja-JP');
+  }
   if (!formatters.has(currencyCode)) {
     formatters.set(
       currencyCode,

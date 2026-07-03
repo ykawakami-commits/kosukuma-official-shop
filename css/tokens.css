@@ -25,6 +25,11 @@
   --brown-dark: #4a3a22;   /* フッター地・強い枠 */
   --terracotta: #b0492f;   /* 価格・注意 (on paper 5.0:1) */
 
+  /* disabled状態（3点セットで使う。個別に生値を書かない） */
+  --disabled-bg: #d9d4c2;
+  --disabled-text: #6b6552;
+  --disabled-border: #a39c85;
+
   /* ---- 色: イーロンマスク様専用売り場（サイト唯一のダーク面） ---- */
   --elon-bg: #16120c;
   --elon-bg-2: #241d12;

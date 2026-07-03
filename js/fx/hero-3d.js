@@ -992,7 +992,8 @@ function hasWebGL() {
 
 function loadRapier() {
   if (_rapierPromise) return _rapierPromise;
-  _rapierPromise = import('https://esm.sh/@dimforge/rapier3d-compat@0.12.0')
+  // セルフホスト版（外部CDN依存の排除 — サプライチェーン防御 + CSPをselfに絞れる）
+  _rapierPromise = import('/assets/vendor/rapier3d-compat.es.js')
     .then((mod) => {
       const R = mod.default || mod;
       return R.init().then(() => R);

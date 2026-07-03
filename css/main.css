@@ -210,12 +210,14 @@ html.js .reveal:not(.visible) {
   margin-top: var(--space-3);
   font-weight: 700;
   color: var(--ink-sub);
+  text-wrap: balance;   /* 「〜ちいさなおみ/せ」の1文字孤立折返し防止 */
 }
 
 .hero-desc {
   margin-top: var(--space-2);
   color: var(--ink-sub);
   font-size: var(--fs-small);
+  text-wrap: pretty;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -321,6 +323,7 @@ html.js .reveal:not(.visible) {
 
 /* ===== 商品: フィーチャーカード（いま買える主役） ===== */
 .feature-card {
+  position: relative;   /* .card-detail-btn::after の基準 */
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: clamp(20px, 3vw, 48px);
@@ -329,6 +332,27 @@ html.js .reveal:not(.visible) {
   border-radius: var(--radius-l);
   overflow: clip;
   box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: transform var(--dur-base) var(--ease-pop), box-shadow var(--dur-base);
+}
+.feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-pop); }
+
+/* 商品名=詳細を開く本物のボタン。::afterでカード全面をクリック領域化 */
+.card-detail-btn {
+  all: unset;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.card-detail-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.card-detail-btn:focus-visible {
+  outline: 3px solid var(--brown-dark);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .feature-media {
@@ -391,6 +415,8 @@ html.js .reveal:not(.visible) {
 
 /* ===== ボタン（駄菓子屋タクタイル） ===== */
 .btn-cart {
+  position: relative;   /* .card-detail-btn::after のカード全面レイヤーより上に出す */
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -407,12 +433,13 @@ html.js .reveal:not(.visible) {
 }
 .btn-cart:hover:not(:disabled) { background: var(--green-deep); transform: translateY(-2px); }
 .btn-cart:active:not(:disabled) { transform: translateY(3px); box-shadow: var(--press-shadow-down) var(--ink); }
-.btn-cart:disabled {
-  background: #d9d4c2;
-  color: #6b6552;
+.btn-cart:disabled,
+.btn-checkout:disabled {
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
   cursor: not-allowed;
   box-shadow: none;
-  border-color: #a39c85;
+  border-color: var(--disabled-border);
 }
 .btn-cart.added { background: var(--honey); color: var(--ink); }
 
@@ -434,6 +461,7 @@ html.js .reveal:not(.visible) {
   border-radius: var(--radius-l);
   overflow: clip;
   box-shadow: var(--shadow-card);
+  cursor: pointer;
   transition: transform var(--dur-base) var(--ease-pop), box-shadow var(--dur-base);
 }
 .product-card:hover { transform: translateY(-4px) rotate(-0.3deg); box-shadow: var(--shadow-pop); }
@@ -444,6 +472,10 @@ html.js .reveal:not(.visible) {
   background: var(--cream);
 }
 .product-media img {
+  /* absoluteで固有サイズをレイアウト計算から外す — 縦長画像が
+     aspect-ratioを破って行全体を伸ばす事故の防止 */
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -663,6 +695,7 @@ html.js .reveal:not(.visible) {
   min-height: 56px;
   cursor: pointer;
 }
+.faq-item summary:hover { background: var(--cream-deep); }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::after {
   content: "＋";
@@ -706,7 +739,7 @@ html.js .reveal:not(.visible) {
   font-family: var(--font-num);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.75;   /* 0.6はAA(4.5:1)をわずかに割る（実測4.49:1） */
   margin-bottom: var(--space-2);
 }
 .footer-nav-col { display: flex; flex-direction: column; }
@@ -837,7 +870,6 @@ html.js .reveal:not(.visible) {
 }
 .btn-checkout:hover:not(:disabled) { transform: translateY(-2px); }
 .btn-checkout:active:not(:disabled) { transform: translateY(3px); box-shadow: var(--press-shadow-down) var(--ink); }
-.btn-checkout:disabled { background: #d9d4c2; color: #6b6552; box-shadow: none; cursor: not-allowed; border-color: #a39c85; }
 
 /* ===== 商品詳細ダイアログ ===== */
 .product-dialog {
@@ -889,6 +921,7 @@ html.js .reveal:not(.visible) {
   display: grid;
   place-items: center;
 }
+.pd-arrow:hover { background: var(--cream-deep); }
 .pd-arrow-prev { left: var(--space-2); }
 .pd-arrow-next { right: var(--space-2); }
 
@@ -987,7 +1020,8 @@ html.js .reveal:not(.visible) {
   margin: auto;
 }
 .legal-dialog::backdrop { background: rgba(58, 49, 38, 0.5); }
-.legal-dialog .dialog-close { position: absolute; top: var(--space-2); right: var(--space-2); background: var(--paper); border-color: var(--ink); }
+/* stickyで長文スクロール中も閉じるボタンを視界に残す */
+.legal-dialog .dialog-close { position: sticky; top: 0; float: right; background: var(--paper); border-color: var(--ink); z-index: 2; }
 .legal-dialog h2 { font-size: var(--fs-h3); font-weight: 900; margin-bottom: var(--space-4); }
 .legal-dialog h3 { font-size: 1rem; font-weight: 700; margin: var(--space-4) 0 var(--space-2); }
 .legal-dialog p, .legal-dialog li { font-size: var(--fs-small); color: var(--ink-sub); }
@@ -1104,6 +1138,7 @@ html.js .reveal:not(.visible) {
   .hero { min-height: min(72vh, 640px); }
   .hero-panel { rotate: 0deg; }
   .product-grid { grid-template-columns: 1fr; }
+  .footer-nav { grid-template-columns: 1fr; gap: var(--space-4); }  /* 3列固定だと1文字孤立折返し */
   .header-nav > a { display: none; }   /* モバイルはロゴ+カートのみ（2段折返し防止） */
   .cart-drawer { width: 100vw; border-left: none; }
   .trust-strip .container { flex-direction: column; align-items: center; gap: var(--space-1); }

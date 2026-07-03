@@ -45,6 +45,17 @@ const SOLDOUT_LABELS = {
 // handle → Shopify商品（hydrate後に入る）
 const products = new Map();
 
+// スクリーンリーダー向けの不可視アナウンス（視覚ポップアップと重複させないため分離）
+export function announce(message) {
+  const region = document.getElementById('toast-region');
+  if (!region) return;
+  const el = document.createElement('div');
+  el.className = 'visually-hidden';
+  el.textContent = message;
+  region.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
 // ===== トースト =====
 export function toast(message, ms = 3200) {
   const region = document.getElementById('toast-region');
@@ -170,18 +181,25 @@ function renderCart(c) {
     const m = line.merchandise;
     const item = document.createElement('div');
     item.className = 'cart-item';
+    // Shopify CDNの画像はwidthパラメータでリサイズできる（?の有無両対応）
+    const thumb = m.image
+      ? m.image.url + (m.image.url.includes('?') ? '&' : '?') + 'width=128'
+      : null;
     item.innerHTML = `
-      <div class="cart-item-img">${m.image ? `<img src="${m.image.url}&width=128" alt="">` : ''}</div>
+      <div class="cart-item-img">${thumb ? `<img src="${encodeURI(thumb)}" alt="">` : ''}</div>
       <div>
         <p class="cart-item-name"></p>
         <p class="cart-item-price">${formatMoney(line.cost.totalAmount)}</p>
       </div>
       <div class="cart-item-qty">
-        <button data-line="${line.id}" data-delta="-1" aria-label="へらす">−</button>
+        <button data-line="${line.id}" data-delta="-1">−</button>
         <span class="qty-num">${line.quantity}</span>
-        <button data-line="${line.id}" data-delta="1" aria-label="ふやす">＋</button>
+        <button data-line="${line.id}" data-delta="1">＋</button>
       </div>`;
     item.querySelector('.cart-item-name').textContent = m.product.title;
+    const [minusBtn, plusBtn] = item.querySelectorAll('.cart-item-qty button');
+    minusBtn.setAttribute('aria-label', `${m.product.title} をへらす`);
+    plusBtn.setAttribute('aria-label', `${m.product.title} をふやす`);
     itemsEl.appendChild(item);
   }
 
@@ -202,11 +220,20 @@ async function changeQty(lineId, delta) {
     if (res?.applied !== undefined && next > line.quantity && res.applied < next) {
       toast(VOICE.partialStock);
     }
+    announce('カートをこうしんしたよ');
   } catch {
     toast(VOICE.netError);
   } finally {
     mutating = false;
     renderCart(cart.getCart()); // ボタン再生成でdisabled解除
+    // innerHTML再構築でフォーカスが全喪失するため、押した操作と同じボタンへ復元
+    const same = document.querySelector(
+      `button[data-line="${CSS.escape(lineId)}"][data-delta="${delta}"]`,
+    );
+    const fallback =
+      document.querySelector('.cart-item-qty button') ??
+      document.querySelector('#cart-drawer .dialog-close');
+    (same ?? fallback)?.focus();
   }
 }
 
@@ -277,6 +304,7 @@ async function addToCart(handle, btn) {
       return;
     }
     if (res.applied < res.requested) toast(VOICE.partialStock);
+    announce('カゴに入れたよ');
     btn.textContent = 'いれたよ！';
     btn.classList.add('added');
     setTimeout(() => {
@@ -324,12 +352,17 @@ function renderGallery() {
   document.getElementById('pd-prev').style.display = multi ? '' : 'none';
   document.getElementById('pd-next').style.display = multi ? '' : 'none';
 
+  const name = document.getElementById('pd-name').textContent;
+  img.alt = multi ? `${name} しゃしん${idx + 1}まいめ` : name;
+
   const thumbs = document.getElementById('pd-thumbs');
   thumbs.innerHTML = '';
   if (multi) {
     images.forEach((src, i) => {
       const t = document.createElement('button');
       t.className = 'pd-thumb' + (i === idx ? ' active' : '');
+      t.setAttribute('aria-label', `しゃしん ${i + 1}まいめ`);
+      if (i === idx) t.setAttribute('aria-current', 'true');
       t.innerHTML = `<img src="${src}" alt="">`;
       t.addEventListener('click', () => {
         pd.index = i;
@@ -377,20 +410,14 @@ function initProductDialog() {
   const dialog = document.getElementById('product-dialog');
   if (!dialog) return;
 
-  document.querySelectorAll('[data-handle]').forEach((card) => {
-    // カード ⇒ キーボードでも開ける
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-haspopup', 'dialog');
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('button, a')) return;
-      openProductDialog(card);
-    });
-    card.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, a')) {
-        e.preventDefault();
-        openProductDialog(card);
-      }
+  // 詳細を開くのは商品名の「本物のボタン」(.card-detail-btn)。
+  // カード全体へのrole="button"付与は入れ子インタラクティブ違反+見出し消失になるため禁止。
+  // カード全面クリックはボタンの::after疑似要素（CSS）で実現している。
+  document.querySelectorAll('[data-open-detail]').forEach((btn) => {
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.addEventListener('click', () => {
+      const card = btn.closest('[data-handle]');
+      if (card) openProductDialog(card);
     });
   });
 
@@ -423,9 +450,14 @@ function initElon() {
   const openBtn = document.getElementById('elon-buy-btn');
   if (!dialog || !content || !openBtn) return;
 
+  // 失敗も自動クローズしない（読み上げ・読了の時間を奪わない）
   const fail = () => {
-    content.innerHTML = '<p class="elon-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>';
-    setTimeout(() => dialog.close(), 2500);
+    content.innerHTML = `
+      <p class="elon-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>
+      <div class="elon-buttons"><button class="elon-btn" id="elon-fail-close">とじる</button></div>`;
+    const closeBtn = document.getElementById('elon-fail-close');
+    closeBtn.addEventListener('click', () => dialog.close());
+    closeBtn.focus();
   };
 
   const success = () => {
@@ -481,6 +513,8 @@ function initElon() {
 
 // ===== スクロール出現 =====
 function initReveal() {
+  // JS死亡時の保険タイマー（index.htmlのinlineスクリプト）はもう不要
+  if (window.__kosuRevealFallback) clearTimeout(window.__kosuRevealFallback);
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
