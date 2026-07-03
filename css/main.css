@@ -71,8 +71,10 @@ a { color: var(--brown); }
   color: var(--honey-deep);
 }
 
-/* ===== スクロール出現 ===== */
-.reveal {
+/* ===== スクロール出現 =====
+   JSが動いている時(html.js)だけ隠す — JS死亡/無効でもコンテンツは必ず見える。
+   :not(.visible) で「隠す側」を限定（詳細度で.visibleに勝ってしまう事故防止） */
+html.js .reveal:not(.visible) {
   opacity: 0;
   transform: translateY(26px);
 }
