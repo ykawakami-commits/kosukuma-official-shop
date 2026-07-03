@@ -1,0 +1,12 @@
+{
+  "name": "kosukuma-official-shop",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "こすくまくんのおみせ — 公式グッズEC（静的サイト + Shopify Storefront Cart API）",
+  "scripts": {
+    "images": "node tools/optimize-images.mjs",
+    "e2e": "node tools/e2e.mjs"
+  },
+  "devDependencies": {}
+}
