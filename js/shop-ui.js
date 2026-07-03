@@ -12,6 +12,9 @@ const FALLBACK_PRODUCTS = [
   { id: 'deco-helmet', name: 'こすくまデコヘルメット',      price: 109000,     status: 'on-sale',     oneliner: '一点ものだよ',      img: 'assets/kosukuma-deco-helmet.png',             images: ['assets/kosukuma-deco-helmet.png'], imgFit: 'contain', imgBg: '#fff' },
   { id: 'tshirt',   name: 'こすくまくんTシャツ',           price: null,       status: 'coming-soon', oneliner: 'おそろいもいいね',  img: 'assets/kosukuma-product.png',                 images: ['assets/kosukuma-product.png'] },
   { id: 'taketombo', name: 'こすくまくん竹とんぼ',         price: null,       status: 'coming-soon', oneliner: '',                  img: 'assets/kosukuma-taketombo.png',               images: ['assets/kosukuma-taketombo.png'] },
+  // シャーロックマ（写真・Shopify登録待ち）— img 省略でプレースホルダー自動表示
+  { id: 'sharlockma-sticker', name: 'シャーロックマ ステッカー',  price: 780,        status: 'coming-soon', oneliner: 'ふしぎがいっぱい' },
+  { id: 'sharlockma-plush',   name: 'シャーロックマ ぬいぐるみ',  price: null,       status: 'coming-soon', oneliner: 'ふしぎがいっぱい' },
 ];
 
 let PRODUCTS = FALLBACK_PRODUCTS;
