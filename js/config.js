@@ -18,3 +18,7 @@ export const PRODUCT_HANDLES = [
   'tシャツ',
   'こすくまデコヘルメット',
 ];
+
+// 送料無料の閾値（円・税込）。特商法表記・trust stripと同じ値であること —
+// ポリシーの数字を変える時は index.html の2箇所も一緒に更新する
+export const FREE_SHIPPING_THRESHOLD_JPY = 5000;

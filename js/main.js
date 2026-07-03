@@ -40,9 +40,32 @@ lazyKumaAnim('hero-inline-dance', 'dance');
 lazyKumaAnim('about-kaikai', 'kaikai');
 lazyKumaAnim('utouto-container', 'utouto');
 
-// ===== キラキラカーソル（マウス環境のみ・reduced-motion除外） =====
+// Aboutのこすくまくんは、つつくとぴょんと跳ねる（隠しあそび）
+const aboutKuma = document.getElementById('about-kaikai');
+if (aboutKuma) {
+  aboutKuma.classList.add('pokeable');
+  aboutKuma.addEventListener('click', () => {
+    if (prefersReducedMotion()) return;
+    aboutKuma.classList.remove('poked');
+    void aboutKuma.offsetWidth; // 連打でもアニメを再発火させるためのreflow
+    aboutKuma.classList.add('poked');
+  });
+}
+
+// ===== スクロール演出（パララックス+イーロンカウントアップ） =====
+if (!prefersReducedMotion()) {
+  import('./fx/scroll-fx.js').then((m) => m.initScrollFx());
+}
+
+// ===== マウス環境限定の演出（reduced-motion除外） =====
 if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
   import('./fx/sparkles.js').then((m) => m.initSparkles());
+  // マグネティックボタン（吸い付く触り心地）— 主役CTAのみ
+  import('./fx/magnetic.js').then((m) => m.initMagnetic('.hero-cta, #elon-buy-btn'));
+  // 商品写真の覗き込みズーム
+  import('./fx/hover-zoom.js').then((m) =>
+    m.initHoverZoom('.feature-media, .product-media'),
+  );
 }
 
 // ===== 3Dこんぺいとうヒーロー（遅延ロード） =====

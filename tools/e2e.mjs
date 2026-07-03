@@ -82,8 +82,24 @@ if (url) {
   ok('C: チェックアウトURLがHTTP 200', false, 'URLがnull');
 }
 
+step='B6-meter';
+// ---- 送料無料メーター（¥1,560 / ¥5,000 = 31%付近） ----
+const meter = await page.evaluate(() => ({
+  hidden: document.getElementById('shipping-meter').hidden,
+  label: document.getElementById('shipping-meter-label').textContent,
+  width: document.getElementById('shipping-meter-bar').style.width,
+}));
+ok(
+  'B6: 送料無料メーターが「あと¥X」を表示',
+  !meter.hidden && meter.label.includes('そうりょうむりょう') && meter.width !== '0%' && meter.width !== '',
+  `${meter.label} (${meter.width})`,
+);
+
 step='B5-empty';
-// 数量を0にして空へ（後片付け兼 削除同期テスト）
+// ---- 「だす」ボタンで行削除（Shopify同期） ----
+await page.click('button[data-remove]');
+await new Promise((r) => setTimeout(r, 3500));
+// 残っていたら数量−で後片付け（在庫クランプ等で行が残るケースの保険）
 while (true) {
   const minus = await page.$('.cart-item-qty button[data-delta="-1"]');
   if (!minus) break;
@@ -91,7 +107,8 @@ while (true) {
   await new Promise((r) => setTimeout(r, 2500));
 }
 const emptyText = await page.$eval('#cart-items', (el) => el.textContent);
-ok('B5: 削除同期 → まだなにも入ってないよ', emptyText.includes('まだなにも入ってないよ'));
+ok('B5: だす→削除同期 → まだなにも入ってないよ+グッズをみるCTA',
+  emptyText.includes('まだなにも入ってないよ') && emptyText.includes('グッズをみる'));
 await page.keyboard.press('Escape');
 
 step='E-elon';

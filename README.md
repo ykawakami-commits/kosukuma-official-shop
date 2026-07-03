@@ -20,6 +20,10 @@ js/kuma-anim.js     こすくまパラパラアニメ（遅延ロード）
 js/fx/motion.js     ブレークポイント(640/900)とreduced-motionの単一情報源
 js/fx/sparkles.js   カーソルきらきら
 js/fx/hero-3d.js    3Dこんぺいとう物理（ヒーロー内限定）
+js/fx/confetti.js   カゴ追加時のこんぺいとう紙吹雪バースト
+js/fx/scroll-fx.js  ヒーローパララックス+イーロン$カウントアップ
+js/fx/magnetic.js   マグネティックボタン（hero-cta/イーロン）
+js/fx/hover-zoom.js 商品写真の覗き込みズーム
 tools/optimize-images.mjs  商品画像→WebP/srcset生成（npm run images）
 tools/e2e.mjs       購入導線E2E 15項目（npm run e2e）
 _headers            キャッシュ/セキュリティヘッダ（Cloudflare Pages）

@@ -7,8 +7,9 @@
 
 import { fetchProductsByHandles, formatMoney } from './storefront.js';
 import * as cart from './cart.js';
-import { PRODUCT_HANDLES } from './config.js';
+import { PRODUCT_HANDLES, FREE_SHIPPING_THRESHOLD_JPY } from './config.js';
 import { KumaAnim } from './kuma-anim.js';
+import { prefersReducedMotion } from './fx/motion.js';
 
 // ===== 表示カタログ（演出レイヤー） =====
 const CATALOG = {
@@ -152,7 +153,13 @@ function renderCart(c) {
   const count = c?.totalQuantity ?? 0;
 
   const countEl = document.getElementById('cart-count');
-  if (countEl) countEl.textContent = count;
+  if (countEl && String(count) !== countEl.textContent) {
+    countEl.textContent = count;
+    // ころんと回って増える（reduced-motionではCSS側でアニメが無効化される）
+    countEl.classList.remove('roll');
+    void countEl.offsetWidth;
+    countEl.classList.add('roll');
+  }
 
   const sticky = document.getElementById('sticky-cart');
   const stickyCount = document.getElementById('sticky-cart-count');
@@ -165,12 +172,18 @@ function renderCart(c) {
   if (!itemsEl) return;
 
   const lines = c?.lines.nodes ?? [];
+  renderShippingMeter(c, lines.length);
   if (lines.length === 0) {
     itemsEl.innerHTML = `
       <div class="cart-empty">
         <img class="pixel-art" src="/assets/kosukuma/front.png" alt="">
         まだなにも入ってないよ
+        <button class="btn-cart cart-empty-cta" id="cart-empty-cta">グッズをみる</button>
       </div>`;
+    itemsEl.querySelector('#cart-empty-cta')?.addEventListener('click', () => {
+      document.getElementById('cart-drawer')?.close();
+      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+    });
     if (totalEl) totalEl.textContent = '¥0';
     if (checkoutBtn) checkoutBtn.disabled = true;
     return;
@@ -191,20 +204,45 @@ function renderCart(c) {
         <p class="cart-item-name"></p>
         <p class="cart-item-price">${formatMoney(line.cost.totalAmount)}</p>
       </div>
-      <div class="cart-item-qty">
-        <button data-line="${line.id}" data-delta="-1">−</button>
-        <span class="qty-num">${line.quantity}</span>
-        <button data-line="${line.id}" data-delta="1">＋</button>
+      <div class="cart-item-actions">
+        <div class="cart-item-qty">
+          <button data-line="${line.id}" data-delta="-1">−</button>
+          <span class="qty-num">${line.quantity}</span>
+          <button data-line="${line.id}" data-delta="1">＋</button>
+        </div>
+        <button class="cart-item-remove" data-remove="${line.id}">だす</button>
       </div>`;
     item.querySelector('.cart-item-name').textContent = m.product.title;
     const [minusBtn, plusBtn] = item.querySelectorAll('.cart-item-qty button');
     minusBtn.setAttribute('aria-label', `${m.product.title} をへらす`);
     plusBtn.setAttribute('aria-label', `${m.product.title} をふやす`);
+    item.querySelector('[data-remove]').setAttribute('aria-label', `${m.product.title} をカートからだす`);
     itemsEl.appendChild(item);
   }
 
   if (totalEl) totalEl.textContent = formatMoney(c.cost.subtotalAmount);
   if (checkoutBtn) checkoutBtn.disabled = false;
+}
+
+// 送料無料メーター（閾値は特商法表記と同一のconfig値）
+function renderShippingMeter(c, lineCount) {
+  const meter = document.getElementById('shipping-meter');
+  if (!meter) return;
+  if (!c || lineCount === 0) {
+    meter.hidden = true;
+    return;
+  }
+  const subtotal = Number(c.cost.subtotalAmount.amount);
+  const remain = FREE_SHIPPING_THRESHOLD_JPY - subtotal;
+  const pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_JPY) * 100));
+  meter.hidden = false;
+  meter.classList.toggle('reached', remain <= 0);
+  document.getElementById('shipping-meter-label').textContent =
+    remain <= 0
+      ? 'そうりょうむりょう！やったね'
+      : `あと ${formatMoney({ amount: remain, currencyCode: 'JPY' })} で そうりょうむりょうだよ`;
+  document.getElementById('shipping-meter-bar').style.width = pct + '%';
+  document.getElementById('shipping-meter-bar-wrap').setAttribute('aria-valuenow', String(pct));
 }
 
 async function changeQty(lineId, delta) {
@@ -237,6 +275,23 @@ async function changeQty(lineId, delta) {
   }
 }
 
+async function removeLineWithFeedback(lineId) {
+  if (mutating) return;
+  mutating = true;
+  document.querySelectorAll('.cart-item-actions button').forEach((b) => (b.disabled = true));
+  try {
+    await cart.removeLine(lineId);
+    announce('カートからだしたよ');
+  } catch {
+    toast(VOICE.netError);
+  } finally {
+    mutating = false;
+    renderCart(cart.getCart());
+    (document.querySelector('.cart-item-qty button') ??
+      document.querySelector('#cart-drawer .dialog-close'))?.focus();
+  }
+}
+
 function initCartDrawer() {
   const drawer = document.getElementById('cart-drawer');
   if (!drawer) return;
@@ -246,6 +301,11 @@ function initCartDrawer() {
   document.getElementById('sticky-cart')?.addEventListener('click', open);
 
   document.getElementById('cart-items')?.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('button[data-remove]');
+    if (removeBtn) {
+      removeLineWithFeedback(removeBtn.dataset.remove);
+      return;
+    }
     const btn = e.target.closest('button[data-line]');
     if (!btn) return;
     changeQty(btn.dataset.line, parseInt(btn.dataset.delta, 10));
@@ -265,9 +325,41 @@ function initCartDrawer() {
   cart.onCartChange(renderCart);
 }
 
-// ===== カゴ追加（おしりふりふり付き） =====
+// ===== カゴ追加（おしりふりふり+商品が飛んでいく） =====
 let popupTimer = null;
 let popupAnim = null;
+
+// 商品画像がカートボタンへ飛んでいく（買い物の快感演出）。
+// ダイアログ内からの追加など、飛ばせる画像が無い時は静かにスキップ
+function flyToCart(card) {
+  if (prefersReducedMotion() || !card) return;
+  const img = card.querySelector('.feature-media img, .product-media img');
+  const target = document.getElementById('cart-toggle');
+  if (!img || !target || typeof img.animate !== 'function') return;
+  const from = img.getBoundingClientRect();
+  const to = target.getBoundingClientRect();
+  if (from.width === 0 || to.width === 0) return;
+
+  const ghost = img.cloneNode(false);
+  ghost.setAttribute('aria-hidden', 'true');
+  ghost.style.cssText =
+    `position:fixed;left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px;` +
+    'object-fit:cover;border-radius:14px;z-index:var(--z-toast);pointer-events:none;will-change:transform,opacity;';
+  document.body.appendChild(ghost);
+
+  const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+  const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+  const anim = ghost.animate(
+    [
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx * 0.55}px, ${dy * 0.55 - 70}px) scale(0.45) rotate(5deg)`, opacity: 0.95, offset: 0.6 },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.06) rotate(10deg)`, opacity: 0.3 },
+    ],
+    { duration: 680, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' },
+  );
+  anim.onfinish = () => ghost.remove();
+  anim.oncancel = () => ghost.remove();
+}
 
 function showAddedPopup() {
   const popup = document.getElementById('cart-popup');
@@ -305,6 +397,7 @@ async function addToCart(handle, btn) {
     }
     if (res.applied < res.requested) toast(VOICE.partialStock);
     announce('カゴに入れたよ');
+    flyToCart(btn.closest('[data-handle]'));
     btn.textContent = 'いれたよ！';
     btn.classList.add('added');
     setTimeout(() => {
@@ -312,6 +405,11 @@ async function addToCart(handle, btn) {
       btn.classList.remove('added');
     }, 1000);
     showAddedPopup();
+    // こんぺいとう紙吹雪（ボタン中心から）
+    if (!prefersReducedMotion()) {
+      const r = btn.getBoundingClientRect();
+      import('./fx/confetti.js').then((m) => m.burst(r.left + r.width / 2, r.top + r.height / 2));
+    }
     const headerCart = document.getElementById('cart-toggle');
     headerCart?.classList.add('bounce');
     setTimeout(() => headerCart?.classList.remove('bounce'), 320);

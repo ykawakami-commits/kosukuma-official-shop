@@ -378,6 +378,12 @@ window.__kosuRevealFallback = setTimeout(function () {
     </div>
   </div>
   <div class="cart-drawer-footer">
+    <div class="shipping-meter" id="shipping-meter" hidden>
+      <p class="shipping-meter-label" id="shipping-meter-label"></p>
+      <div class="shipping-meter-track" role="progressbar" aria-labelledby="shipping-meter-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shipping-meter-bar-wrap">
+        <div class="shipping-meter-bar" id="shipping-meter-bar"></div>
+      </div>
+    </div>
     <div class="cart-total">
       <span>ごうけい <small style="font-weight:400">(税込)</small></span>
       <span class="cart-total-amount" id="cart-total-price">¥0</span>
