@@ -204,7 +204,6 @@ html.js .reveal:not(.visible) {
   border-radius: 22px 15px 26px 14px / 17px 24px 14px 22px;
   padding: clamp(16px, 2.5vw, 28px);
   box-shadow: var(--shadow-card);
-  rotate: -0.6deg;
 }
 
 .hero-panel .eyebrow { display: block; margin-bottom: var(--space-2); }
@@ -212,8 +211,11 @@ html.js .reveal:not(.visible) {
 .hero-title {
   font-size: var(--fs-hero);
   font-weight: 900;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: 0.01em;
+  /* 折返しは<wbr>（「こすくまくんの|おみせ」）だけに限定 —
+     balanceが「こすくまく/んのおみせ」と単語の途中で均等割りする事故防止 */
+  word-break: keep-all;
 }
 
 .hero-subtitle {
@@ -312,6 +314,10 @@ html.js .reveal:not(.visible) {
     justify-content: center;
     gap: var(--space-1) var(--space-4);
   }
+  /* 文節の途中で折らない（「こす.く/ま」の孤立防止）。
+     いちばん長い送料項目だけ全幅に逃がす */
+  .trust-item { white-space: nowrap; }
+  .trust-item:first-child { grid-column: 1 / -1; justify-self: center; }
 }
 .trust-item img { width: 18px; height: 18px; }
 
@@ -1086,7 +1092,7 @@ html.js .reveal:not(.visible) {
 @media (max-width: 640px) {
   /* FVで商品棚が見えるよう、バナーはさらに圧縮 */
   .hero { min-height: min(26vh, 240px); }
-  .hero-panel { rotate: 0deg; padding: var(--space-3) var(--space-4); }
+  .hero-panel { padding: var(--space-3) var(--space-4); }
   .hero-shop-link { min-height: 40px; margin-top: var(--space-2); }
   .inline-kuma-anim { width: 28px; height: 28px; }
   .menu-btn { display: grid; place-items: center; }
