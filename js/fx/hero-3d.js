@@ -23,7 +23,7 @@ import { isMobile, onBreakpointChange } from './motion.js';
 // 旧実装と同じ相対パス（先頭 /assets/...）
 const MODEL_SRC = '/assets/3d/konpeito.glb';
 const MODEL_SCALE_DESKTOP = 1.5;   // 2.2→1.5: 「巨大な謎オブジェ」でなく「こんぺいとうの山」に見えるサイズ
-const MODEL_SCALE_MOBILE = 0.1;    // スマホ: 微粒（紙吹雪感を保ちつつ視認できる下限）
+const MODEL_SCALE_MOBILE = 0.95;   // スマホもPC同様「ちゃんとこんぺいとう」（微粒0.1はほぼ不可視だった）
 
 const KONPEITO_PALETTE = [
   { color: '#5cc8e8' },  // 水色（鮮やか）
@@ -35,7 +35,7 @@ const KONPEITO_PALETTE = [
 ];
 
 const DESKTOP_COUNT = 90;   // 粒を小さくした分、数で密度を出す（InstancedMeshなので描画コスト増は僅少）
-const MOBILE_COUNT = 70;    // モバイルは最大70に削減
+const MOBILE_COUNT = 42;    // 粒を大きくした分、数を絞って物理・描画コストを維持
 
 // ── 水中物理（クラゲモード / デスクトップ） ──
 const SPRING_K = 5.0;             // ソフトバネ — ふわっと戻る（急に引き戻さない）
@@ -53,7 +53,12 @@ const DRIFT_FORCE = 0.18;         // 水流の揺らぎ（クラゲの漂い感�
 const FIXED_DT = 1 / 120;
 
 // ── モバイル重力物理 ──
-const MOBILE_BALL_RADIUS = 0.035;
+// 衝突半径は見た目と整合させる: モデルはmaxDim=1に正規化→スケール0.95で
+// 見た目半径≈0.475。こんぺいとうはトゲ星形なのでコア球（トゲ根元）の
+// 半径≈0.31を採用 — トゲ同士は自然に絡み、粒は物理的に積み重なって山になる。
+// （旧0.035は微粒スケール0.07時代の値。0.95に対しては1/14で、42粒全部が
+//   1層の薄い帯に潰れて下端に沈み「山」にならなかった）
+const MOBILE_BALL_RADIUS = 0.31;
 const MOBILE_DAMPING = 0.15;       // ほぼ無抵抗 — 瞬時に反応
 const MOBILE_ANGULAR_DAMPING = 0.3;
 const MOBILE_RESTITUTION = 0.7;    // 壁で弾む

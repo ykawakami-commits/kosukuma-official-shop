@@ -1,0 +1,71 @@
+/* legal.css — 法定情報の静的ページ（/legal/*.html）専用 */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+.pixel-art { image-rendering: pixelated; }
+a { color: var(--brown); }
+
+.legal-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--brown) 18%, transparent);
+  padding: var(--space-3) var(--gutter);
+}
+.legal-home {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 900;
+  color: var(--ink);
+  text-decoration: none;
+}
+.legal-official {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--honey);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 1px 8px;
+}
+
+.legal-main {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--gutter) var(--space-7);
+}
+.legal-main h1 { font-size: 1.5rem; font-weight: 900; margin-bottom: var(--space-4); }
+.legal-main h2 { font-size: 1.05rem; font-weight: 700; margin: var(--space-4) 0 var(--space-2); }
+.legal-main p, .legal-main li { font-size: 0.9rem; color: var(--ink-sub); }
+.legal-main ul { padding-left: 1.4em; }
+
+.legal-main table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.legal-main th, .legal-main td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--brown) 30%, transparent);
+  vertical-align: top;
+}
+.legal-main th { white-space: nowrap; background: var(--cream); width: 34%; font-weight: 700; }
+.legal-main td { color: var(--ink-sub); }
+
+.legal-back { margin-top: var(--space-5); }
+.legal-back a { font-weight: 700; }
+
+.legal-footer {
+  border-top: 1px solid color-mix(in srgb, var(--brown) 18%, transparent);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-sub);
+  padding: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .legal-main th { white-space: normal; width: 30%; }
+}

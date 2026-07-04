@@ -91,12 +91,19 @@ function wireDialog(dialog) {
 
 function initDialogs() {
   document.querySelectorAll('dialog').forEach(wireDialog);
-  // フッターの法務リンク等
+  // data-dialog属性を持つリンク（将来用の汎用フック）
   document.querySelectorAll('[data-dialog]').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById(link.dataset.dialog)?.showModal();
     });
+  });
+
+  // モバイルメニュー: 開く + ページ内リンクは閉じてからスクロール
+  const menuDialog = document.getElementById('menu-dialog');
+  document.getElementById('menu-btn')?.addEventListener('click', () => menuDialog?.showModal());
+  menuDialog?.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', () => menuDialog.close());
   });
 }
 
@@ -125,12 +132,18 @@ function applyProductState(card, p) {
   }
   const btn = card.querySelector('[data-add-to-cart]');
   if (!btn) return;
+  const chip = card.querySelector('.status-chip');
 
   if (p.availableForSale && p.variantId) {
     btn.disabled = false;
     btn.textContent = 'カゴに入れる';
     card.classList.remove('is-soldout');
     card.querySelector('[data-soldout-stamp]')?.remove();
+    card.querySelector('.restock-link')?.remove(); // 再入荷したら再入荷案内は不要
+    if (chip) {
+      chip.className = 'status-chip on-sale';
+      chip.textContent = '販売中';
+    }
   } else {
     btn.disabled = true;
     btn.textContent = SOLDOUT_LABELS[p.handle] ?? SOLDOUT_LABELS.default;
@@ -140,7 +153,11 @@ function applyProductState(card, p) {
       stamp.className = 'soldout-stamp';
       stamp.dataset.soldoutStamp = '';
       stamp.innerHTML = 'うりきれ<small>SOLD OUT</small>';
-      card.querySelector('.product-media, .feature-media')?.appendChild(stamp);
+      card.querySelector('.product-media')?.appendChild(stamp);
+    }
+    if (chip) {
+      chip.className = 'status-chip is-out';
+      chip.textContent = '売り切れ';
     }
     card.querySelector('[data-stock-note]')?.remove();
   }
@@ -333,7 +350,7 @@ let popupAnim = null;
 // ダイアログ内からの追加など、飛ばせる画像が無い時は静かにスキップ
 function flyToCart(card) {
   if (prefersReducedMotion() || !card) return;
-  const img = card.querySelector('.feature-media img, .product-media img');
+  const img = card.querySelector('.product-media img');
   const target = document.getElementById('cart-toggle');
   if (!img || !target || typeof img.animate !== 'function') return;
   const from = img.getBoundingClientRect();
@@ -515,6 +532,16 @@ function initProductDialog() {
     btn.setAttribute('aria-haspopup', 'dialog');
     btn.addEventListener('click', () => {
       const card = btn.closest('[data-handle]');
+      if (card) openProductDialog(card);
+    });
+  });
+
+  // ECの体の記憶「商品写真タップ=詳細」にも応える（マウス/タップ用の補助経路。
+  // キーボードは上の本物のボタンが担う）
+  document.querySelectorAll('[data-handle] .product-media').forEach((media) => {
+    media.addEventListener('click', (e) => {
+      if (e.target.closest('button, a')) return;
+      const card = media.closest('[data-handle]');
       if (card) openProductDialog(card);
     });
   });

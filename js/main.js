@@ -60,11 +60,11 @@ if (!prefersReducedMotion()) {
 // ===== マウス環境限定の演出（reduced-motion除外） =====
 if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
   import('./fx/sparkles.js').then((m) => m.initSparkles());
-  // マグネティックボタン（吸い付く触り心地）— 主役CTAのみ
-  import('./fx/magnetic.js').then((m) => m.initMagnetic('.hero-cta, #elon-buy-btn'));
-  // 商品写真の覗き込みズーム
+  // マグネティックボタン（吸い付く触り心地）— イーロン様専用のみ
+  import('./fx/magnetic.js').then((m) => m.initMagnetic('#elon-buy-btn'));
+  // 商品写真の覗き込みズーム（イーロン/プレースホルダーは対象外）
   import('./fx/hover-zoom.js').then((m) =>
-    m.initHoverZoom('.feature-media, .product-media'),
+    m.initHoverZoom('.product-media:not(.elon-media)'),
   );
 }
 

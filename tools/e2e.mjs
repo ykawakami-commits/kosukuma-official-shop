@@ -20,13 +20,25 @@ const ok = (name, pass, detail = '') => {
   console.log(`${pass ? 'PASS' : 'FAIL'}: ${name}${detail ? ' — ' + detail : ''}`);
 };
 
-const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+// swiftshader: ヘッドレスでもWebGLを有効化（3D初期化の回帰検知に必要）
+const browser = await puppeteer.launch({
+  headless: 'new',
+  args: ['--no-sandbox', '--enable-unsafe-swiftshader'],
+});
 const page = await browser.newPage();
 const jsErrors = [];
+const brokenAssets = [];
 let step = 'init';
 page.on('pageerror', (e) => {
   jsErrors.push(`[${step}] ${e.message.slice(0, 200)}`);
   if (process.env.E2E_DEBUG) console.log(`PAGEERROR@${step}:`, (e.stack || e.message).slice(0, 500));
+});
+// 自ホストのアセット404は全部バグ（three.core.js欠落で3Dが黙って死んだ前科）
+page.on('response', (res) => {
+  const url = res.url();
+  if (res.status() === 404 && /\/(assets|css|js|legal)\//.test(url)) {
+    brokenAssets.push(url.split('/').slice(-2).join('/'));
+  }
 });
 await page.setViewport({ width: 1440, height: 900 });
 await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 60000 });
@@ -206,6 +218,28 @@ const sync = await page.evaluate(async () => {
   return issues;
 });
 ok('G: JSON-LDとShopify実データが同期', sync.length === 0, sync.join(' / '));
+
+// ---- H: 3Dこんぺいとうが初期化されている（import黙殺死の回帰検知） ----
+step = 'H-3d';
+await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+await new Promise((r) => setTimeout(r, 9000)); // idle初期化+GLB+presim待ち
+const canvas3d = await page.evaluate(() => {
+  const c = document.getElementById('hero-3d-canvas');
+  return { w: c?.width ?? 0, h: c?.height ?? 0 };
+});
+ok('H: 3Dこんぺいとう初期化（canvasバッファ設定済み）', canvas3d.w > 300, `${canvas3d.w}x${canvas3d.h}`);
+
+// ---- I: 自ホストアセットの404ゼロ ----
+ok('I: アセット404ゼロ', brokenAssets.length === 0, [...new Set(brokenAssets)].join(', ').slice(0, 200));
+
+// ---- J: 法定ページが実URLで到達可能（JSなしでも法定表記に辿り着ける） ----
+for (const path of ['/legal/tokushoho.html', '/legal/privacy.html']) {
+  const p3 = await browser.newPage();
+  const r3 = await p3.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  const hasContent = await p3.evaluate(() => document.body.textContent.includes('株式会社こす.くま'));
+  ok(`J: ${path} が200+実内容`, r3.status() === 200 && hasContent, String(r3.status()));
+  await p3.close();
+}
 
 // ---- A: JSエラー0 ----
 const realErrors = jsErrors.filter((e) => !e.includes('hero-3d'));
