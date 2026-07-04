@@ -505,17 +505,6 @@ html.js .reveal:not(.visible) {
   margin-top: var(--space-1);
 }
 
-/* イーロン専用チケット（実ステータスチップの語彙を借りない、ネタ専用の金縁札） */
-.elon-ticket {
-  margin-top: var(--space-2);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--elon-gold);
-  border: 1px dashed color-mix(in srgb, var(--elon-gold) 65%, transparent);
-  border-radius: 4px;
-  padding: 3px 10px;
-}
 
 /* 売り切れ: 判子スタイル */
 .soldout-stamp {
@@ -568,24 +557,16 @@ html.js .reveal:not(.visible) {
   background: linear-gradient(180deg, var(--elon-bg-2), var(--elon-bg));
   border-color: var(--elon-gold);
 }
-.elon-media {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  text-align: center;
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 0%, color-mix(in srgb, var(--elon-gold) 16%, transparent), transparent 70%),
-    var(--elon-bg-2);
-  padding: var(--space-3);
+/* メルカリ「〇〇様専用」出品パロディの黒画像をそのまま見せる（切り抜かない） */
+.elon-card-media {
+  background: #000;
 }
-.elon-media .eyebrow { color: var(--elon-gold); }
+.elon-card-media img { object-fit: contain; }
 .elon-price {
   font-family: var(--font-num);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  font-size: clamp(1.4rem, 1rem + 1.6vw, 2rem);
+  font-size: var(--fs-price);
   color: var(--elon-gold);
   line-height: 1.1;
 }
@@ -1110,7 +1091,6 @@ html.js .reveal:not(.visible) {
   .product-no { font-size: 0.6rem; }
   .product-body .btn-cart { min-height: 44px; padding: 0 var(--space-2); font-size: 0.8rem; letter-spacing: 0; align-self: stretch; }
   .restock-link { font-size: 0.7rem; }
-  .elon-ticket { font-size: 0.62rem; padding: 2px 6px; }
   .status-chip { font-size: 0.65rem; padding: 2px 8px; }
   .elon-price { font-size: 1.3rem; }
 

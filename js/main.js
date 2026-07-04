@@ -62,9 +62,9 @@ if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
   import('./fx/sparkles.js').then((m) => m.initSparkles());
   // マグネティックボタン（吸い付く触り心地）— イーロン様専用のみ
   import('./fx/magnetic.js').then((m) => m.initMagnetic('#elon-buy-btn'));
-  // 商品写真の覗き込みズーム（イーロン/プレースホルダーは対象外）
+  // 商品写真の覗き込みズーム（イーロンのパロディ画像は対象外 — ネタは静止で見せる）
   import('./fx/hover-zoom.js').then((m) =>
-    m.initHoverZoom('.product-media:not(.elon-media)'),
+    m.initHoverZoom('.product-media:not(.elon-card-media)'),
   );
 }
 
