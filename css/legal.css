@@ -26,14 +26,6 @@ a { color: var(--brown); }
   color: var(--ink);
   text-decoration: none;
 }
-.legal-official {
-  font-size: 0.68rem;
-  font-weight: 700;
-  background: var(--honey);
-  border: 1.5px solid var(--ink);
-  border-radius: 6px;
-  padding: 1px 8px;
-}
 
 .legal-main {
   max-width: 760px;

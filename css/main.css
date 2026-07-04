@@ -1099,7 +1099,6 @@ html.js .reveal:not(.visible) {
   .header-nav { gap: 6px; }
   .header-logo { gap: 5px; font-size: 0.86rem; white-space: nowrap; }
   .header-logo img { width: 22px; height: 22px; }
-  .official-badge { font-size: 0.58rem; padding: 1px 5px; }
   .header-cart { padding: 0 10px; font-size: 0.78rem; white-space: nowrap; gap: 4px; }
   .header-cart img { display: none; }   /* 宝箱アイコンは狭幅では畳む */
   .header-nav > a { display: none; }    /* ページ内リンクはメニュー(☰)へ */
@@ -1116,21 +1115,6 @@ html.js .reveal:not(.visible) {
 }
 
 /* ===== 公式感・安心感レイヤー ===== */
-
-.official-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--ink);
-  background: var(--honey);
-  border: 1.5px solid var(--ink);
-  border-radius: 6px;
-  padding: 1px 8px;
-  translate: 0 -1px;
-}
-.official-badge-footer { background: var(--honey); }
 
 /* おかいものガイド */
 .guide-grid {
