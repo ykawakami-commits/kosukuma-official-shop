@@ -1,63 +1,15 @@
-// ui.js — 画面の配線
-//
-// 原則:
-// - カートの数字・合計・チェックアウトURLは cart.js（=Shopify）だけを見る
-// - CATALOGは「見せ方」だけを持つ演出レイヤー。価格と在庫は必ずShopifyで上書き
-// - 失敗は黙殺しない。全部こすくまくんの声でトーストする
-
+// js/ui.js — 画面配線（ドロワー/トースト/hydration/reveal/サムネ切替）
+// カートの真実は js/cart.js（Shopify Cart API）。ここでは表示と配線だけを行う。
+import { PRODUCT_HANDLES, FREE_SHIPPING_THRESHOLD_JPY } from './config.js';
 import { fetchProductsByHandles, formatMoney } from './storefront.js';
 import * as cart from './cart.js';
-import { PRODUCT_HANDLES, FREE_SHIPPING_THRESHOLD_JPY } from './config.js';
-import { KumaAnim } from './kuma-anim.js';
-import { prefersReducedMotion } from './fx/motion.js';
 
-// ===== 表示カタログ（演出レイヤー） =====
-const CATALOG = {
-  'こすくまくんステッカー': {
-    no: 'NO. 001',
-    story: 'どこにでも貼れる。まちのどこかで見かけたら、それはたぶん、なかまのしわざ。',
-    images: [
-      '/assets/img/kosukuma-sticker-street-800.webp',
-      '/assets/img/kosukuma-sticker-pack-800.webp',
-      '/assets/img/kosukuma-sticker-main-800.webp',
-    ],
-  },
-  'tシャツ': {
-    no: 'NO. 002',
-    story: 'いちばんいいやつ。なにがいいかは、きたひとだけわかる。',
-    images: [
-      '/assets/img/kosukuma-ultra-tshirt-1-800.webp',
-      '/assets/img/kosukuma-ultra-tshirt-2-800.webp',
-    ],
-  },
-  'こすくまデコヘルメット': {
-    no: 'NO. 003',
-    story: 'せかいに1こだけだった、デコレーションヘルメット。あたらしいおうちに たびだっていったよ。',
-    images: ['/assets/img/kosukuma-deco-helmet-800.webp'],
-    imgFit: 'contain',
-  },
-};
-
-const SOLDOUT_LABELS = {
-  'こすくまデコヘルメット': 'たびだっていったよ',
-  default: 'うりきれちゃった',
-};
-
-// handle → Shopify商品（hydrate後に入る）
-const products = new Map();
-
-// スクリーンリーダー向けの不可視アナウンス（視覚ポップアップと重複させないため分離）
+// ── トースト／スクリーンリーダー通知 ──
 export function announce(message) {
   const region = document.getElementById('toast-region');
-  if (!region) return;
-  const el = document.createElement('div');
-  el.className = 'visually-hidden';
-  el.textContent = message;
-  region.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  if (region) region.setAttribute('aria-label', message);
 }
 
-// ===== トースト =====
 export function toast(message, ms = 3200) {
   const region = document.getElementById('toast-region');
   if (!region) return;
@@ -65,607 +17,254 @@ export function toast(message, ms = 3200) {
   el.className = 'toast';
   el.textContent = message;
   region.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
   setTimeout(() => {
-    el.classList.add('leaving');
-    setTimeout(() => el.remove(), 350);
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
   }, ms);
 }
 
-const VOICE = {
-  netError: 'ごめん、おみせとつながらないみたい。ちょっとまってもういちどためして。',
-  noStock: 'ごめん、いまざいこがないみたい。',
-  partialStock: 'ざいこがすこししかなくて、いれられるだけいれたよ。',
-  checkoutError: 'レジのちょうしがわるいみたい。すこしまってから、もういちどおしてみて。',
+// ── 売り切れスタンプ文言（商品ごとの遊び。在庫情報そのものはShopifyが真実） ──
+const SOLDOUT_LABELS = {
+  'こすくまデコヘルメット': 'たびだっていったよ',
 };
+const soldoutLabel = (handle) => SOLDOUT_LABELS[handle] ?? 'うりきれちゃった';
 
-// ===== ダイアログ共通 =====
-function wireDialog(dialog) {
-  dialog.querySelectorAll('[data-close]').forEach((btn) =>
-    btn.addEventListener('click', () => dialog.close()),
-  );
-  // 背景クリックで閉じる
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
-  });
-}
-
+// ── ダイアログ（メニュー/カート共通） ──
 function initDialogs() {
-  document.querySelectorAll('dialog').forEach(wireDialog);
-  // data-dialog属性を持つリンク（将来用の汎用フック）
-  document.querySelectorAll('[data-dialog]').forEach((link) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById(link.dataset.dialog)?.showModal();
-    });
-  });
-
-  // モバイルメニュー: 開く + ページ内リンクは閉じてからスクロール
-  const menuDialog = document.getElementById('menu-dialog');
-  document.getElementById('menu-btn')?.addEventListener('click', () => menuDialog?.showModal());
-  menuDialog?.querySelectorAll('a[href^="#"]').forEach((a) => {
-    a.addEventListener('click', () => menuDialog.close());
-  });
-}
-
-// ===== 商品のhydration（静的HTML → Shopify実データで上書き） =====
-async function hydrateProducts() {
-  let fetched;
-  try {
-    fetched = await fetchProductsByHandles(PRODUCT_HANDLES);
-  } catch {
-    // 静的HTMLに正しい直近データが焼いてあるので、表示はそのまま生かす。
-    // ただし購入操作は variantId が無いとできないため、ボタン押下時に改めて伝える
-    return;
-  }
-  fetched.forEach((p) => p && products.set(p.handle, p));
-
-  document.querySelectorAll('[data-handle]').forEach((card) => {
-    const p = products.get(card.dataset.handle);
-    if (p) applyProductState(card, p);
-  });
-}
-
-function applyProductState(card, p) {
-  const priceEl = card.querySelector('[data-price]');
-  if (priceEl && p.price) {
-    priceEl.innerHTML = `${formatMoney(p.price)}<span class="tax-label">(税込)</span>`;
-  }
-  const btn = card.querySelector('[data-add-to-cart]');
-  if (!btn) return;
-  const chip = card.querySelector('.status-chip');
-
-  if (p.availableForSale && p.variantId) {
-    btn.disabled = false;
-    btn.textContent = 'カゴに入れる';
-    card.classList.remove('is-soldout');
-    card.querySelector('[data-soldout-stamp]')?.remove();
-    card.querySelector('.restock-link')?.remove(); // 再入荷したら再入荷案内は不要
-    if (chip) {
-      chip.className = 'status-chip on-sale';
-      chip.textContent = '販売中';
-    }
-  } else {
-    btn.disabled = true;
-    btn.textContent = SOLDOUT_LABELS[p.handle] ?? SOLDOUT_LABELS.default;
-    card.classList.add('is-soldout');
-    if (!card.querySelector('[data-soldout-stamp]')) {
-      const stamp = document.createElement('span');
-      stamp.className = 'soldout-stamp';
-      stamp.dataset.soldoutStamp = '';
-      stamp.innerHTML = 'うりきれ<small>SOLD OUT</small>';
-      card.querySelector('.product-media')?.appendChild(stamp);
-    }
-    if (chip) {
-      chip.className = 'status-chip is-out';
-      chip.textContent = '売り切れ';
-    }
-    card.querySelector('[data-stock-note]')?.remove();
-  }
-}
-
-// ===== カート表示（cart.jsのShopifyミラーを描くだけ） =====
-let mutating = false; // 連打による多重mutation防止
-
-function renderCart(c) {
-  const count = c?.totalQuantity ?? 0;
-
-  const countEl = document.getElementById('cart-count');
-  if (countEl && String(count) !== countEl.textContent) {
-    countEl.textContent = count;
-    // ころんと回って増える（reduced-motionではCSS側でアニメが無効化される）
-    countEl.classList.remove('roll');
-    void countEl.offsetWidth;
-    countEl.classList.add('roll');
-  }
-
-  const sticky = document.getElementById('sticky-cart');
-  const stickyCount = document.getElementById('sticky-cart-count');
-  if (stickyCount) stickyCount.textContent = count;
-  sticky?.classList.toggle('show', count > 0);
-
-  const itemsEl = document.getElementById('cart-items');
-  const totalEl = document.getElementById('cart-total-price');
-  const checkoutBtn = document.getElementById('btn-checkout');
-  if (!itemsEl) return;
-
-  const lines = c?.lines.nodes ?? [];
-  renderShippingMeter(c, lines.length);
-  if (lines.length === 0) {
-    itemsEl.innerHTML = `
-      <div class="cart-empty">
-        <img class="pixel-art" src="/assets/kosukuma/front.png" alt="">
-        まだなにも入ってないよ
-        <button class="btn-cart cart-empty-cta" id="cart-empty-cta">グッズをみる</button>
-      </div>`;
-    itemsEl.querySelector('#cart-empty-cta')?.addEventListener('click', () => {
-      document.getElementById('cart-drawer')?.close();
-      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-    });
-    if (totalEl) totalEl.textContent = '¥0';
-    if (checkoutBtn) checkoutBtn.disabled = true;
-    return;
-  }
-
-  itemsEl.innerHTML = '';
-  for (const line of lines) {
-    const m = line.merchandise;
-    const item = document.createElement('div');
-    item.className = 'cart-item';
-    // Shopify CDNの画像はwidthパラメータでリサイズできる（?の有無両対応）
-    const thumb = m.image
-      ? m.image.url + (m.image.url.includes('?') ? '&' : '?') + 'width=128'
-      : null;
-    item.innerHTML = `
-      <div class="cart-item-img">${thumb ? `<img src="${encodeURI(thumb)}" alt="">` : ''}</div>
-      <div>
-        <p class="cart-item-name"></p>
-        <p class="cart-item-price">${formatMoney(line.cost.totalAmount)}</p>
-      </div>
-      <div class="cart-item-actions">
-        <div class="cart-item-qty">
-          <button data-line="${line.id}" data-delta="-1">−</button>
-          <span class="qty-num">${line.quantity}</span>
-          <button data-line="${line.id}" data-delta="1">＋</button>
-        </div>
-        <button class="cart-item-remove" data-remove="${line.id}">だす</button>
-      </div>`;
-    item.querySelector('.cart-item-name').textContent = m.product.title;
-    const [minusBtn, plusBtn] = item.querySelectorAll('.cart-item-qty button');
-    minusBtn.setAttribute('aria-label', `${m.product.title} をへらす`);
-    plusBtn.setAttribute('aria-label', `${m.product.title} をふやす`);
-    item.querySelector('[data-remove]').setAttribute('aria-label', `${m.product.title} をカートからだす`);
-    itemsEl.appendChild(item);
-  }
-
-  if (totalEl) totalEl.textContent = formatMoney(c.cost.subtotalAmount);
-  if (checkoutBtn) checkoutBtn.disabled = false;
-}
-
-// 送料無料メーター（閾値は特商法表記と同一のconfig値）
-function renderShippingMeter(c, lineCount) {
-  const meter = document.getElementById('shipping-meter');
-  if (!meter) return;
-  if (!c || lineCount === 0) {
-    meter.hidden = true;
-    return;
-  }
-  const subtotal = Number(c.cost.subtotalAmount.amount);
-  const remain = FREE_SHIPPING_THRESHOLD_JPY - subtotal;
-  const pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_JPY) * 100));
-  meter.hidden = false;
-  meter.classList.toggle('reached', remain <= 0);
-  document.getElementById('shipping-meter-label').textContent =
-    remain <= 0
-      ? 'そうりょうむりょう！やったね'
-      : `あと ${formatMoney({ amount: remain, currencyCode: 'JPY' })} で そうりょうむりょうだよ`;
-  document.getElementById('shipping-meter-bar').style.width = pct + '%';
-  document.getElementById('shipping-meter-bar-wrap').setAttribute('aria-valuenow', String(pct));
-}
-
-async function changeQty(lineId, delta) {
-  if (mutating) return;
-  const c = cart.getCart();
-  const line = c?.lines.nodes.find((l) => l.id === lineId);
-  if (!line) return;
-  mutating = true;
-  document.querySelectorAll('.cart-item-qty button').forEach((b) => (b.disabled = true));
-  try {
-    const next = line.quantity + delta;
-    const res = await cart.updateLineQuantity(lineId, next);
-    if (res?.applied !== undefined && next > line.quantity && res.applied < next) {
-      toast(VOICE.partialStock);
-    }
-    announce('カートをこうしんしたよ');
-  } catch {
-    toast(VOICE.netError);
-  } finally {
-    mutating = false;
-    renderCart(cart.getCart()); // ボタン再生成でdisabled解除
-    // innerHTML再構築でフォーカスが全喪失するため、押した操作と同じボタンへ復元
-    const same = document.querySelector(
-      `button[data-line="${CSS.escape(lineId)}"][data-delta="${delta}"]`,
+  document.querySelectorAll('dialog').forEach((dialog) => {
+    dialog.querySelectorAll('[data-close]').forEach((btn) =>
+      btn.addEventListener('click', () => dialog.close()),
     );
-    const fallback =
-      document.querySelector('.cart-item-qty button') ??
-      document.querySelector('#cart-drawer .dialog-close');
-    (same ?? fallback)?.focus();
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close(); // 背景クリックで閉じる
+    });
+  });
+  const menuBtn = document.getElementById('menu-btn');
+  const menuDialog = document.getElementById('menu-dialog');
+  if (menuBtn && menuDialog) {
+    menuBtn.addEventListener('click', () => menuDialog.showModal());
+    // メニュー内リンクは遷移前に閉じる
+    menuDialog.querySelectorAll('a').forEach((a) =>
+      a.addEventListener('click', () => menuDialog.close()),
+    );
   }
 }
 
-async function removeLineWithFeedback(lineId) {
-  if (mutating) return;
-  mutating = true;
-  document.querySelectorAll('.cart-item-actions button').forEach((b) => (b.disabled = true));
-  try {
-    await cart.removeLine(lineId);
-    announce('カートからだしたよ');
-  } catch {
-    toast(VOICE.netError);
-  } finally {
-    mutating = false;
-    renderCart(cart.getCart());
-    (document.querySelector('.cart-item-qty button') ??
-      document.querySelector('#cart-drawer .dialog-close'))?.focus();
+// ── カート描画 ──
+function renderCart() {
+  const c = cart.getCart();
+  const items = document.getElementById('cart-items');
+  if (!items) return;
+  const empty = document.querySelector('.cart-empty');
+  const meter = document.getElementById('shipping-meter');
+  const totalWrap = document.getElementById('cart-total');
+  const checkout = document.getElementById('btn-checkout');
+  const lines = c?.lines?.nodes ?? [];
+
+  // バッジ（ヘッダー＋スティッキー）
+  const qty = c?.totalQuantity ?? 0;
+  for (const id of ['cart-count', 'sticky-cart-count']) {
+    const badge = document.getElementById(id);
+    if (badge) {
+      badge.textContent = String(qty);
+      badge.hidden = qty === 0;
+    }
+  }
+
+  // 明細
+  items.innerHTML = '';
+  for (const line of lines) {
+    const row = document.createElement('div');
+    row.className = 'cart-line';
+    const img = document.createElement('img');
+    img.src = line.merchandise.image?.url ?? '/assets/kosukuma/front.png';
+    img.alt = line.merchandise.image?.altText ?? line.merchandise.product.title;
+    img.width = 64; img.height = 64;
+    const mid = document.createElement('div');
+    const title = document.createElement('p');
+    title.className = 'ci-title';
+    title.textContent = line.merchandise.product.title;
+    const qtyWrap = document.createElement('p');
+    qtyWrap.className = 'ci-qty';
+    const minus = document.createElement('button');
+    minus.type = 'button'; minus.textContent = '−';
+    minus.dataset.line = line.id; minus.dataset.delta = '-1';
+    const q = document.createElement('span');
+    q.textContent = String(line.quantity);
+    const plus = document.createElement('button');
+    plus.type = 'button'; plus.textContent = '＋';
+    plus.dataset.line = line.id; plus.dataset.delta = '1';
+    qtyWrap.append(minus, q, plus);
+    const remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'ci-remove';
+    remove.textContent = 'ぽいってする';
+    remove.dataset.remove = ''; remove.dataset.line = line.id;
+    mid.append(title, qtyWrap, remove);
+    const price = document.createElement('p');
+    price.className = 'ci-price';
+    price.textContent = formatMoney(line.cost.totalAmount);
+    row.append(img, mid, price);
+    items.appendChild(row);
+  }
+
+  const isEmpty = lines.length === 0;
+  if (empty) empty.hidden = !isEmpty;
+  if (meter) meter.hidden = isEmpty;
+  if (totalWrap) totalWrap.hidden = isEmpty;
+  if (checkout) checkout.hidden = isEmpty;
+
+  if (!isEmpty && c) {
+    const subtotal = Number(c.cost.subtotalAmount.amount);
+    const total = document.getElementById('cart-total-price');
+    if (total) total.textContent = formatMoney(c.cost.subtotalAmount);
+    const label = document.getElementById('shipping-meter-label');
+    const bar = document.getElementById('shipping-meter-bar');
+    const rest = Math.max(0, FREE_SHIPPING_THRESHOLD_JPY - subtotal);
+    if (label) {
+      label.textContent = rest > 0
+        ? `あと${formatMoney({ amount: rest, currencyCode: 'JPY' })}で送料無料だよ`
+        : '送料、タダになったよ。おめでとう。ぼくも嬉しいよ';
+    }
+    if (bar) bar.style.width = `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_JPY) * 100)}%`;
   }
 }
 
+// ── カート操作（全てShopify API経由。フロントで金額計算しない） ──
 function initCartDrawer() {
   const drawer = document.getElementById('cart-drawer');
   if (!drawer) return;
-
-  const open = () => drawer.showModal();
+  const open = () => { renderCart(); drawer.showModal(); };
   document.getElementById('cart-toggle')?.addEventListener('click', open);
   document.getElementById('sticky-cart')?.addEventListener('click', open);
 
-  document.getElementById('cart-items')?.addEventListener('click', (e) => {
-    const removeBtn = e.target.closest('button[data-remove]');
-    if (removeBtn) {
-      removeLineWithFeedback(removeBtn.dataset.remove);
-      return;
-    }
-    const btn = e.target.closest('button[data-line]');
+  document.getElementById('cart-items')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
     if (!btn) return;
-    changeQty(btn.dataset.line, parseInt(btn.dataset.delta, 10));
+    try {
+      if (btn.dataset.remove !== undefined) {
+        await cart.removeLine(btn.dataset.line);
+        toast('ぽいってしたよ');
+      } else if (btn.dataset.delta) {
+        const line = cart.getCart()?.lines?.nodes?.find((l) => l.id === btn.dataset.line);
+        if (!line) return;
+        const next = line.quantity + Number(btn.dataset.delta);
+        const { requested, applied } = await cart.updateLineQuantity(btn.dataset.line, next);
+        if (applied < requested) toast('それは全部は用意できなかったよ。ある分だけにしといた');
+      }
+    } catch {
+      toast('うまくいかなかったよ。もう一回ためしてみて');
+    }
   });
 
   document.getElementById('btn-checkout')?.addEventListener('click', () => {
     const url = cart.getCheckoutUrl();
-    const c = cart.getCart();
-    if (!c || c.totalQuantity === 0) return;
     if (url) {
       window.location.href = url;
     } else {
-      toast(VOICE.checkoutError);
+      toast('レジの用意がまだみたい。もう一回ためしてみて');
     }
   });
 
-  cart.onCartChange(renderCart);
+  cart.onCartChange(() => renderCart());
 }
 
-// ===== カゴ追加（おしりふりふり+商品が飛んでいく） =====
-let popupTimer = null;
-let popupAnim = null;
-
-// 商品画像がカートボタンへ飛んでいく（買い物の快感演出）。
-// ダイアログ内からの追加など、飛ばせる画像が無い時は静かにスキップ
-function flyToCart(card) {
-  if (prefersReducedMotion() || !card) return;
-  const img = card.querySelector('.product-media img');
-  const target = document.getElementById('cart-toggle');
-  if (!img || !target || typeof img.animate !== 'function') return;
-  const from = img.getBoundingClientRect();
-  const to = target.getBoundingClientRect();
-  if (from.width === 0 || to.width === 0) return;
-
-  const ghost = img.cloneNode(false);
-  ghost.setAttribute('aria-hidden', 'true');
-  ghost.style.cssText =
-    `position:fixed;left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px;` +
-    'object-fit:cover;border-radius:14px;z-index:var(--z-toast);pointer-events:none;will-change:transform,opacity;';
-  document.body.appendChild(ghost);
-
-  const dx = to.left + to.width / 2 - (from.left + from.width / 2);
-  const dy = to.top + to.height / 2 - (from.top + from.height / 2);
-  const anim = ghost.animate(
-    [
-      { transform: 'translate(0,0) scale(1)', opacity: 1 },
-      { transform: `translate(${dx * 0.55}px, ${dy * 0.55 - 70}px) scale(0.45) rotate(5deg)`, opacity: 0.95, offset: 0.6 },
-      { transform: `translate(${dx}px, ${dy}px) scale(0.06) rotate(10deg)`, opacity: 0.3 },
-    ],
-    { duration: 680, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)' },
-  );
-  anim.onfinish = () => ghost.remove();
-  anim.oncancel = () => ghost.remove();
-}
-
-function showAddedPopup() {
-  const popup = document.getElementById('cart-popup');
-  if (!popup) return;
-  popup.classList.add('show');
-  const container = document.getElementById('popup-anim-container');
-  if (container && !popupAnim) {
-    popupAnim = new KumaAnim(container, 'osirihurihuri', {
-      style: { width: '100%', height: '100%', objectFit: 'contain' },
-    });
-  }
-  popupAnim?.play();
-  clearTimeout(popupTimer);
-  popupTimer = setTimeout(() => {
-    popup.classList.remove('show');
-    popupAnim?.stop();
-  }, 2500);
-}
-
-async function addToCart(handle, btn) {
-  const p = products.get(handle);
-  if (!p?.variantId || !p.availableForSale) {
-    toast(products.size === 0 ? VOICE.netError : VOICE.noStock);
-    return;
-  }
-  if (mutating) return;
-  mutating = true;
-  const origText = btn.textContent;
-  btn.disabled = true;
-  try {
-    const res = await cart.addLine(p.variantId, 1);
-    if (res.applied === 0) {
-      toast(VOICE.noStock);
+// ── カゴ追加 ──
+function initAddButtons() {
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-add-to-cart]');
+    if (!btn || btn.disabled) return;
+    const variantId = btn.dataset.variantId;
+    if (!variantId) {
+      toast('もうちょっと待って。いま読み込み中だよ');
       return;
     }
-    if (res.applied < res.requested) toast(VOICE.partialStock);
-    announce('カゴに入れたよ');
-    flyToCart(btn.closest('[data-handle]'));
-    btn.textContent = 'いれたよ！';
-    btn.classList.add('added');
-    setTimeout(() => {
-      btn.textContent = origText;
-      btn.classList.remove('added');
-    }, 1000);
-    showAddedPopup();
-    // こんぺいとう紙吹雪（ボタン中心から）
-    if (!prefersReducedMotion()) {
-      const r = btn.getBoundingClientRect();
-      import('./fx/confetti.js').then((m) => m.burst(r.left + r.width / 2, r.top + r.height / 2));
+    btn.disabled = true;
+    try {
+      const { requested, applied } = await cart.addLine(variantId, 1);
+      toast(applied >= requested
+        ? 'カートに入れたよ'
+        : 'それは全部は用意できなかったよ。ある分だけ入れといた');
+    } catch {
+      toast('うまくいかなかったよ。もう一回ためしてみて');
+    } finally {
+      btn.disabled = false;
     }
-    const headerCart = document.getElementById('cart-toggle');
-    headerCart?.classList.add('bounce');
-    setTimeout(() => headerCart?.classList.remove('bounce'), 320);
-  } catch {
-    toast(VOICE.netError);
-  } finally {
-    mutating = false;
-    btn.disabled = false;
-  }
-}
-
-function initAddButtons() {
-  document.querySelectorAll('[data-add-to-cart]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (btn.disabled) return;
-      const handle = btn.closest('[data-handle]')?.dataset.handle;
-      if (handle) addToCart(handle, btn);
-    });
   });
 }
 
-// ===== 商品詳細ダイアログ =====
-const pd = { handle: null, index: 0 };
-
-function renderGallery() {
-  const meta = CATALOG[pd.handle] ?? {};
-  const images = meta.images ?? [];
-  const idx = ((pd.index % images.length) + images.length) % images.length;
-  pd.index = idx;
-
-  const main = document.getElementById('pd-main');
-  const img = document.getElementById('pd-image');
-  img.src = images[idx] ?? '';
-  main.classList.toggle('fit-contain', meta.imgFit === 'contain');
-
-  const multi = images.length > 1;
-  document.getElementById('pd-prev').style.display = multi ? '' : 'none';
-  document.getElementById('pd-next').style.display = multi ? '' : 'none';
-
-  const name = document.getElementById('pd-name').textContent;
-  img.alt = multi ? `${name} しゃしん${idx + 1}まいめ` : name;
-
-  const thumbs = document.getElementById('pd-thumbs');
-  thumbs.innerHTML = '';
-  if (multi) {
-    images.forEach((src, i) => {
-      const t = document.createElement('button');
-      t.className = 'pd-thumb' + (i === idx ? ' active' : '');
-      t.setAttribute('aria-label', `しゃしん ${i + 1}まいめ`);
-      if (i === idx) t.setAttribute('aria-current', 'true');
-      t.innerHTML = `<img src="${src}" alt="">`;
-      t.addEventListener('click', () => {
-        pd.index = i;
-        renderGallery();
-      });
-      thumbs.appendChild(t);
+// ── Shopify実データで表示を上書き（価格・在庫の真実はShopify） ──
+async function hydrateProducts() {
+  const products = await fetchProductsByHandles(PRODUCT_HANDLES);
+  for (const p of products) {
+    if (!p) continue;
+    document.querySelectorAll(`[data-handle="${CSS.escape(p.handle)}"]`).forEach((el) => {
+      const priceEl = el.querySelector('[data-price]');
+      if (priceEl && p.price) priceEl.textContent = formatMoney(p.price);
+      const btn = el.querySelector('[data-add-to-cart]');
+      const chip = el.querySelector('.status-chip');
+      const stamp = el.querySelector('[data-soldout-stamp]');
+      const restock = el.querySelector('.restock-link');
+      const note = el.querySelector('[data-stock-note]');
+      if (chip) chip.hidden = false;
+      if (p.availableForSale && p.variantId) {
+        if (btn) { btn.disabled = false; btn.dataset.variantId = p.variantId; btn.textContent = 'カートに入れる'; }
+        if (chip) { chip.textContent = 'あるよ'; chip.classList.add('is-instock'); }
+        if (stamp) stamp.hidden = true;
+        if (restock) restock.hidden = true;
+      } else {
+        if (btn) { btn.disabled = true; btn.textContent = 'うりきれ'; }
+        if (chip) { chip.textContent = 'うりきれ'; chip.classList.add('is-soldout'); }
+        if (stamp) { stamp.hidden = false; stamp.textContent = soldoutLabel(p.handle); }
+        if (restock) restock.hidden = false;
+        if (note) note.textContent = '戻ってきたら、ここで言うよ';
+      }
     });
   }
 }
 
-function openProductDialog(card) {
-  const handle = card.dataset.handle;
-  const dialog = document.getElementById('product-dialog');
-  if (!handle || !dialog) return;
-
-  pd.handle = handle;
-  pd.index = 0;
-
-  const meta = CATALOG[handle] ?? {};
-  const name = card.querySelector('h3, .product-name')?.textContent ?? '';
-  const img = document.getElementById('pd-image');
-  img.alt = name;
-  document.getElementById('pd-no').textContent = meta.no ?? '';
-  document.getElementById('pd-name').textContent = name;
-  document.getElementById('pd-story').textContent = meta.story ?? '';
-
-  const p = products.get(handle);
-  const priceEl = document.getElementById('pd-price');
-  const priceText = card.querySelector('[data-price]')?.textContent ?? '';
-  priceEl.innerHTML = p?.price
-    ? `${formatMoney(p.price)}<span class="tax-label">(税込)</span>`
-    : priceText;
-
-  const addBtn = document.getElementById('pd-add');
-  const srcBtn = card.querySelector('[data-add-to-cart]');
-  addBtn.disabled = srcBtn?.disabled ?? true;
-  addBtn.textContent = srcBtn?.textContent ?? 'カゴに入れる';
-  addBtn.dataset.handle = handle;
-
-  renderGallery();
-  dialog.showModal();
-}
-
-function initProductDialog() {
-  const dialog = document.getElementById('product-dialog');
-  if (!dialog) return;
-
-  // 詳細を開くのは商品名の「本物のボタン」(.card-detail-btn)。
-  // カード全体へのrole="button"付与は入れ子インタラクティブ違反+見出し消失になるため禁止。
-  // カード全面クリックはボタンの::after疑似要素（CSS）で実現している。
-  document.querySelectorAll('[data-open-detail]').forEach((btn) => {
-    btn.setAttribute('aria-haspopup', 'dialog');
-    btn.addEventListener('click', () => {
-      const card = btn.closest('[data-handle]');
-      if (card) openProductDialog(card);
+// ── 商品詳細のサムネ切替（商品ページのみ存在） ──
+function initThumbs() {
+  const main = document.getElementById('detail-main');
+  if (!main) return;
+  document.querySelectorAll('.detail-thumb').forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+      main.src = thumb.dataset.full;
+      document.querySelectorAll('.detail-thumb').forEach((t) => t.setAttribute('aria-selected', 'false'));
+      thumb.setAttribute('aria-selected', 'true');
     });
   });
-
-  // ECの体の記憶「商品写真タップ=詳細」にも応える（マウス/タップ用の補助経路。
-  // キーボードは上の本物のボタンが担う）
-  document.querySelectorAll('[data-handle] .product-media').forEach((media) => {
-    media.addEventListener('click', (e) => {
-      if (e.target.closest('button, a')) return;
-      const card = media.closest('[data-handle]');
-      if (card) openProductDialog(card);
-    });
-  });
-
-  document.getElementById('pd-prev')?.addEventListener('click', () => {
-    pd.index--;
-    renderGallery();
-  });
-  document.getElementById('pd-next')?.addEventListener('click', () => {
-    pd.index++;
-    renderGallery();
-  });
-  dialog.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { pd.index--; renderGallery(); }
-    if (e.key === 'ArrowRight') { pd.index++; renderGallery(); }
-  });
-
-  document.getElementById('pd-add')?.addEventListener('click', (e) => {
-    const btn = e.currentTarget;
-    if (btn.disabled) return;
-    addToCart(btn.dataset.handle, btn);
-    setTimeout(() => dialog.close(), 700);
-  });
 }
 
-// ===== イーロンマスク様 ほんにんかくにん =====
-// 2段階クイズ（名前 → かいいぬ）。この店の名物なので一言一句大切に扱う。
-function initElon() {
-  const dialog = document.getElementById('elon-dialog');
-  const content = document.getElementById('elon-dialog-content');
-  const openBtn = document.getElementById('elon-buy-btn');
-  if (!dialog || !content || !openBtn) return;
-
-  // 失敗も自動クローズしない（読み上げ・読了の時間を奪わない）
-  const fail = () => {
-    content.innerHTML = `
-      <p class="elon-message fail">ちがうみたい。イーロンマスクさんしかかえないよ。</p>
-      <div class="elon-buttons"><button class="elon-btn" id="elon-fail-close">とじる</button></div>`;
-    const closeBtn = document.getElementById('elon-fail-close');
-    closeBtn.addEventListener('click', () => dialog.close());
-    closeBtn.focus();
-  };
-
-  const success = () => {
-    content.innerHTML = `
-      <p class="elon-message success">かくにんできたよ！ほんものだ。</p>
-      <p class="elon-q">けっこう おおきなおかいものだから、<br>メールでそうだんしよ。</p>
-      <div class="elon-buttons">
-        <a class="elon-btn primary" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none"
-           href="mailto:info@kosukuma.com?subject=%E3%82%A4%E3%83%BC%E3%83%AD%E3%83%B3%E3%83%9E%E3%82%B9%E3%82%AF%E6%A7%98%E5%B0%82%E7%94%A8%E3%81%AE%E4%BB%B6">そうだんする</a>
-      </div>`;
-  };
-
-  const askDog = () => {
-    content.innerHTML = `
-      <div class="elon-input-group">
-        <label for="elon-dog-input">かいいぬのなまえは？</label>
-        <input type="text" id="elon-dog-input" autocomplete="off">
-        <button class="elon-btn primary" id="elon-dog-submit">かくにん</button>
-      </div>`;
-    const input = document.getElementById('elon-dog-input');
-    input.focus();
-    const submit = () => (input.value.trim() === 'Floki' ? success() : fail());
-    document.getElementById('elon-dog-submit').addEventListener('click', submit);
-    input.addEventListener('keydown', (e) => e.key === 'Enter' && submit());
-  };
-
-  const askName = () => {
-    content.innerHTML = `
-      <div class="elon-input-group">
-        <label for="elon-name-input">おなまえをおしえてね</label>
-        <input type="text" id="elon-name-input" placeholder="おなまえ" autocomplete="off">
-        <button class="elon-btn primary" id="elon-name-submit">かくにん</button>
-      </div>`;
-    const input = document.getElementById('elon-name-input');
-    input.focus();
-    const submit = () => (input.value.trim() === 'Elon Musk' ? askDog() : fail());
-    document.getElementById('elon-name-submit').addEventListener('click', submit);
-    input.addEventListener('keydown', (e) => e.key === 'Enter' && submit());
-  };
-
-  openBtn.addEventListener('click', () => {
-    content.innerHTML = `
-      <p class="elon-q">イーロンマスク様ですか？</p>
-      <div class="elon-buttons">
-        <button class="elon-btn primary" id="elon-yes">はい</button>
-        <button class="elon-btn" id="elon-no">いいえ</button>
-      </div>`;
-    dialog.showModal();
-    document.getElementById('elon-yes').addEventListener('click', askName);
-    document.getElementById('elon-no').addEventListener('click', fail);
-  });
-}
-
-// ===== スクロール出現 =====
+// ── reveal（控えめな出現）＋ JS死亡保険の解除 ──
 function initReveal() {
-  // JS死亡時の保険タイマー（index.htmlのinlineスクリプト）はもう不要
   if (window.__kosuRevealFallback) clearTimeout(window.__kosuRevealFallback);
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          io.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.12 },
-  );
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
+  }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 }
 
-// ===== 起動 =====
+// ── スティッキーカート（ヒーローが見えなくなったら出す） ──
+function initStickyCart() {
+  const sticky = document.getElementById('sticky-cart');
+  const hero = document.querySelector('.hero');
+  if (!sticky || !hero) return;
+  new IntersectionObserver((entries) => {
+    sticky.classList.toggle('show', !entries[0].isIntersecting);
+  }).observe(hero);
+}
+
 export async function initUI() {
   initDialogs();
   initCartDrawer();
   initAddButtons();
-  initProductDialog();
-  initElon();
+  initThumbs();
   initReveal();
-
-  // カート復元と商品hydrationは並行（どちらも失敗してもページは生きる）
+  initStickyCart();
+  renderCart();
   await Promise.allSettled([
-    cart.restoreCart().then(() => renderCart(cart.getCart())),
+    cart.restoreCart().then(() => renderCart()),
     hydrateProducts(),
   ]);
 }

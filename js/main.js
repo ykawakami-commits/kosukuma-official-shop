@@ -1,89 +1,28 @@
-// main.js — こすくまくんのおみせ エントリポイント
-//
-// 起動順:
-// 1. UI配線 + カート復元 + 商品hydration（購入導線 = 最優先）
-// 2. くまアニメ（見えてから生成・再生 — 起動時の一括プリロード禁止）
-// 3. 演出（キラキラ / 3Dこんぺいとう）は遅延ロード。reduced-motionでは起動しない
-
+// js/main.js — エントリポイント
 import { initUI } from './ui.js';
-import { KumaAnim } from './kuma-anim.js';
-import { prefersReducedMotion, isMobile } from './fx/motion.js';
+import { initWhimsy } from './fx/whimsy.js';
+import { isMobile } from './fx/motion.js';
+import { initHero3D } from './fx/hero-3d.js';
 
 initUI();
+const band = initWhimsy();
 
-// ===== くまアニメ（IntersectionObserverで遅延生成+可視のみ再生） =====
-function lazyKumaAnim(id, name) {
-  const container = document.getElementById(id);
-  if (!container) return;
-  let anim = null;
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          if (!anim) {
-            anim = new KumaAnim(container, name, {
-              style: { width: '100%', height: '100%', objectFit: 'contain' },
-            });
-          }
-          if (!prefersReducedMotion()) anim.play();
-        } else {
-          anim?.stop();
-        }
-      });
-    },
-    { rootMargin: '10% 0px' },
-  );
-  io.observe(container);
+// コマアニメ遅延ロード（公式ルール: 同一アニメは1ページ1個まで）
+async function lazyKumaAnim(id, name) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const io = new IntersectionObserver(async (entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    const { KumaAnim } = await import('./kuma-anim.js');
+    new KumaAnim(el, name).play();
+  }, { rootMargin: '10% 0px' });
+  io.observe(el);
 }
-
-lazyKumaAnim('hero-inline-dance', 'dance');
 lazyKumaAnim('about-kaikai', 'kaikai');
-lazyKumaAnim('utouto-container', 'utouto');
+if (band === 'night') lazyKumaAnim('whimsy-kuma-anim', 'utouto');
 
-// Aboutのこすくまくんは、つつくとぴょんと跳ねる（隠しあそび）
-const aboutKuma = document.getElementById('about-kaikai');
-if (aboutKuma) {
-  aboutKuma.classList.add('pokeable');
-  aboutKuma.addEventListener('click', () => {
-    if (prefersReducedMotion()) return;
-    aboutKuma.classList.remove('poked');
-    void aboutKuma.offsetWidth; // 連打でもアニメを再発火させるためのreflow
-    aboutKuma.classList.add('poked');
-  });
-}
-
-// ===== スクロール演出（パララックス+イーロンカウントアップ） =====
-if (!prefersReducedMotion()) {
-  import('./fx/scroll-fx.js').then((m) => m.initScrollFx());
-}
-
-// ===== マウス環境限定の演出（reduced-motion除外） =====
-if (!prefersReducedMotion() && window.matchMedia('(pointer: fine)').matches) {
-  import('./fx/sparkles.js').then((m) => m.initSparkles());
-  // マグネティックボタン（吸い付く触り心地）— イーロン様専用のみ
-  import('./fx/magnetic.js').then((m) => m.initMagnetic('#elon-buy-btn'));
-  // 商品写真の覗き込みズーム（イーロンのパロディ画像は対象外 — ネタは静止で見せる）
-  import('./fx/hover-zoom.js').then((m) =>
-    m.initHoverZoom('.product-media:not(.elon-card-media)'),
-  );
-}
-
-// ===== 3Dこんぺいとうヒーロー（遅延ロード） =====
-// - reduced-motion では起動しない（静的グラデーションのまま）
-// - 初期化はアイドル時に回し、購入導線のロードを絶対に邪魔しない
-if (!prefersReducedMotion()) {
-  const start = () => {
-    import('./fx/hero-3d.js')
-      .then((m) => m.initHero3D({ mobile: isMobile() }))
-      .catch(() => {
-        /* WebGL不可・ロード失敗時は静的ヒーローのまま（購入には無関係） */
-      });
-  };
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(start, { timeout: 2500 });
-  } else {
-    setTimeout(start, 800);
-  }
-}
-
-console.log('%c こすくまくんのおみせ — ready', 'color: #8B6914; font-weight: bold;');
+// 聖域: ジャイロ金平糖（アイドル時に遅延初期化。モバイル前提の機能）
+const start3d = () => initHero3D({ mobile: isMobile() });
+if ('requestIdleCallback' in window) requestIdleCallback(start3d, { timeout: 2500 });
+else setTimeout(start3d, 800);

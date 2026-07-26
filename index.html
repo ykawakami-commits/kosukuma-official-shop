@@ -3,56 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>こすくまくんのおみせ — 公式グッズ</title>
-<meta name="description" content="こすくまくんの公式グッズショップ。ほっとするグッズがならぶ、ちいさなおみせ。ステッカー、Tシャツ、一点ものまで。">
+<title>こすくまくんのおみせ｜公式グッズショップ</title>
+<meta name="description" content="こすくまくんの公式グッズのおみせだよ。ぼくがすきなものだけ置いてあるよ。">
 <link rel="canonical" href="https://kosukuma-official-shop.pages.dev/">
-
-<meta property="og:site_name" content="こすくまくんのおみせ">
-<meta property="og:title" content="こすくまくんのおみせ — 公式グッズ">
-<meta property="og:description" content="ほっとするグッズがならぶ、ちいさなおみせ。">
-<meta property="og:url" content="https://kosukuma-official-shop.pages.dev/">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://kosukuma-official-shop.pages.dev/assets/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="ja_JP">
-<meta property="og:image:alt" content="こすくまくんのおみせ — 公式グッズショップ">
+<meta property="og:title" content="こすくまくんのおみせ｜公式グッズショップ">
+<meta property="og:description" content="こすくまくんの公式グッズのおみせだよ。ぼくがすきなものだけ置いてあるよ。">
+<meta property="og:image" content="https://kosukuma-official-shop.pages.dev/assets/og.webp">
+<meta property="og:url" content="https://kosukuma-official-shop.pages.dev/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@Kosu_dot_kuma">
-<meta name="twitter:title" content="こすくまくんのおみせ — 公式グッズ">
-<meta name="twitter:description" content="ほっとするグッズがならぶ、ちいさなおみせ。">
-<meta name="twitter:image" content="https://kosukuma-official-shop.pages.dev/assets/og.png">
-
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/main.css">
 <script>
-document.documentElement.classList.add('js');
-// main.jsのロード失敗時にコンテンツが隠れたままにならない保険。
-// initReveal(ui.js)が起動したらこのタイマーは解除される
-window.__kosuRevealFallback = setTimeout(function () {
-  document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('visible'); });
+/* 時間帯の先行判定（背景のフラッシュ防止。whimsy.js と同じ帯ロジック） */
+(() => { const h = new Date().getHours();
+  const t = (h >= 16 && h < 19) ? 'evening' : (h >= 19 || h < 5) ? 'night' : 'day';
+  document.documentElement.dataset.time = t; })();
+/* JS死亡保険: reveal が残ったら全表示 */
+window.__kosuRevealFallback = setTimeout(() => {
+  document.querySelectorAll('.reveal:not(.visible)').forEach((el) => el.classList.add('visible'));
 }, 4000);
 </script>
-
 <script type="importmap">
-{
-  "imports": {
-    "three": "/assets/vendor/three.module.js",
-    "three/addons/": "/assets/vendor/addons/"
-  }
-}
+{ "imports": { "three": "/assets/vendor/three.module.js", "three/addons/": "/assets/vendor/addons/" } }
 </script>
-
-<!-- 注意: このJSON-LDと本文の静的価格/在庫はhydrationでは更新されない。
-     Shopifyで価格・在庫を変えたら (1)ここのprice/availability (2)本文の¥表示 を
-     手動で更新すること。tools/e2e.mjs が実データとの乖離を検出する -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -61,66 +41,42 @@ window.__kosuRevealFallback = setTimeout(function () {
       "@type": "OnlineStore",
       "name": "こすくまくんのおみせ",
       "url": "https://kosukuma-official-shop.pages.dev/",
-      "description": "こすくまくんの公式グッズショップ。ほっとするグッズがならぶ、ちいさなおみせ。",
       "parentOrganization": { "@type": "Organization", "name": "株式会社こす.くま" }
     },
     {
       "@type": "Product",
       "name": "こすくまくんステッカー",
-      "brand": { "@type": "Brand", "name": "こすくまくん" },
-      "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-sticker-pack-800.webp",
-      "description": "どこにでも貼れる、こすくまくんの公式ステッカー。",
+      "url": "https://kosukuma-official-shop.pages.dev/products/sticker.html",
+      "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-sticker-main-800.webp",
       "offers": {
-        "@type": "Offer",
-        "price": "780",
-        "priceCurrency": "JPY",
+        "@type": "Offer", "price": 780, "priceCurrency": "JPY",
         "availability": "https://schema.org/InStock",
-        "url": "https://kosukuma-official-shop.pages.dev/#p-sticker",
-        "shippingDetails": {
-          "@type": "OfferShippingDetails",
-          "shippingRate": { "@type": "MonetaryAmount", "value": 500, "currency": "JPY" },
-          "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "JP" },
-          "deliveryTime": {
-            "@type": "ShippingDeliveryTime",
-            "handlingTime": { "@type": "QuantitativeValue", "minValue": 3, "maxValue": 5, "unitCode": "DAY" }
-          }
-        },
-        "hasMerchantReturnPolicy": {
-          "@type": "MerchantReturnPolicy",
-          "applicableCountry": "JP",
-          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-          "merchantReturnDays": 7,
-          "returnMethod": "https://schema.org/ReturnByMail",
-          "returnFees": "https://schema.org/ReturnShippingFees"
-        }
+        "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": 500, "currency": "JPY" } },
+        "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7 }
       }
     },
     {
       "@type": "Product",
-      "name": "こすくまウルトラプレミアムTシャツ",
-      "brand": { "@type": "Brand", "name": "こすくまくん" },
+      "name": "ウルトラプレミアムTシャツ",
+      "url": "https://kosukuma-official-shop.pages.dev/products/ultra-tshirt.html",
       "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-ultra-tshirt-1-800.webp",
-      "description": "いちばんいいやつ。こすくまくんのウルトラプレミアムTシャツ。",
       "offers": {
-        "@type": "Offer",
-        "price": "150000",
-        "priceCurrency": "JPY",
-        "availability": "https://schema.org/SoldOut",
-        "url": "https://kosukuma-official-shop.pages.dev/#p-ultra-tshirt"
+        "@type": "Offer", "price": 150000, "priceCurrency": "JPY",
+        "availability": "https://schema.org/OutOfStock",
+        "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": 500, "currency": "JPY" } },
+        "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7 }
       }
     },
     {
       "@type": "Product",
       "name": "こすくまデコヘルメット",
-      "brand": { "@type": "Brand", "name": "こすくまくん" },
+      "url": "https://kosukuma-official-shop.pages.dev/products/deco-helmet.html",
       "image": "https://kosukuma-official-shop.pages.dev/assets/img/kosukuma-deco-helmet-800.webp",
-      "description": "せかいに1こだけの、デコレーションヘルメット。",
       "offers": {
-        "@type": "Offer",
-        "price": "109000",
-        "priceCurrency": "JPY",
-        "availability": "https://schema.org/SoldOut",
-        "url": "https://kosukuma-official-shop.pages.dev/#p-deco-helmet"
+        "@type": "Offer", "price": 109000, "priceCurrency": "JPY",
+        "availability": "https://schema.org/OutOfStock",
+        "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": 500, "currency": "JPY" } },
+        "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7 }
       }
     }
   ]
@@ -128,396 +84,253 @@ window.__kosuRevealFallback = setTimeout(function () {
 </script>
 </head>
 <body>
-
-<a class="skip-link" href="#main">ほんぶんへとぶ</a>
-
-<div class="announce-bar">¥5,000以上のご注文で送料無料 ｜ ご注文から3〜5営業日以内に発送</div>
+<a class="skip-link" href="#main">本文へスキップ</a>
+<div class="announce-bar">¥5,000以上で送料無料だよ。ぼくが運ぶわけじゃないけどね</div>
 
 <header class="site-header">
-  <div class="container">
-    <a href="#" class="header-logo">
-      <img class="pixel-art" src="/assets/kosukuma/front.png" alt="" width="30" height="30">
-      <span class="header-logo-text">こすくまくんのおみせ</span>
-    </a>
-    <nav class="header-nav" aria-label="メイン">
-      <a href="#products">商品一覧</a>
-      <a href="#guide">おかいものガイド</a>
-      <a href="#faq">よくあるしつもん</a>
-      <button class="header-cart" id="cart-toggle" aria-haspopup="dialog">
-        <img class="pixel-art" src="/assets/dot-illust/fantasy_treasure_gold.png" alt="" width="20" height="20">
-        カート(<span id="cart-count" class="cart-count-num">0</span>)
-      </button>
-      <button class="menu-btn" id="menu-btn" aria-haspopup="dialog" aria-label="メニューをひらく">☰</button>
-    </nav>
+  <a class="header-logo" href="/">
+    <img src="/assets/kosukuma/front.png" alt="こすくまくん" width="40" height="40">
+    <span class="logo-text">こすくまくんのおみせ</span>
+    <span class="logo-official">公式</span>
+  </a>
+  <div class="header-actions">
+    <button class="icon-btn" id="cart-toggle" type="button" aria-label="カートを開く">
+      レジ<span class="badge" id="cart-count" hidden>0</span>
+    </button>
+    <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く">メニュー</button>
   </div>
 </header>
 
 <main id="main">
-
-  <!-- ===== Hero（3Dこんぺいとうはこの箱の中だけ） ===== -->
-  <section class="hero" aria-label="こすくまくんのおみせ">
-    <div class="hero-fx" aria-hidden="true">
+  <!-- ヒーロー: 聖域の3D金平糖は .hero-fx 内の canvas にマウントされる -->
+  <section class="hero">
+    <div class="hero-fx">
       <canvas id="hero-3d-canvas"></canvas>
+      <button id="gyro-btn" type="button" hidden>かたむけてあそぶ</button>
     </div>
-    <div class="hero-inner container">
+    <div class="hero-inner">
       <div class="hero-panel">
-        <span class="eyebrow">Kosukuma Official Goods Store</span>
-        <h1 class="hero-title">こすくまくんの<wbr>おみせ</h1>
-        <p class="hero-subtitle">ほっとするグッズがならぶ、ちいさなおみせ<span class="inline-kuma-anim" id="hero-inline-dance" aria-hidden="true"></span></p>
-        <a href="#products" class="hero-shop-link">グッズをみる</a>
+        <img id="hero-kuma" src="/assets/gen/kuma-shopkeeper.webp" alt="店番をしているこすくまくん" width="200" height="200">
+        <div class="hero-copy">
+          <h1>こすくまくんのおみせ</h1>
+          <p class="hero-sub">ぼくがすきなものだけ置いてあるよ。むりに買わなくていいよ。ぼくもむりしてないから</p>
+          <a class="btn btn-primary hero-cta" href="#products">おみせを見る</a>
+        </div>
       </div>
     </div>
-    <button class="gyro-btn" id="gyro-btn" hidden>かたむけてあそぶ</button>
   </section>
 
-  <!-- ===== 約束ごと（内容は特商法表記と同一。取引情報は「ちゃんとした日本語」で書く） ===== -->
   <div class="trust-strip">
-    <div class="container">
-      <span class="trust-item"><img class="pixel-art" src="/assets/dot-illust/nature_star_yellow.png" alt="">送料 ¥500（¥5,000以上のご注文で無料）</span>
-      <span class="trust-item"><img class="pixel-art" src="/assets/dot-illust/nature_star_yellow.png" alt="">ご注文から3〜5営業日以内に発送</span>
-      <span class="trust-item"><img class="pixel-art" src="/assets/dot-illust/nature_star_yellow.png" alt="">クレジットカード決済対応</span>
-      <span class="trust-item"><img class="pixel-art" src="/assets/dot-illust/nature_star_yellow.png" alt="">運営: 株式会社こす.くま</span>
-    </div>
+    <div class="trust-item">送料 全国一律 ¥500<small>どこでも同じだよ</small></div>
+    <div class="trust-item">¥5,000以上で送料無料<small>タダって、いい言葉だよね</small></div>
+    <div class="trust-item">発送まで 3〜5日<small>ぼくが歩いて届けるわけじゃないから</small></div>
+    <div class="trust-item">返品 到着後7日以内<small>気が変わるのは、悪いことじゃないよ</small></div>
   </div>
 
-  <!-- ===== 商品一覧（全商品を1つの棚に。開いた瞬間にECだとわかる構造） ===== -->
-  <section class="section section-products container" id="products">
-    <div class="section-heading reveal">
-      <span class="eyebrow">All Items — 全8点</span>
-      <h2>商品一覧</h2>
+  <!-- お知らせ（公式感: 日付＋内容の退屈なリスト） -->
+  <section class="section reveal" id="news">
+    <div class="section-head">
+      <h2>お知らせ</h2>
     </div>
+    <ul class="news-list">
+      <li><time datetime="2026-07-26">2026.07.26</time><p>おみせが新しくなったよ。ぼくもまだ見慣れてなくて、ときどき迷うよ</p></li>
+      <li><time datetime="2026-07-26">2026.07.26</time><p>発送は注文から3〜5日だよ。すこし待ってね</p></li>
+      <li><time datetime="2026-07-26">2026.07.26</time><p>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ（<a href="mailto:info@kosukuma.com">info@kosukuma.com</a>）</p></li>
+    </ul>
+  </section>
 
+  <!-- 商品一覧 -->
+  <section class="section reveal" id="products">
+    <div class="section-head">
+      <h2>売ってるもの</h2>
+      <p class="section-lead">3つだけだよ。多いと迷うでしょ。ぼくが迷うから</p>
+    </div>
     <div class="product-grid">
       <article class="product-card" id="p-sticker" data-handle="こすくまくんステッカー">
-        <div class="product-media">
-          <img
-            src="/assets/img/kosukuma-sticker-street-800.webp"
-            srcset="/assets/img/kosukuma-sticker-street-480.webp 480w, /assets/img/kosukuma-sticker-street-800.webp 800w"
-            sizes="(max-width: 900px) 50vw, 33vw"
-            alt="街の壁に貼られたこすくまくんステッカー" fetchpriority="high">
-          <span class="status-chip on-sale">販売中</span>
-        </div>
+        <a class="product-media" href="/products/sticker.html">
+          <img src="/assets/img/kosukuma-sticker-main-800.webp" srcset="/assets/img/kosukuma-sticker-main-480.webp 480w, /assets/img/kosukuma-sticker-main-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="こすくまくんステッカー" loading="lazy">
+          <span class="status-chip" hidden></span>
+          <span data-soldout-stamp hidden></span>
+        </a>
         <div class="product-body">
-          <span class="product-no">NO. 001</span>
-          <h3 class="product-name"><button class="card-detail-btn" data-open-detail>こすくまくんステッカー</button></h3>
-          <p class="product-oneliner">どこにでも貼れる</p>
-          <p class="product-price" data-price>¥780<span class="tax-label">(税込)</span></p>
-          <p class="stock-note" data-stock-note>のこりすこしだけ</p>
-          <button class="btn-cart" data-add-to-cart>カゴに入れる</button>
+          <h3 class="product-name"><a href="/products/sticker.html">こすくまくんステッカー</a></h3>
+          <p class="product-oneliner">はっても はがしても、ぼくはぼくだよ</p>
+          <p class="product-price"><span data-price>¥780</span><span class="tax">（税込）</span></p>
+          <p data-stock-note></p>
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" data-add-to-cart>カートに入れる</button>
+            <a class="btn btn-ghost" href="/products/sticker.html">くわしく</a>
+          </div>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
         </div>
       </article>
 
-      <article class="product-card is-coming">
-        <div class="product-media fit-contain">
-          <img src="/assets/img/kosukuma-product-480.webp" alt="こすくまくんTシャツの試作" loading="lazy">
-          <span class="status-chip is-soon">近日発売</span>
-        </div>
+      <article class="product-card" id="p-ultra-tshirt" data-handle="tシャツ">
+        <a class="product-media" href="/products/ultra-tshirt.html">
+          <img src="/assets/img/kosukuma-ultra-tshirt-1-800.webp" srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="ウルトラプレミアムTシャツ" loading="lazy">
+          <span class="status-chip" hidden></span>
+          <span data-soldout-stamp hidden></span>
+        </a>
         <div class="product-body">
-          <span class="product-no">NO. 004</span>
-          <h3 class="product-name">こすくまくんTシャツ</h3>
-          <p class="product-oneliner">おそろいもいいね</p>
-          <p class="product-price price-tbd">価格未定</p>
-          <button class="btn-cart" disabled>もうすこしまってね</button>
+          <h3 class="product-name"><a href="/products/ultra-tshirt.html">ウルトラプレミアムTシャツ</a></h3>
+          <p class="product-oneliner">15万円。たかい？ ぼくもそう思うよ</p>
+          <p class="product-price"><span data-price>¥150,000</span><span class="tax">（税込）</span></p>
+          <p data-stock-note></p>
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
+            <a class="btn btn-ghost" href="/products/ultra-tshirt.html">くわしく</a>
+          </div>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
         </div>
       </article>
 
-      <article class="product-card is-coming">
-        <div class="product-media fit-contain">
-          <img src="/assets/img/kosukuma-taketombo-480.webp" alt="こすくまくん竹とんぼの試作" loading="lazy">
-          <span class="status-chip is-soon">近日発売</span>
-        </div>
+      <article class="product-card" id="p-deco-helmet" data-handle="こすくまデコヘルメット">
+        <a class="product-media" href="/products/deco-helmet.html" data-img-fit="contain">
+          <img src="/assets/img/kosukuma-deco-helmet-800.webp" srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="こすくまデコヘルメット" loading="lazy">
+          <span class="status-chip" hidden></span>
+          <span data-soldout-stamp hidden></span>
+        </a>
         <div class="product-body">
-          <span class="product-no">NO. 005</span>
-          <h3 class="product-name">こすくまくん<wbr>竹とんぼ</h3>
-          <p class="product-oneliner">とぶよ</p>
-          <p class="product-price price-tbd">価格未定</p>
-          <button class="btn-cart" disabled>もうすこしまってね</button>
+          <h3 class="product-name"><a href="/products/deco-helmet.html">こすくまデコヘルメット</a></h3>
+          <p class="product-oneliner">頭はまもるよ。心はまもってくれないよ</p>
+          <p class="product-price"><span data-price>¥109,000</span><span class="tax">（税込）</span></p>
+          <p data-stock-note></p>
+          <div class="card-actions">
+            <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
+            <a class="btn btn-ghost" href="/products/deco-helmet.html">くわしく</a>
+          </div>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
         </div>
       </article>
-
-      <article class="product-card is-coming">
-        <div class="product-media">
-          <span class="coming-placeholder">しゃしん じゅんびちゅう</span>
-          <span class="status-chip is-soon">近日発売</span>
-        </div>
-        <div class="product-body">
-          <span class="product-no">NO. 006</span>
-          <h3 class="product-name">シャーロックマ ステッカー</h3>
-          <p class="product-oneliner">ふしぎがいっぱい</p>
-          <p class="product-price price-tbd">価格未定</p>
-          <button class="btn-cart" disabled>もうすこしまってね</button>
-        </div>
-      </article>
-
-      <article class="product-card is-coming">
-        <div class="product-media">
-          <span class="coming-placeholder">しゃしん じゅんびちゅう</span>
-          <span class="status-chip is-soon">近日発売</span>
-        </div>
-        <div class="product-body">
-          <span class="product-no">NO. 007</span>
-          <h3 class="product-name">シャーロックマ ぬいぐるみ</h3>
-          <p class="product-oneliner">ふしぎがいっぱい</p>
-          <p class="product-price price-tbd">価格未定</p>
-          <button class="btn-cart" disabled>もうすこしまってね</button>
-        </div>
-      </article>
-
-      <article class="product-card is-soldout" id="p-ultra-tshirt" data-handle="tシャツ">
-        <div class="product-media">
-          <img
-            src="/assets/img/kosukuma-ultra-tshirt-1-800.webp"
-            srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w"
-            sizes="(max-width: 900px) 50vw, 33vw"
-            alt="ハンガーにかかったこすくまウルトラプレミアムTシャツ" loading="lazy">
-          <span class="status-chip is-out">売り切れ</span>
-          <span class="soldout-stamp" data-soldout-stamp>うりきれ<small>SOLD OUT</small></span>
-        </div>
-        <div class="product-body">
-          <span class="product-no">NO. 002</span>
-          <h3 class="product-name"><button class="card-detail-btn" data-open-detail>こすくまウルトラ<wbr>プレミアム<wbr>Tシャツ</button></h3>
-          <p class="product-oneliner">いちばんいいやつ</p>
-          <p class="product-price" data-price>¥150,000<span class="tax-label">(税込)</span></p>
-          <button class="btn-cart" data-add-to-cart disabled>うりきれちゃった</button>
-          <a class="restock-link" href="https://x.com/Kosu_dot_kuma" target="_blank" rel="noopener">にゅうかしたら X でおしらせ</a>
-        </div>
-      </article>
-
-      <article class="product-card is-soldout" id="p-deco-helmet" data-handle="こすくまデコヘルメット" data-img-fit="contain">
-        <div class="product-media fit-contain">
-          <img
-            src="/assets/img/kosukuma-deco-helmet-800.webp"
-            srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w"
-            sizes="(max-width: 900px) 50vw, 33vw"
-            alt="ビーズとデコパーツで飾られたこすくまデコヘルメット" loading="lazy">
-          <span class="status-chip is-out">売り切れ</span>
-          <span class="soldout-stamp" data-soldout-stamp>うりきれ<small>SOLD OUT</small></span>
-        </div>
-        <div class="product-body">
-          <span class="product-no">NO. 003</span>
-          <h3 class="product-name"><button class="card-detail-btn" data-open-detail>こすくまデコヘルメット</button></h3>
-          <p class="product-oneliner">一点ものだよ。せかいに1こだけだった</p>
-          <p class="product-price" data-price>¥109,000<span class="tax-label">(税込)</span></p>
-          <button class="btn-cart" data-add-to-cart disabled>たびだっていったよ</button>
-          <a class="restock-link" href="https://x.com/Kosu_dot_kuma" target="_blank" rel="noopener">つぎのいってんものは X でおしらせ</a>
-        </div>
-      </article>
-
-      <article class="product-card elon-card" id="p-elon">
-        <div class="product-media elon-card-media">
-          <img
-            src="/assets/img/elon-special-new-480.webp"
-            srcset="/assets/img/elon-special-new-480.webp 480w, /assets/img/elon-special-new-800.webp 800w"
-            sizes="(max-width: 900px) 50vw, 33vw"
-            alt="イーロンマスク様専用 For Elon Musk only" loading="lazy">
-        </div>
-        <div class="product-body">
-          <span class="product-no">NO. 000</span>
-          <h3 class="product-name">イーロンマスク様<wbr>専用</h3>
-          <p class="product-oneliner">いっしょにあそぼ</p>
-          <p class="product-price elon-price">$420,000,000</p>
-          <p class="elon-price-note">にほんえんだと、だいたい630おくえん</p>
-          <button class="btn-cart elon-buy" id="elon-buy-btn">かいたい</button>
-        </div>
-      </article>
-    </div>
-    <p class="coming-note reveal">あたらしいグッズができたら <a href="https://x.com/Kosu_dot_kuma" target="_blank" rel="noopener">X（@Kosu_dot_kuma）</a>でお知らせします。</p>
-  </section>
-
-
-
-  <!-- ===== About ===== -->
-  <section class="about" id="about">
-    <div class="container">
-      <div class="about-img" id="about-kaikai" aria-hidden="true"></div>
-      <div class="about-text">
-        <h2>こすくまくんだよ</h2>
-        <p>25さい。にしおぎくぼに住んでる。はちみつとねることがすき。<br>むずかしいことはわかんないけど、まぁなんとかなるんじゃない。</p>
-        <p class="about-sub">グッズはぜんぶ、ぼくがすきなものばっかり。きにいるといいなぁ。</p>
-      </div>
     </div>
   </section>
 
-  <!-- ===== おかいものガイド（ちゃんと買えて、ちゃんと届く） ===== -->
-  <section class="section container" id="guide">
-    <div class="section-heading reveal">
-      <span class="eyebrow">Shopping Guide — おかいものガイド</span>
-      <h2>ご注文からお届けまで</h2>
+  <!-- about -->
+  <section class="section reveal" id="about">
+    <div class="section-head">
+      <h2>こすくまくんについて</h2>
     </div>
-    <ol class="guide-grid">
-      <li class="guide-step reveal">
-        <span class="guide-no">01</span>
-        <h3>ご注文</h3>
-        <p>カゴに入れて「レジにすすむ」へ。決済は Shopify の安全なチェックアウトで処理されます。カード情報が当店に保存されることはありません。</p>
-      </li>
-      <li class="guide-step reveal" style="--reveal-delay: 90ms">
-        <span class="guide-no">02</span>
-        <h3>ご注文確認メール</h3>
-        <p>ご注文が確定すると、確認メールをお送りします。内容に間違いがないかご確認ください。</p>
-      </li>
-      <li class="guide-step reveal" style="--reveal-delay: 180ms">
-        <span class="guide-no">03</span>
-        <h3>発送・お届け</h3>
-        <p>ご注文から3〜5営業日以内に発送します。発送完了メールで追跡番号をお知らせします。送料は全国一律 ¥500、¥5,000以上のご注文で無料です。</p>
-      </li>
-    </ol>
-    <p class="guide-kuma reveal">だいじに つつんで おくるね。<span class="guide-kuma-sign">— こすくまくん</span></p>
-  </section>
-
-  <!-- ===== FAQ ===== -->
-  <section class="section container" id="faq">
-    <div class="section-heading reveal">
-      <span class="eyebrow">FAQ</span>
-      <h2>よくあるしつもん</h2>
-    </div>
-    <div class="faq-list">
-      <details class="faq-item reveal">
-        <summary>ここは公式のおみせ？</summary>
-        <p class="faq-a">はい。株式会社こす.くまが運営する、こすくまくんの公式オンラインショップです。グッズはすべて公式商品です。</p>
-      </details>
-      <details class="faq-item reveal">
-        <summary>いつとどく？</summary>
-        <p class="faq-a">ご注文から3〜5営業日以内に発送いたします。ご注文確定時と発送完了時にメールでお知らせし、発送完了メールには追跡番号を記載いたします。</p>
-      </details>
-      <details class="faq-item reveal">
-        <summary>しはらいには なにがつかえる？</summary>
-        <p class="faq-a">クレジットカードがご利用いただけます。決済は Shopify の安全なチェックアウトで処理され、カード情報が当店のサーバーに保存されることはありません。</p>
-      </details>
-      <details class="faq-item reveal">
-        <summary>へんぴんできる？</summary>
-        <p class="faq-a">商品到着後7日以内、未使用品に限り返品を承ります（送料はお客様のご負担となります）。商品に不良があった場合は、送料当社負担でお取り替えいたします。詳しくは「特定商取引法に基づく表記」をご覧ください。</p>
-      </details>
-      <details class="faq-item reveal" id="contact">
-        <summary>おといあわせしたい</summary>
-        <p class="faq-a"><a href="mailto:info@kosukuma.com">info@kosukuma.com</a> までメールにてお問い合わせください。2〜3営業日以内にご返信いたします。</p>
-      </details>
-      <details class="faq-item reveal">
-        <summary>イーロンマスク様専用ってなに？</summary>
-        <p class="faq-a">イーロンマスク様専用は、イーロン・マスク氏のみがご購入いただける特別商品です。ご購入時に本人確認を行っております。商品の内容・詳細については、ご本人様にのみ開示しております。一般のお客様はご購入いただけませんので、あらかじめご了承ください。</p>
-      </details>
+    <div class="about-wrap">
+      <div class="about-anim" id="about-kaikai" aria-hidden="true"></div>
+      <p class="about-text">ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。……たぶんね</p>
     </div>
   </section>
 
+  <!-- お買い物ガイド（標準EC・退屈） -->
+  <section class="section reveal" id="guide">
+    <div class="section-head">
+      <h2>とどくまでの話</h2>
+    </div>
+    <div class="guide-grid">
+      <div class="guide-item"><h3>送料</h3><p>全国一律500円だよ。5,000円以上でタダになるよ</p></div>
+      <div class="guide-item"><h3>発送</h3><p>注文から3〜5日で送るよ。そのくらい待ってね</p></div>
+      <div class="guide-item"><h3>返品</h3><p>届いてから7日以内なら返品できるよ。詳しくは特商法のページを見てね</p></div>
+      <div class="guide-item"><h3>支払い</h3><p>Shopifyのページで支払うよ。ぼくはお金に触らない主義だよ</p></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section reveal" id="faq">
+    <div class="section-head">
+      <h2>よくある質問と、ぼくの返事</h2>
+    </div>
+    <details class="faq-item">
+      <summary>売り切れた商品は、また入るの？</summary>
+      <p class="faq-a">たぶんね。決まったらこの店の「お知らせ」で言うよ。約束はしないよ。ぼく、約束苦手だから</p>
+    </details>
+    <details class="faq-item">
+      <summary>ギフト包装はできる？</summary>
+      <p class="faq-a">今はできないよ。ごめんね。ぼくも不器用だから、包装も不器用なんだ</p>
+    </details>
+    <details class="faq-item">
+      <summary>問い合わせはどこから？</summary>
+      <p class="faq-a"><a href="mailto:info@kosukuma.com">info@kosukuma.com</a> へメールしてね。24時間受け付けてるよ。返事は営業日に、中の人が書くよ</p>
+    </details>
+    <details class="faq-item" id="contact">
+      <summary>金平糖は売ってないの？</summary>
+      <p class="faq-a">ぼくのだよ。売り物じゃないよ。……わけてあげたいのは山々だけどね</p>
+    </details>
+  </section>
 </main>
 
-<!-- ===== Footer ===== -->
-<footer class="footer">
-  <div class="container footer-main">
-    <div class="footer-brand">
-      <p class="footer-logo">こすくまくんのおみせ</p>
-      <p class="footer-tagline">ほっとするグッズがならぶ、ちいさなおみせ</p>
-      <address class="footer-company">
-        株式会社こす.くま<br>
-        東京都目黒区東山3丁目7-11 大橋会館205<br>
-        <a href="mailto:info@kosukuma.com">info@kosukuma.com</a>
-      </address>
-      <div class="footer-utouto" id="utouto-container" aria-hidden="true"></div>
+<!-- フッター（時間帯バンド＋公式情報） -->
+<footer>
+  <div class="footer-band">
+    <img id="whimsy-kuma-img" src="/assets/kosukuma/front.png" alt="こすくまくん" width="160" height="160">
+    <div id="whimsy-kuma-anim" hidden aria-hidden="true"></div>
+    <p id="whimsy-line">……</p>
+  </div>
+  <div class="footer-main">
+    <div>
+      <h3>運営</h3>
+      <p>株式会社こす.くま<br>東京都目黒区東山3丁目7-11 大橋会館205<br><a href="mailto:info@kosukuma.com">info@kosukuma.com</a></p>
     </div>
-    <nav class="footer-nav" aria-label="フッター">
-      <div class="footer-nav-col">
-        <h3>Shop</h3>
-        <a href="#products">グッズ一覧</a>
-        <a href="#about">こすくまくんについて</a>
-      </div>
-      <div class="footer-nav-col">
-        <h3>Support</h3>
-        <a href="#faq">よくあるしつもん</a>
-        <a href="#contact">おといあわせ</a>
-      </div>
-      <div class="footer-nav-col">
-        <h3>Legal</h3>
-        <a href="/legal/tokushoho.html">特定商取引法に基づく表記</a>
-        <a href="/legal/privacy.html">プライバシーポリシー</a>
-      </div>
-    </nav>
+    <div>
+      <h3>公式SNS</h3>
+      <ul>
+        <li><a href="https://x.com/Kosu_dot_kuma" rel="noopener">X（旧Twitter）@Kosu_dot_kuma</a></li>
+        <li>ぼくの日々はこっちだよ</li>
+      </ul>
+    </div>
+    <div>
+      <h3>お店のルール</h3>
+      <ul>
+        <li><a href="/legal/tokushoho.html">特定商取引法に基づく表記</a></li>
+        <li><a href="/legal/privacy.html">プライバシーポリシー</a></li>
+        <li><a href="/#guide">とどくまでの話</a></li>
+      </ul>
+    </div>
   </div>
-  <div class="footer-bottom container">
-    <p>&copy; 2026 株式会社こす.くま All Rights Reserved.</p>
-  </div>
+  <p class="footer-copy">© 2026 株式会社こす.くま ／ この店の言葉はぜんぶ、ぼくが言ってるよ。間違ってたらごめんね</p>
 </footer>
 
-<!-- ===== メニュー（モバイル） ===== -->
-<dialog class="menu-dialog" id="menu-dialog" aria-label="メニュー">
-  <button class="dialog-close" data-close aria-label="とじる">&times;</button>
-  <nav class="menu-list">
-    <a href="#products">商品一覧</a>
-    <a href="#guide">おかいものガイド</a>
-    <a href="#faq">よくあるしつもん</a>
-    <a href="/legal/tokushoho.html">特定商取引法に基づく表記</a>
-    <a href="/legal/privacy.html">プライバシーポリシー</a>
-  </nav>
-</dialog>
-
-<!-- ===== カートドロワー ===== -->
-<dialog class="cart-drawer" id="cart-drawer" aria-labelledby="cart-drawer-title">
-  <div class="cart-drawer-header">
-    <h2 id="cart-drawer-title">カート</h2>
-    <button class="dialog-close" data-close aria-label="カートをとじる">&times;</button>
+<!-- メニュー -->
+<dialog id="menu-dialog" aria-label="メニュー">
+  <div class="dialog-head">
+    <h2>メニュー</h2>
+    <button class="icon-btn" type="button" data-close>とじる</button>
   </div>
-  <div class="cart-items" id="cart-items">
-    <div class="cart-empty">
-      <img class="pixel-art" src="/assets/kosukuma/front.png" alt="">
-      まだなにも入ってないよ
-    </div>
-  </div>
-  <div class="cart-drawer-footer">
-    <div class="shipping-meter" id="shipping-meter" hidden>
-      <p class="shipping-meter-label" id="shipping-meter-label"></p>
-      <div class="shipping-meter-track" role="progressbar" aria-labelledby="shipping-meter-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shipping-meter-bar-wrap">
-        <div class="shipping-meter-bar" id="shipping-meter-bar"></div>
-      </div>
-    </div>
-    <div class="cart-total">
-      <span>合計 <small style="font-weight:400">（税込）</small></span>
-      <span class="cart-total-amount" id="cart-total-price">¥0</span>
-    </div>
-    <button class="btn-checkout" id="btn-checkout">レジにすすむ</button>
-    <p class="checkout-note">🔒 決済は Shopify の安全なチェックアウトで処理されます</p>
+  <div class="dialog-body">
+    <nav>
+      <ul>
+        <li><a href="/#products">売ってるもの</a></li>
+        <li><a href="/#news">お知らせ</a></li>
+        <li><a href="/#about">こすくまくんについて</a></li>
+        <li><a href="/#guide">とどくまでの話</a></li>
+        <li><a href="/#faq">よくある質問</a></li>
+        <li><a href="/legal/tokushoho.html">特定商取引法に基づく表記</a></li>
+        <li><a href="/legal/privacy.html">プライバシーポリシー</a></li>
+      </ul>
+    </nav>
   </div>
 </dialog>
 
-<!-- ===== 商品詳細ダイアログ ===== -->
-<dialog class="product-dialog" id="product-dialog" aria-labelledby="pd-name">
-  <button class="dialog-close" data-close aria-label="とじる">&times;</button>
-  <div class="product-dialog-inner">
-    <div class="pd-gallery">
-      <div class="pd-main" id="pd-main">
-        <img id="pd-image" alt="">
-        <button class="pd-arrow pd-arrow-prev" id="pd-prev" aria-label="まえのしゃしん">&lsaquo;</button>
-        <button class="pd-arrow pd-arrow-next" id="pd-next" aria-label="つぎのしゃしん">&rsaquo;</button>
-      </div>
-      <div class="pd-thumbs" id="pd-thumbs"></div>
+<!-- カート（レジ） -->
+<dialog id="cart-drawer" aria-label="カート">
+  <div class="dialog-head">
+    <h2>レジ</h2>
+    <button class="icon-btn" type="button" data-close>とじる</button>
+  </div>
+  <div class="dialog-body">
+    <div class="cart-empty" hidden>
+      <img class="drawer-kuma" src="/assets/gen/kuma-register.webp" alt="レジ係のこすくまくん">
+      <p>まだ何も入ってないよ。ぼくの店、見るだけでもいいんだよ。ぼくもよくやる</p>
     </div>
-    <div class="pd-info">
-      <span class="product-no" id="pd-no"></span>
-      <h2 id="pd-name"></h2>
-      <p class="pd-story" id="pd-story"></p>
-      <p class="product-price" id="pd-price"></p>
-      <button class="btn-cart" id="pd-add">カゴに入れる</button>
+    <div id="cart-items"></div>
+    <div id="shipping-meter" hidden>
+      <p id="shipping-meter-label"></p>
+      <div id="shipping-meter-bar-wrap"><div id="shipping-meter-bar"></div></div>
     </div>
+    <div class="cart-total" id="cart-total" hidden>
+      <span>合計</span><span id="cart-total-price"></span>
+    </div>
+    <button class="btn btn-primary" id="btn-checkout" type="button" hidden>レジにすすむ</button>
+    <p class="drawer-note">ここから先はShopifyさんの担当だよ。ぼくより確かだよ</p>
   </div>
 </dialog>
 
-<!-- ===== イーロン本人確認ダイアログ ===== -->
-<dialog class="elon-dialog" id="elon-dialog" aria-labelledby="elon-dialog-title">
-  <button class="dialog-close" data-close aria-label="とじる">&times;</button>
-  <div class="elon-dialog-icon" aria-hidden="true">🔐</div>
-  <h2 id="elon-dialog-title">ほんにんかくにん</h2>
-  <div id="elon-dialog-content" aria-live="polite"></div>
-</dialog>
-
-<!-- ===== 通知 ===== -->
-<div class="toast-region" id="toast-region" aria-live="polite" role="status"></div>
-
-<div class="cart-added-popup" id="cart-popup" aria-hidden="true">
-  <div class="popup-anim" id="popup-anim-container"></div>
-  <span>カゴに入れたよ</span>
-</div>
-
-<button class="sticky-cart" id="sticky-cart" aria-haspopup="dialog">
-  カート
-  <span class="sticky-cart-count" id="sticky-cart-count">0</span>
-</button>
+<button id="sticky-cart" type="button" aria-label="カートを開く">レジ<span class="badge" id="sticky-cart-count" hidden>0</span></button>
+<div id="toast-region" aria-live="polite"></div>
 
 <script type="module" src="/js/main.js"></script>
 </body>
