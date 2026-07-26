@@ -138,22 +138,29 @@ function initCartDrawer() {
   document.getElementById('cart-toggle')?.addEventListener('click', open);
   document.getElementById('sticky-cart')?.addEventListener('click', open);
 
+  const mutating = new Set(); // ライン単位の二重送信ガード
+
   document.getElementById('cart-items')?.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
+    const lineId = btn.dataset.line;
+    if (!lineId || mutating.has(lineId)) return; // 連打による二重送信ガード（stale数量のPUT防止）
+    mutating.add(lineId);
     try {
       if (btn.dataset.remove !== undefined) {
-        await cart.removeLine(btn.dataset.line);
+        await cart.removeLine(lineId);
         toast('ぽいってしたよ');
       } else if (btn.dataset.delta) {
-        const line = cart.getCart()?.lines?.nodes?.find((l) => l.id === btn.dataset.line);
+        const line = cart.getCart()?.lines?.nodes?.find((l) => l.id === lineId);
         if (!line) return;
         const next = line.quantity + Number(btn.dataset.delta);
-        const { requested, applied } = await cart.updateLineQuantity(btn.dataset.line, next);
+        const { requested, applied } = await cart.updateLineQuantity(lineId, next);
         if (applied < requested) toast('それは全部は用意できなかったよ。ある分だけにしといた');
       }
     } catch {
       toast('うまくいかなかったよ。もう一回ためしてみて');
+    } finally {
+      mutating.delete(lineId);
     }
   });
 
