@@ -88,18 +88,33 @@ window.__kosuRevealFallback = setTimeout(() => {
 <div class="announce-bar"><span class="u-ib">¥5,000以上で送料無料だよ。</span><span class="u-ib">ぼくが運ぶわけじゃないけどね</span></div>
 
 <header class="site-header">
+  <p class="header-greeting">いらっしゃい。<br>見るだけでもいいよ</p>
   <a class="header-logo" href="/">
-    <img src="/assets/kosukuma/front.png" alt="こすくまくん" width="40" height="40">
+    <img src="/assets/kosukuma/front.png" alt="こすくまくん" width="48" height="48">
     <span class="logo-text">こすくまくんのおみせ</span>
     <span class="logo-official">公式</span>
   </a>
   <div class="header-actions">
+    <a class="icon-btn" href="https://x.com/Kosu_dot_kuma" rel="noopener" aria-label="公式X">X</a>
     <button class="icon-btn" id="cart-toggle" type="button" aria-label="カートを開く">
       レジ<span class="badge" id="cart-count" hidden>0</span>
     </button>
     <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く">メニュー</button>
   </div>
 </header>
+
+<nav class="nav-band" aria-label="サイト内ナビゲーション">
+  <img class="nav-kuma" src="/assets/kosukuma/front.png" alt="" width="34" height="34">
+  <ul>
+    <li><a href="#products">売ってるもの</a></li>
+    <li><a href="#news">お知らせ</a></li>
+    <li><a href="#about">こすくまくんについて</a></li>
+    <li><a href="#guide">とどくまでの話</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+  </ul>
+</nav>
+
+<p class="notice-line">※発送は注文から3〜5営業日だよ※</p>
 
 <main id="main">
   <!-- ヒーロー: 聖域の3D金平糖は .hero-fx 内の canvas にマウントされる -->
@@ -120,35 +135,17 @@ window.__kosuRevealFallback = setTimeout(() => {
     </div>
   </section>
 
-  <div class="trust-strip">
-    <div class="trust-item">送料 全国一律 ¥500<small>どこでも同じだよ</small></div>
-    <div class="trust-item">¥5,000以上で送料無料<small>タダって、いい言葉だよね</small></div>
-    <div class="trust-item">発送まで 3〜5営業日<small>ぼくが歩いて届けるわけじゃないから</small></div>
-    <div class="trust-item">返品 到着後7日以内<small>気が変わるのは、悪いことじゃないよ</small></div>
-  </div>
-
-  <!-- お知らせ（公式感: 日付＋内容の退屈なリスト） -->
-  <section class="section reveal" id="news">
-    <div class="section-head">
-      <h2>お知らせ</h2>
-    </div>
-    <ul class="news-list">
-      <li><time datetime="2026-07-26">2026.07.26</time><p>おみせが新しくなったよ。ぼくもまだ見慣れてなくて、ときどき迷うよ</p></li>
-      <li><time datetime="2026-07-26">2026.07.26</time><p>発送は注文から3〜5営業日だよ。すこし待ってね</p></li>
-      <li><time datetime="2026-07-26">2026.07.26</time><p>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ（<a href="mailto:info@kosukuma.com">info@kosukuma.com</a>）</p></li>
-    </ul>
-  </section>
-
   <!-- 商品一覧 -->
   <section class="section reveal" id="products">
     <div class="section-head">
       <h2>売ってるもの</h2>
+      <p class="section-cap">ITEMS</p>
       <p class="section-lead">3つだけだよ。多いと迷うでしょ。ぼくが迷うから</p>
     </div>
     <div class="product-grid">
       <article class="product-card" id="p-sticker" data-handle="こすくまくんステッカー">
         <a class="product-media" href="/products/sticker.html">
-          <img src="/assets/img/kosukuma-sticker-main-800.webp" srcset="/assets/img/kosukuma-sticker-main-480.webp 480w, /assets/img/kosukuma-sticker-main-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="こすくまくんステッカー" loading="lazy">
+          <img src="/assets/img/kosukuma-sticker-main-800.webp" srcset="/assets/img/kosukuma-sticker-main-480.webp 480w, /assets/img/kosukuma-sticker-main-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="こすくまくんステッカー" loading="lazy">
           <span class="status-chip" hidden></span>
           <span data-soldout-stamp hidden></span>
         </a>
@@ -167,7 +164,7 @@ window.__kosuRevealFallback = setTimeout(() => {
 
       <article class="product-card" id="p-ultra-tshirt" data-handle="tシャツ">
         <a class="product-media" href="/products/ultra-tshirt.html">
-          <img src="/assets/img/kosukuma-ultra-tshirt-1-800.webp" srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="ウルトラプレミアムTシャツ" loading="lazy">
+          <img src="/assets/img/kosukuma-ultra-tshirt-1-800.webp" srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="ウルトラプレミアムTシャツ" loading="lazy">
           <span class="status-chip" hidden></span>
           <span data-soldout-stamp hidden></span>
         </a>
@@ -186,7 +183,7 @@ window.__kosuRevealFallback = setTimeout(() => {
 
       <article class="product-card" id="p-deco-helmet" data-handle="こすくまデコヘルメット">
         <a class="product-media" href="/products/deco-helmet.html" data-img-fit="contain">
-          <img src="/assets/img/kosukuma-deco-helmet-800.webp" srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w" sizes="(max-width: 640px) 100vw, 33vw" alt="こすくまデコヘルメット" loading="lazy">
+          <img src="/assets/img/kosukuma-deco-helmet-800.webp" srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="こすくまデコヘルメット" loading="lazy">
           <span class="status-chip" hidden></span>
           <span data-soldout-stamp hidden></span>
         </a>
@@ -202,6 +199,30 @@ window.__kosuRevealFallback = setTimeout(() => {
           <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
         </div>
       </article>
+    </div>
+  </section>
+
+  <!-- 最近チェックした商品（localStorage。空なら非表示） -->
+  <section class="section" id="checked" hidden>
+    <div class="section-head">
+      <h2>最近チェックした商品</h2>
+      <p class="section-cap">CHECKED ITEMS</p>
+    </div>
+    <div class="product-grid" id="checked-grid"></div>
+  </section>
+
+  <!-- お知らせ（公式感: 日付＋内容の退屈なリスト） -->
+  <section class="section reveal" id="news">
+    <div class="info-box">
+      <div class="info-head">
+        <h2>お知らせ</h2>
+        <p class="section-cap">INFORMATION</p>
+      </div>
+      <ul class="news-list">
+        <li><time datetime="2026-07-26">2026.07.26</time><p>おみせが新しくなったよ。ぼくもまだ見慣れてなくて、ときどき迷うよ</p></li>
+        <li><time datetime="2026-07-26">2026.07.26</time><p>発送は注文から3〜5営業日だよ。すこし待ってね</p></li>
+        <li><time datetime="2026-07-26">2026.07.26</time><p>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ（<a href="mailto:info@kosukuma.com">info@kosukuma.com</a>）</p></li>
+      </ul>
     </div>
   </section>
 
@@ -253,8 +274,26 @@ window.__kosuRevealFallback = setTimeout(() => {
   </section>
 </main>
 
-<!-- フッター（時間帯バンド＋公式情報） -->
+<!-- フッター（ガイドボックス＋時間帯バンド＋公式情報） -->
 <footer>
+  <div class="footer-boxes">
+    <a class="footer-box" href="#guide">
+      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <span>とどくまでの話</span>
+    </a>
+    <a class="footer-box" href="#faq">
+      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <span>よくある質問</span>
+    </a>
+    <a class="footer-box" href="https://x.com/Kosu_dot_kuma" rel="noopener">
+      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <span>公式X</span>
+    </a>
+    <a class="footer-box" href="mailto:info@kosukuma.com">
+      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <span>お問い合わせ</span>
+    </a>
+  </div>
   <div class="footer-band">
     <img id="whimsy-kuma-img" src="/assets/kosukuma/front.png" alt="こすくまくん" width="160" height="160">
     <div id="whimsy-kuma-anim" hidden aria-hidden="true"></div>

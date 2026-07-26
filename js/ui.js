@@ -245,6 +245,57 @@ async function hydrateProducts() {
   }
 }
 
+// ── 最近チェックした商品（localStorage。商品ページで記録し、トップで表示） ──
+const CHECKED_KEY = 'kosukuma-checked';
+const CHECKED_META = {
+  'こすくまくんステッカー': { name: 'こすくまくんステッカー', slug: 'sticker', img: '/assets/img/kosukuma-sticker-main-480.webp' },
+  'tシャツ': { name: 'ウルトラプレミアムTシャツ', slug: 'ultra-tshirt', img: '/assets/img/kosukuma-ultra-tshirt-1-480.webp' },
+  'こすくまデコヘルメット': { name: 'こすくまデコヘルメット', slug: 'deco-helmet', img: '/assets/img/kosukuma-deco-helmet-480.webp' },
+};
+
+function readChecked() {
+  try { return JSON.parse(localStorage.getItem(CHECKED_KEY) ?? '[]'); } catch { return []; }
+}
+
+// 商品ページ（.product-detail[data-handle]）で閲覧を記録
+function recordCheckedView() {
+  const detail = document.querySelector('.product-detail[data-handle]');
+  if (!detail) return;
+  const handle = detail.dataset.handle;
+  const list = [handle, ...readChecked().filter((h) => h !== handle)].slice(0, 8);
+  try { localStorage.setItem(CHECKED_KEY, JSON.stringify(list)); } catch { /* 保存できなくても画面は止めない */ }
+}
+
+// トップ（#checked-grid）に描画。空ならセクションごと非表示のまま
+function renderCheckedItems() {
+  const section = document.getElementById('checked');
+  const grid = document.getElementById('checked-grid');
+  if (!section || !grid) return;
+  const items = readChecked().filter((h) => CHECKED_META[h]);
+  if (items.length === 0) return;
+  for (const handle of items) {
+    const meta = CHECKED_META[handle];
+    const card = document.createElement('article');
+    card.className = 'product-card';
+    card.dataset.handle = handle;
+    card.innerHTML = `
+      <a class="product-media" href="/products/${meta.slug}.html">
+        <img src="${meta.img}" alt="${meta.name}" loading="lazy">
+        <span class="status-chip" hidden></span>
+        <span data-soldout-stamp hidden></span>
+      </a>
+      <div class="product-body">
+        <h3 class="product-name"><a href="/products/${meta.slug}.html">${meta.name}</a></h3>
+        <p class="product-price"><span data-price></span><span class="tax">（税込）</span></p>
+        <div class="card-actions">
+          <a class="btn btn-ghost" href="/products/${meta.slug}.html">くわしく</a>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  }
+  section.hidden = false;
+}
+
 // ── 商品詳細のサムネ切替（商品ページのみ存在） ──
 function initThumbs() {
   const main = document.getElementById('detail-main');
@@ -284,6 +335,8 @@ export async function initUI() {
   initThumbs();
   initReveal();
   initStickyCart();
+  recordCheckedView();
+  renderCheckedItems();
   renderCart();
   await Promise.allSettled([
     cart.restoreCart().then(() => renderCart()),
