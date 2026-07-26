@@ -88,7 +88,7 @@ function needEnv(name) {
   return v;
 }
 
-async function genWithRefs({ prompt, refPaths, transparent }) {
+async function genWithRefs({ prompt, refPaths, transparent, size = '1024x1024' }) {
   const form = new FormData();
   form.set('model', process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2');
   for (const p of refPaths) {
@@ -96,7 +96,7 @@ async function genWithRefs({ prompt, refPaths, transparent }) {
     form.append('image[]', new Blob([buf], { type: 'image/png' }), path.basename(p));
   }
   form.set('prompt', prompt);
-  form.set('size', '1024x1024');
+  form.set('size', size);
   form.set('quality', 'high');
   if (transparent) form.set('background', 'transparent');
   const res = await fetch('https://api.openai.com/v1/images/edits', {
@@ -159,10 +159,21 @@ async function runTarget(id) {
     ? MOUTH_BAN + t.brief + POSE_STYLE + '\n\n' + MOUTH_BAN
     : t.brief + BG_STYLE;
   console.log(`[gen] ${id} を2枚並列生成中...`);
-  const candidates = await Promise.all([
-    genWithRefs({ prompt, refPaths, transparent: isPose }),
-    genWithRefs({ prompt, refPaths, transparent: isPose }),
-  ]);
+  const size = isPose ? '1024x1024' : '1536x1024';
+  const genOpts = { prompt, refPaths, transparent: isPose, size };
+  let candidates;
+  try {
+    candidates = await Promise.all([genWithRefs(genOpts), genWithRefs(genOpts)]);
+  } catch (e) {
+    // 1536x1024 非対応モデルなら正方形にフォールバック（アスペクトは sharp 側でトリミングしない＝指定サイズで生成されない場合の保険）
+    if (!isPose && /size|invalid|unsupported/i.test(e.message)) {
+      console.log('[gen] 1536x1024 非対応のため 1024x1024 にフォールバック');
+      const fb = { ...genOpts, size: '1024x1024' };
+      candidates = await Promise.all([genWithRefs(fb), genWithRefs(fb)]);
+    } else {
+      throw e;
+    }
+  }
   console.log(`[gen] ${id} を SELECT 中...`);
   const sel = await selectWinner({ candidates, refPaths, brief: t.brief });
   console.log(`[gen] ${id} → 候補${sel.winner} 採用 (${sel.reason})${sel.bothBroken ? ' ※両方破綻・軽い方' : ''}`);
@@ -178,8 +189,9 @@ async function runTarget(id) {
     await sharp(winner).resize({ width: 600 }).webp({ quality: 88, alphaQuality: 95 }).toFile(path.join(outDir, `${t.out}.webp`));
     console.log(`[gen] → assets/gen/${t.out}.webp (+ png master)`);
   } else {
-    await sharp(winner).resize({ width: 1536 }).webp({ quality: 82 }).toFile(path.join(outDir, `${t.out}-1536.webp`));
-    await sharp(winner).resize({ width: 768 }).webp({ quality: 82 }).toFile(path.join(outDir, `${t.out}-768.webp`));
+    // ドット絵は滲ませない（nearest kernel）。生成が既に1536幅なら拡大しない
+    await sharp(winner).resize({ width: 1536, withoutEnlargement: true, kernel: 'nearest' }).webp({ quality: 82 }).toFile(path.join(outDir, `${t.out}-1536.webp`));
+    await sharp(winner).resize({ width: 768, withoutEnlargement: true, kernel: 'nearest' }).webp({ quality: 82 }).toFile(path.join(outDir, `${t.out}-768.webp`));
     console.log(`[gen] → assets/pixel/${t.out}-{1536,768}.webp (+ png master)`);
   }
 }
