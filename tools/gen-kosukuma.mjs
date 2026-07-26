@@ -13,6 +13,8 @@
 //
 // 環境変数: OPENAI_API_KEY（生成）/ ANTHROPIC_API_KEY（SELECT）
 //   OPENAI_IMAGE_MODEL で生成モデル上書き可（既定 gpt-image-2）
+//   ※ gpt-image-2 は background=transparent 非対応（400 invalid_value）。
+//     pose:* を生成するときは OPENAI_IMAGE_MODEL=gpt-image-1 を付けること（2026-07-26 実測）
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +31,7 @@ const MOUTH_BAN =
   "TOP RULE (absolute): Kosukuma's face consists of EXACTLY three tiny marks — two small round dot-eyes plus one tiny flat OVAL nose (a simple small horizontal ellipse, about half the size of one eye) sitting just below the midpoint between the eyes — and NOTHING else, exactly like the reference stamps. The nose is REQUIRED whenever his face is visible, and it is a plain flat oval dot: NOT an omega, NOT a wavy line, NOT a 'w' shape, NOT a curve — never draw any wavy or w-shaped mark on his face. He is MOUTHLESS: draw NO mouth, NO lips, NO smile, NO teeth, NO open mouth anywhere on Kosukuma. His rear has exactly ONE small round tail — never two. The mole is ONE small FLAT black dot printed on his fur on the LOWER SIDE of his round torso (the hip/rear area): put it on the right hip when the right hip is visible, otherwise on the left hip — always on whichever hip side faces the viewer. NEVER draw the mole on his feet, legs, paws, tail, face or chest — it sits on the round body ABOVE the leg line, and it is flat, not a bump. ";
 
 const POSE_STYLE =
-  " STYLE: the official Kosukuma look — a simple white cream-colored round marshmallow mascot bear with short limbs, small round ears and one small round tail, minimal clean shapes, thin dark outline, soft flat colors. Match the reference stamps exactly. Do NOT make him pixel art, do NOT redesign him, do NOT make a generic cute sticker of a different bear. Full body visible, on a TRANSPARENT background (alpha channel, no backdrop).";
+  " STYLE: the official Kosukuma look — a simple white cream-colored round marshmallow mascot bear with short limbs, small round ears and one small round tail, minimal clean shapes, thin dark outline, soft flat colors (his fur is always filled with the pale cream color, never left as uncolored white line art). Match the reference stamps exactly. Do NOT make him pixel art, do NOT redesign him, do NOT make a generic cute sticker of a different bear. Full body visible, on a TRANSPARENT background (alpha channel, no backdrop). Every pixel outside the character and the props named in the brief must be fully transparent (alpha 0): NO glow, NO light haze, NO ambient color wash, NO drop shadow on invisible ground, NO vignette.";
 
 const BG_STYLE =
   " STYLE: 16-bit pixel art in EXACTLY the same style, palette and scene composition as the reference image (the camper van by the river with the village, bridge and mountains). Chunky visible pixels, consistent dithering, same camera angle and layout. Do NOT draw any characters, bears, people or animals in the scene — landscape only.";
@@ -58,7 +60,7 @@ const TARGETS = {
   },
   'pose:sleeping': {
     kind: 'pose', out: 'kuma-sleeping',
-    brief: 'Kosukuma lying on his side peacefully asleep, curled slightly, calm sleeping face (still just two dot eyes closed as small curves are NOT allowed — keep the two dot eyes and the flat oval nose only, no mouth), one small round tail visible with the flat mole on the visible hip.',
+    brief: 'Kosukuma lying on his side on the ground, relaxed and drowsy, curled slightly, calmly resting while staying awake. His face is EXACTLY the same as the wide-awake reference stamps: two small round solid black dot-eyes (open, perfectly round, identical to the stamps) plus one tiny flat oval nose — nothing else on the face: no mouth, no eyelid lines, no closed-eye arcs, no eyebrow curves, no eyelashes. One small round tail visible with the flat mole on the visible hip.',
   },
   'bg:evening': {
     kind: 'bg', out: 'bg-evening',
