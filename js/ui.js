@@ -52,6 +52,8 @@ function initDialogs() {
 }
 
 // ── カート描画 ──
+let lastCartAction = null; // { lineId, delta } — 再描画後のフォーカス復元用
+
 function renderCart() {
   const c = cart.getCart();
   const items = document.getElementById('cart-items');
@@ -90,11 +92,13 @@ function renderCart() {
     const minus = document.createElement('button');
     minus.type = 'button'; minus.textContent = '−';
     minus.dataset.line = line.id; minus.dataset.delta = '-1';
+    minus.setAttribute('aria-label', `${line.merchandise.product.title} をへらす`);
     const q = document.createElement('span');
     q.textContent = String(line.quantity);
     const plus = document.createElement('button');
     plus.type = 'button'; plus.textContent = '＋';
     plus.dataset.line = line.id; plus.dataset.delta = '1';
+    plus.setAttribute('aria-label', `${line.merchandise.product.title} をふやす`);
     qtyWrap.append(minus, q, plus);
     const remove = document.createElement('button');
     remove.type = 'button'; remove.className = 'ci-remove';
@@ -128,6 +132,16 @@ function renderCart() {
     }
     if (bar) bar.style.width = `${Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD_JPY) * 100)}%`;
   }
+
+  // フォーカス復元（数量/削除操作で再描画されてもドロワー内で迷子にしない）
+  const drawer = document.getElementById('cart-drawer');
+  if (lastCartAction && drawer?.open) {
+    const sel = lastCartAction.delta
+      ? `button[data-line="${CSS.escape(lastCartAction.lineId)}"][data-delta="${lastCartAction.delta}"]`
+      : null;
+    const target = (sel && document.querySelector(sel)) || drawer.querySelector('[data-close]');
+    target?.focus();
+  }
 }
 
 // ── カート操作（全てShopify API経由。フロントで金額計算しない） ──
@@ -146,6 +160,7 @@ function initCartDrawer() {
     const lineId = btn.dataset.line;
     if (!lineId || mutating.has(lineId)) return; // 連打による二重送信ガード（stale数量のPUT防止）
     mutating.add(lineId);
+    lastCartAction = { lineId, delta: btn.dataset.delta ?? null };
     try {
       if (btn.dataset.remove !== undefined) {
         await cart.removeLine(lineId);
