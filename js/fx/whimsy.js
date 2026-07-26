@@ -36,7 +36,10 @@ export function initWhimsy() {
   // ごく稀にヒーローが昼寝（1割以下・装飾のみ）
   if (Math.random() < 0.1) {
     const hero = document.getElementById('hero-kuma');
-    if (hero) hero.src = '/assets/gen/kuma-sleeping.webp';
+    if (hero) {
+      hero.src = '/assets/gen/kuma-sleeping.webp';
+      hero.alt = '昼寝しているこすくまくん';
+    }
   }
   return band;
 }

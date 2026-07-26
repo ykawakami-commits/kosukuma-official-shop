@@ -49,7 +49,7 @@ html[data-time="night"] {
   /* 字 */
   --font-body: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
   --font-num: "Quicksand", "Zen Maru Gothic", sans-serif;
-  --fs-hero: clamp(1.9rem, 1.2rem + 3vw, 3rem);
+  --fs-hero: clamp(1.75rem, 1.1rem + 2.2vw, 2.4rem); /* デスクトップでh1が1行に収まる上限 */
   --fs-h2: clamp(1.4rem, 1.1rem + 1.6vw, 2rem);
   --fs-h3: 1.15rem;
   --fs-body: 1rem;

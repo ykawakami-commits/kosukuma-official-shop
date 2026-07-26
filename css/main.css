@@ -20,18 +20,23 @@ p { margin: 0; }
    クラスの display がUAの [hidden] ルールを上書きして「空カート表示」等が消えなくなる事故の防止 */
 [hidden] { display: none !important; }
 
-/* ── 日本語改行制御（kigyo-ip方式: 文字間改行を抑止し句読点・括弧でのみ改行＋見出しbalance＋本文pretty） ── */
-h1, h2, h3, .hero-sub, .product-oneliner, .detail-oneliner, .detail-story, .guide-item p,
-.faq-item summary, .faq-a, .news-list p, .trust-item, .about-text, .balloon, #whimsy-line,
-.footer-main li, .footer-main p, .cart-empty p, .drawer-note, .spec-table th, .spec-table td,
-.ci-title, .toast {
+/* ── 日本語改行制御（モバイル幅基準: 見出しは keep-all+balance で行長を均す。
+     本文は keep-all を掛けない（日本語の文全体が不可分の巨大単語化し、狭幅で犬食い改行になるため）。
+     line-break: strict の禁則処理＋ text-wrap: pretty で最終行の短切れを防ぐ） ── */
+h1, h2, h3, .product-name, .faq-item summary {
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: break-word; /* 保険: どうしても収まらない長文句のみ許す */
+  text-wrap: balance;
 }
-h1, h2, h3, .product-name, .faq-item summary { text-wrap: balance; }
-.hero-sub, .product-oneliner, .detail-oneliner, .detail-story, .guide-item p, .news-list p,
-.about-text, #whimsy-line, .cart-empty p, .spec-table td, .faq-a { text-wrap: pretty; }
+.hero-sub, .product-oneliner, .detail-oneliner, .detail-story, .guide-item p,
+.faq-a, .news-list p, .trust-item, .about-text, .balloon, #whimsy-line,
+.footer-main li, .footer-main p, .cart-empty p, .drawer-note, .spec-table th, .spec-table td,
+.ci-title, .toast {
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
 /* keep-all の長文句（「Shopifyの…」「info@…」等）が grid/flex 子の min-width:auto と衝突し、
    min-content 幅で列を膨らませ横スクロール化する事故の防止（402px実測）。
    min-width:0 で縮ませ、どうしても収まらない文句だけ上の overflow-wrap 保険に任せる */
@@ -50,7 +55,10 @@ h1, h2, h3, .product-name, .faq-item summary { text-wrap: balance; }
   background: var(--ink); color: var(--paper);
   text-align: center; font-size: var(--fs-small);
   padding: var(--space-2) var(--gutter);
+  text-wrap: balance; /* ぶら下がり1文字を防ぐ */
 }
+/* 句読点単位でしか折り返さないインラインブロック（アナウンス等の短文用） */
+.u-ib { display: inline-block; }
 
 /* ── ヘッダー ── */
 .site-header {
@@ -85,10 +93,9 @@ h1, h2, h3, .product-name, .faq-item summary { text-wrap: balance; }
 /* ── ヒーロー（ドット絵背景×公式こすくま×聖域金平糖） ── */
 .hero { position: relative; overflow: hidden; }
 .hero-fx {
-  position: relative; z-index: var(--z-fx);
-  height: min(72vw, 520px);
+  position: absolute; inset: 0; z-index: var(--z-fx);
   background-image: var(--hero-bg);
-  background-size: cover; background-position: center bottom;
+  background-size: cover; background-position: center;
   image-rendering: pixelated;
 }
 .hero-fx::after { /* 時間帯の色味調整（背景の上・コンテンツの下） */
@@ -97,8 +104,8 @@ h1, h2, h3, .product-name, .faq-item summary { text-wrap: balance; }
 #hero-3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hero-inner {
   position: relative; z-index: var(--z-content);
-  margin: calc(-1 * var(--space-6)) auto 0;
-  max-width: var(--content-max); padding: 0 var(--gutter);
+  max-width: var(--content-max); margin: 0 auto;
+  padding: var(--space-5) var(--gutter);
   display: flex; justify-content: center;
 }
 .hero-panel {
@@ -113,7 +120,7 @@ h1, h2, h3, .product-name, .faq-item summary { text-wrap: balance; }
 .hero-sub { margin-top: var(--space-2); color: var(--ink-sub); }
 .hero-cta { margin-top: var(--space-4); display: inline-block; }
 #gyro-btn {
-  position: absolute; right: var(--gutter); bottom: var(--space-4); z-index: var(--z-content);
+  position: absolute; right: var(--gutter); bottom: var(--space-3); z-index: var(--z-content);
   border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
   background: var(--cream); color: var(--ink); padding: var(--space-2) var(--space-3);
   font-size: var(--fs-small); font-weight: 700;
@@ -342,12 +349,15 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
 @media (max-width: 640px) {
   .product-grid { grid-template-columns: 1fr; }
   .trust-strip { grid-template-columns: repeat(2, 1fr); }
-  .hero-panel { flex-direction: column; text-align: center; padding: var(--space-3); gap: var(--space-2); }
-  #hero-kuma { width: 128px; }
-  .hero-fx { height: 88vw; }
+  .hero-inner { padding: var(--space-3) var(--gutter); }
+  .hero-panel { padding: var(--space-3); gap: var(--space-2); }
+  #hero-kuma { width: 96px; }
+  .hero-cta { margin-top: var(--space-3); }
+  .header-logo .logo-text { font-size: var(--fs-body); }
   .footer-band { flex-direction: column; text-align: center; gap: var(--space-2); }
   #cart-drawer { max-width: 100vw; }
-  .about-wrap { flex-direction: column; text-align: center; }
+  .about-wrap { flex-direction: column; }
+  .about-wrap .about-text { text-align: left; }
 }
 
 /* ── reduced motion ── */
