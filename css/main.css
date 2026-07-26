@@ -401,6 +401,7 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
   .hero-cta { margin-top: var(--space-3); }
   .site-header { grid-template-columns: auto 1fr auto; }
   .header-greeting { display: none; }
+  .header-actions a.icon-btn { display: none; } /* Xボタンはフッターボックスにあるのでモバイルでは畳む */
   .header-logo { justify-self: start; }
   .header-logo img { width: 36px; height: 36px; }
   .header-logo .logo-text { font-size: var(--fs-small); white-space: nowrap; }
