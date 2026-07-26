@@ -3,49 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>みつからないよ — こすくまくんのおみせ</title>
+<title>ページがないよ｜こすくまくんのおみせ</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="stylesheet" href="/css/tokens.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: var(--font-body);
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100dvh;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    padding: 24px;
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font-family: var(--font-body); color: var(--ink); background: var(--paper);
+    padding: var(--space-4); text-align: center;
   }
-  img { width: 120px; image-rendering: pixelated; margin-inline: auto; }
-  h1 { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 900; margin-top: 16px; }
-  p { margin-top: 8px; color: var(--ink-sub); }
-  a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 24px;
-    min-height: 52px;
-    padding: 0 40px;
-    background: var(--green);
-    color: #fff;
-    text-decoration: none;
-    font-weight: 700;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    box-shadow: 0 4px 0 var(--ink);
+  main { display: grid; justify-items: center; gap: var(--space-3); max-width: 420px; }
+  img { width: clamp(140px, 40vw, 220px); }
+  h1 { font-size: var(--fs-h2); word-break: keep-all; line-break: strict; overflow-wrap: break-word; text-wrap: balance; }
+  p { color: var(--ink-sub); word-break: keep-all; line-break: strict; overflow-wrap: break-word; text-wrap: pretty; }
+  a.btn {
+    display: inline-block; margin-top: var(--space-2);
+    border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+    background: var(--honey); color: var(--ink); font-weight: 700;
+    padding: var(--space-2) var(--space-4); text-decoration: none;
+    box-shadow: var(--press-shadow);
   }
-  a:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 </style>
 </head>
 <body>
-<div>
-  <img src="/assets/kosukuma/front.png" alt="こすくまくん">
-  <h1>あれ、ここにはなにもないみたい</h1>
-  <p>さがしてるページ、みつからなかったよ。ごめんね。</p>
-  <a href="/">おみせにもどる</a>
-</div>
+<main>
+  <img src="/assets/gen/kuma-lost.webp" alt="地図を持って道に迷っているこすくまくん">
+  <h1>そのページ、ないよ</h1>
+  <p>ぼくもさっき探した。なかった。<br>ページを探す旅に出たまま、ぼくもまだ戻ってないよ</p>
+  <a class="btn" href="/">おみせに戻る</a>
+</main>
 </body>
 </html>

@@ -29,8 +29,8 @@ if (!prefersReducedMotion()) {
 // hero-3d は dynamic import（static だと importmap の無い商品ページで three の解決に失敗し main.js 全体が死ぬ）
 if (document.querySelector('.hero') && !prefersReducedMotion()) {
   const start3d = async () => {
-    const { initHero3D } = await import('./fx/hero-3d.js');
-    initHero3D({ mobile: isMobile() });
+    const { initHero3D } = await import('./fx/hero-3d.js').catch(() => ({}));
+    if (initHero3D) initHero3D({ mobile: isMobile() });
   };
   if ('requestIdleCallback' in window) requestIdleCallback(start3d, { timeout: 2500 });
   else setTimeout(start3d, 800);

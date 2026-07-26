@@ -315,6 +315,7 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
 .detail-thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
 .detail-thumb { width: 72px; height: 72px; border: 2px solid var(--cream-deep); border-radius: var(--radius-s); background: var(--cream); padding: 0; overflow: hidden; }
 .detail-thumb[aria-selected="true"] { border-color: var(--brown-dark); }
+.main-img[data-img-fit="contain"] img { object-fit: contain; }
 .detail-info { display: flex; flex-direction: column; gap: var(--space-3); }
 .detail-info h1 { font-size: var(--fs-h2); }
 .detail-oneliner { color: var(--ink-sub); }
