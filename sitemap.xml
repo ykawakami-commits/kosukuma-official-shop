@@ -5,6 +5,9 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://kosukuma-official-shop.pages.dev/products/sticker.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kosukuma-official-shop.pages.dev/products/ultra-tshirt.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kosukuma-official-shop.pages.dev/products/deco-helmet.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url>
     <loc>https://kosukuma-official-shop.pages.dev/legal/tokushoho.html</loc>
     <changefreq>yearly</changefreq>
