@@ -25,10 +25,6 @@
 (() => { const h = new Date().getHours();
   const t = (h >= 16 && h < 19) ? 'evening' : (h >= 19 || h < 5) ? 'night' : 'day';
   document.documentElement.dataset.time = t; })();
-/* JS死亡保険: reveal が残ったら全表示 */
-window.__kosuRevealFallback = setTimeout(() => {
-  document.querySelectorAll('.reveal:not(.visible)').forEach((el) => el.classList.add('visible'));
-}, 4000);
 </script>
 <script type="importmap">
 { "imports": { "three": "/assets/vendor/three.module.js", "three/addons/": "/assets/vendor/addons/" } }
@@ -168,7 +164,7 @@ window.__kosuRevealFallback = setTimeout(() => {
   </div>
 
   <!-- 商品一覧 -->
-  <section class="section reveal" id="products">
+  <section class="section" id="products">
     <div class="section-head">
       <h2>売ってるもの</h2>
       <p class="section-cap">ITEMS</p>
@@ -244,7 +240,7 @@ window.__kosuRevealFallback = setTimeout(() => {
   </section>
 
   <!-- お知らせ（公式感: 日付＋内容の退屈なリスト） -->
-  <section class="section reveal" id="news">
+  <section class="section" id="news">
     <div class="info-box">
       <div class="info-head">
         <h2>お知らせ</h2>
@@ -259,7 +255,7 @@ window.__kosuRevealFallback = setTimeout(() => {
   </section>
 
   <!-- about -->
-  <section class="section reveal" id="about">
+  <section class="section" id="about">
     <div class="section-head">
       <h2>こすくまくんについて</h2>
     </div>
@@ -270,7 +266,7 @@ window.__kosuRevealFallback = setTimeout(() => {
   </section>
 
   <!-- お買い物ガイド（標準EC・退屈） -->
-  <section class="section reveal" id="guide">
+  <section class="section" id="guide">
     <div class="section-head">
       <h2>とどくまでの話</h2>
     </div>
@@ -283,7 +279,7 @@ window.__kosuRevealFallback = setTimeout(() => {
   </section>
 
   <!-- FAQ -->
-  <section class="section reveal" id="faq">
+  <section class="section" id="faq">
     <div class="section-head">
       <h2>よくある質問と、ぼくの返事</h2>
     </div>
@@ -400,7 +396,6 @@ window.__kosuRevealFallback = setTimeout(() => {
   </div>
 </dialog>
 
-<button id="sticky-cart" type="button" aria-label="カートを開く"><img src="/assets/gen/ui-icon-cart.webp" alt="" width="18" height="18">レジ<span class="badge" id="sticky-cart-count" hidden>0</span></button>
 <div id="toast-region" aria-live="polite"></div>
 
 <script type="module" src="/js/main.js"></script>

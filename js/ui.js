@@ -309,32 +309,11 @@ function initThumbs() {
   });
 }
 
-// ── reveal（控えめな出現）＋ JS死亡保険の解除 ──
-function initReveal() {
-  if (window.__kosuRevealFallback) clearTimeout(window.__kosuRevealFallback);
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); } });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
-}
-
-// ── スティッキーカート（ヒーローが見えなくなったら出す） ──
-function initStickyCart() {
-  const sticky = document.getElementById('sticky-cart');
-  const hero = document.querySelector('.hero');
-  if (!sticky || !hero) return;
-  new IntersectionObserver((entries) => {
-    sticky.classList.toggle('show', !entries[0].isIntersecting);
-  }).observe(hero);
-}
-
 export async function initUI() {
   initDialogs();
   initCartDrawer();
   initAddButtons();
   initThumbs();
-  initReveal();
-  initStickyCart();
   recordCheckedView();
   renderCheckedItems();
   renderCart();
