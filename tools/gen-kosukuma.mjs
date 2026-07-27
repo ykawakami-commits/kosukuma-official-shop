@@ -70,6 +70,23 @@ const TARGETS = {
     kind: 'bg', out: 'bg-night',
     brief: 'The same camper-van-by-the-river scene at night: deep dark blue sky with small stars, the scene lit mainly by a warm glowing campfire in front of the van and soft warm window light from the van, moonlit river reflections.',
   },
+  // ── UI素材（ボタン・アイコン。ドット絵・透過・中央は文字を載せるためフラット） ──
+  'ui:btn-primary': {
+    kind: 'ui', out: 'ui-btn-primary', width: 640,
+    brief: 'A single 16-bit pixel art rounded-rectangle button shaped like a small wooden shop sign plank: warm honey-brown wood, thick dark chocolate outline, a slightly lighter perfectly FLAT empty center panel (absolutely no text, no icons, no symbols, no decorations in the center — it is a blank area for HTML text overlay), subtle wood grain only near the edges, gentle top highlight. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
+  },
+  'ui:btn-ghost': {
+    kind: 'ui', out: 'ui-btn-ghost', width: 640,
+    brief: 'A single 16-bit pixel art rounded-rectangle button made of plain cream paper with a thin dark outline: soft warm off-white paper, perfectly FLAT empty center (absolutely no text, no icons, no decorations in the center), very subtle paper texture near the edges only. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
+  },
+  'ui:icon-cart': {
+    kind: 'ui', out: 'ui-icon-cart', width: 192,
+    brief: 'A 16-bit pixel art small wooden shopping basket icon holding a few colorful konpeito (tiny star-shaped sugar candies in pastel pink, blue, yellow, green), thick dark outline, simple and readable at favicon size, centered, transparent background.',
+  },
+  'ui:icon-menu': {
+    kind: 'ui', out: 'ui-icon-menu', width: 192,
+    brief: 'A 16-bit pixel art small wooden signpost icon with three blank horizontal wooden planks stacked on one post, warm brown wood, thick dark outline, simple and readable at favicon size, centered, transparent background.',
+  },
 };
 
 // ── SELECT（比較選抜）: qcLoop.ts SELECT_SYSTEM 移植 ──
@@ -90,9 +107,9 @@ function needEnv(name) {
   return v;
 }
 
-async function genWithRefs({ prompt, refPaths, transparent, size = '1024x1024' }) {
+async function genWithRefs({ prompt, refPaths, transparent, size = '1024x1024', model }) {
   const form = new FormData();
-  form.set('model', process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2');
+  form.set('model', model || process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2');
   for (const p of refPaths) {
     const buf = await readFile(p);
     form.append('image[]', new Blob([buf], { type: 'image/png' }), path.basename(p));
@@ -154,15 +171,23 @@ async function runTarget(id) {
   const t = TARGETS[id];
   if (!t) throw new Error(`未知の生成対象: ${id}`);
   const isPose = t.kind === 'pose';
+  const isUi = t.kind === 'ui';
   const refPaths = isPose
     ? ['01-front.png', '02-threequarter.png', '04-gorogoro.png', '06-charsheet.png'].map((f) => path.join(REF_IDENTITY, f))
-    : [path.join(REF_STYLE, 'base-map-day.png')];
+    : isUi
+      ? ['maptile_wood_01.png', 'nature_star_yellow.png', 'effect_kirakira_01_yellow.png', 'food_hachimitsu_01.png'].map((f) => path.join(ROOT, 'assets/dot-illust', f))
+      : [path.join(REF_STYLE, 'base-map-day.png')];
+  const UI_STYLE =
+    " STYLE: crisp 16-bit pixel art matching the reference pixel items (chunky visible pixels, thick dark outlines, limited palette), on a TRANSPARENT background (alpha channel). Absolutely NO text or letters anywhere in the image.";
   const prompt = isPose
     ? MOUTH_BAN + t.brief + POSE_STYLE + '\n\n' + MOUTH_BAN
-    : t.brief + BG_STYLE;
+    : isUi
+      ? t.brief + UI_STYLE
+      : t.brief + BG_STYLE;
   console.log(`[gen] ${id} を2枚並列生成中...`);
-  const size = isPose ? '1024x1024' : '1536x1024';
-  const genOpts = { prompt, refPaths, transparent: isPose, size };
+  const size = isUi && t.width <= 192 ? '1024x1024' : isPose ? '1024x1024' : '1536x1024';
+  // 透過が必要なのは gpt-image-1 のみ対応（gpt-image-2 は background=transparent を400拒否。ヘッダGotcha参照）
+  const genOpts = { prompt, refPaths, transparent: isPose || isUi, size, model: isUi ? 'gpt-image-1' : undefined };
   let candidates;
   try {
     candidates = await Promise.all([genWithRefs(genOpts), genWithRefs(genOpts)]);
@@ -180,15 +205,16 @@ async function runTarget(id) {
   const sel = await selectWinner({ candidates, refPaths, brief: t.brief });
   console.log(`[gen] ${id} → 候補${sel.winner} 採用 (${sel.reason})${sel.bothBroken ? ' ※両方破綻・軽い方' : ''}`);
   const winner = Buffer.from(candidates[sel.winner] ?? candidates[0], 'base64');
-  const outDir = isPose ? OUT_POSE : OUT_BG;
+  const outDir = isPose || isUi ? OUT_POSE : OUT_BG;
   await mkdir(outDir, { recursive: true });
   const pngPath = path.join(outDir, `${t.out}.png`);
   await writeFile(pngPath, winner);
 
-  // WebP化（sharp）。ポーズは600px幅透過webp、背景は1536px/768pxの2幅
+  // WebP化（sharp）。ポーズは600px幅・UIは指定幅の透過webp、背景は1536px/768pxの2幅
   const sharp = (await import('sharp')).default;
-  if (isPose) {
-    await sharp(winner).resize({ width: 600 }).webp({ quality: 88, alphaQuality: 95 }).toFile(path.join(outDir, `${t.out}.webp`));
+  if (isPose || isUi) {
+    const resizeOpts = isUi ? { width: t.width, kernel: 'nearest' } : { width: 600 };
+    await sharp(winner).resize(resizeOpts).webp({ quality: 88, alphaQuality: 95 }).toFile(path.join(outDir, `${t.out}.webp`));
     console.log(`[gen] → assets/gen/${t.out}.webp (+ png master)`);
   } else {
     // ドット絵は滲ませない（nearest kernel）。生成が既に1536幅なら拡大しない
@@ -202,7 +228,7 @@ async function main() {
   const [cmd, ...args] = process.argv.slice(2);
   if (cmd === 'list' || !cmd) {
     console.log('生成対象:');
-    for (const [id, t] of Object.entries(TARGETS)) console.log(`  ${id} → ${t.kind === 'pose' ? 'assets/gen' : 'assets/pixel'}/${t.out}`);
+    for (const [id, t] of Object.entries(TARGETS)) console.log(`  ${id} → ${t.kind === 'bg' ? 'assets/pixel' : 'assets/gen'}/${t.out}`);
     console.log(`環境: OPENAI_API_KEY=${process.env.OPENAI_API_KEY ? '設定済み' : '未設定'} ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY ? '設定済み' : '未設定'} model=${process.env.OPENAI_IMAGE_MODEL || 'gpt-image-2'}`);
     return;
   }

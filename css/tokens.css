@@ -26,6 +26,12 @@
     url("/assets/pixel/bg-day-768.webp") 1x,
     url("/assets/pixel/bg-day-1536.webp") 2x
   );
+  /* 全面背景（ドット絵の世界）＋可読性のヴェール */
+  --page-bg: image-set(
+    url("/assets/pixel/bg-day-768.webp") 1x,
+    url("/assets/pixel/bg-day-1536.webp") 2x
+  );
+  --page-veil: rgba(255, 253, 246, 0.3);
 }
 html[data-time="evening"] {
   --sky-tint: rgba(255, 166, 88, 0.14);
@@ -35,6 +41,11 @@ html[data-time="evening"] {
     url("/assets/pixel/bg-evening-768.webp") 1x,
     url("/assets/pixel/bg-evening-1536.webp") 2x
   );
+  --page-bg: image-set(
+    url("/assets/pixel/bg-evening-768.webp") 1x,
+    url("/assets/pixel/bg-evening-1536.webp") 2x
+  );
+  --page-veil: rgba(255, 226, 188, 0.26);
 }
 html[data-time="night"] {
   --sky-tint: rgba(24, 34, 78, 0.22);
@@ -44,6 +55,11 @@ html[data-time="night"] {
     url("/assets/pixel/bg-night-768.webp") 1x,
     url("/assets/pixel/bg-night-1536.webp") 2x
   );
+  --page-bg: image-set(
+    url("/assets/pixel/bg-night-768.webp") 1x,
+    url("/assets/pixel/bg-night-1536.webp") 2x
+  );
+  --page-veil: rgba(16, 22, 48, 0.32);
 }
 :root {
   /* 字 */

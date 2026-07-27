@@ -6,9 +6,21 @@ body {
   font-family: var(--font-body);
   font-size: var(--fs-body);
   color: var(--ink);
-  background: var(--paper);
+  background: var(--cream);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+/* ドット絵の世界を全面背景に（時間帯で --page-bg が昼/夕/夜に変わる） */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -2;
+  background-image: var(--page-bg);
+  background-size: cover; background-position: center top;
+  image-rendering: pixelated;
+}
+/* 可読性のヴェール（世界の上に薄く掛ける） */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: var(--page-veil); pointer-events: none;
 }
 img { max-width: 100%; height: auto; display: block; }
 a { color: var(--green-deep); }
@@ -88,6 +100,7 @@ h1, h2, h3, .product-name, .faq-item summary {
   padding: var(--space-2) var(--space-3); font-size: var(--fs-small); font-weight: 700;
   text-decoration: none; white-space: nowrap;
 }
+.icon-btn img { width: 18px; height: 18px; image-rendering: pixelated; }
 .badge {
   position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px;
   border-radius: 999px; background: var(--terracotta); color: var(--paper);
@@ -109,19 +122,15 @@ h1, h2, h3, .product-name, .faq-item summary {
 /* ── 告知行 ── */
 .notice-line {
   text-align: center; color: var(--terracotta); font-weight: 700;
-  padding: var(--space-3) var(--gutter) 0; font-size: var(--fs-small);
+  background: var(--cream); border-bottom: 2px solid var(--cream-deep);
+  margin: 0; padding: var(--space-2) var(--gutter); font-size: var(--fs-small);
 }
 
 /* ── ヒーロー（ドット絵背景×公式こすくま×聖域金平糖） ── */
 .hero { position: relative; overflow: hidden; }
 .hero-fx {
   position: absolute; inset: 0; z-index: var(--z-fx);
-  background-image: var(--hero-bg);
-  background-size: cover; background-position: center;
-  image-rendering: pixelated;
-}
-.hero-fx::after { /* 時間帯の色味調整（背景の上・コンテンツの下） */
-  content: ""; position: absolute; inset: 0; background: var(--sky-tint); pointer-events: none;
+  /* 背景は body::before の全面ドット絵に一本化（ヒーローは世界の続き） */
 }
 #hero-3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hero-inner {
@@ -162,7 +171,11 @@ h1, h2, h3, .product-name, .faq-item summary {
 
 /* ── セクション共通 ── */
 .section { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter) 0; }
-.section-head { margin-bottom: var(--space-4); text-align: center; }
+.section-head {
+  margin: 0 auto var(--space-4); text-align: center;
+  background: var(--cream); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
+  padding: var(--space-2) var(--space-4); display: table;
+}
 .section-head h2 { font-size: var(--fs-h2); }
 .section-head:has(.section-cap) h2 { font-size: var(--fs-h3); color: var(--ink-sub); letter-spacing: 0.05em; }
 .section-cap {
@@ -218,21 +231,23 @@ h1, h2, h3, .product-name, .faq-item summary {
 .card-actions { margin-top: auto; display: flex; gap: var(--space-2); align-items: center; }
 .restock-link { font-size: var(--fs-small); }
 
-/* ── ボタン（購入UIは聖域・退屈で押しやすく） ── */
+/* ── ボタン（購入UIは聖域。画像生成した木の看板/紙ボタンにテキストを載せる） ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
-  border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+  border: none; background-color: transparent;
+  background-repeat: no-repeat; background-position: center; background-size: 100% 100%;
   font-weight: 700; font-size: var(--fs-small);
-  padding: var(--space-2) var(--space-4); text-decoration: none;
+  padding: var(--space-3) var(--space-5); text-decoration: none;
+  min-height: 44px;
   transition: transform var(--dur-quick) var(--ease-pop);
 }
 .btn:active { transform: translateY(2px); }
-.btn-primary { background: var(--honey); color: var(--ink); box-shadow: var(--press-shadow); }
-.btn-primary:active { box-shadow: var(--press-shadow-down); }
-.btn-ghost { background: var(--paper); color: var(--ink); }
+.btn-primary { background-image: url("/assets/gen/ui-btn-primary.webp"); color: var(--brown-dark); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35); }
+.btn-ghost { background-image: url("/assets/gen/ui-btn-ghost.webp"); color: var(--ink); }
 .btn:disabled, .btn-primary:disabled {
-  background: var(--disabled-bg); color: var(--disabled-text);
-  border-color: var(--disabled-border); box-shadow: none; cursor: not-allowed;
+  background-image: url("/assets/gen/ui-btn-ghost.webp");
+  color: var(--disabled-text); filter: grayscale(0.7) opacity(0.8);
+  cursor: not-allowed;
 }
 
 /* ── about ── */
@@ -250,7 +265,10 @@ h1, h2, h3, .product-name, .faq-item summary {
 .guide-item p { font-size: var(--fs-small); color: var(--ink-sub); }
 
 /* ── faq ── */
-.faq-item { border-bottom: 1px solid var(--cream-deep); }
+.faq-item {
+  background: var(--paper); border: 2px solid var(--cream-deep); border-radius: var(--radius-m);
+  padding: 0 var(--space-3); margin-bottom: var(--space-2);
+}
 .faq-item summary {
   cursor: pointer; font-weight: 700; padding: var(--space-3) 0; list-style: none;
 }
@@ -355,10 +373,16 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* ── 商品詳細ページ ── */
-.breadcrumb { max-width: var(--content-max); margin: 0 auto; padding: var(--space-3) var(--gutter) 0; font-size: var(--fs-small); color: var(--ink-sub); }
+.breadcrumb {
+  display: table; margin: var(--space-3) auto 0; padding: var(--space-1) var(--space-3);
+  background: var(--cream); border-radius: var(--radius-m);
+  font-size: var(--fs-small); color: var(--ink-sub);
+}
 .breadcrumb a { color: var(--green-deep); }
 .product-detail {
-  max-width: var(--content-max); margin: 0 auto; padding: var(--space-4) var(--gutter) 0;
+  max-width: var(--content-max); margin: var(--space-3) auto 0; padding: var(--space-4);
+  width: calc(100% - 2 * var(--gutter)); box-sizing: border-box;
+  background: var(--paper); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
   display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--space-5); align-items: start;
 }
 .detail-media .main-img { background: var(--cream); border-radius: var(--radius-l); overflow: hidden; border: 2px solid var(--cream-deep); position: relative; }
