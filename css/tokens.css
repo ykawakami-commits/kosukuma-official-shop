@@ -1,26 +1,32 @@
 /* css/tokens.css — デザイントークン（色/余白/z-index — 唯一の真実。生値ハードコード禁止） */
 :root {
-  /* 色ベース */
-  --paper: #fffdf6;
-  --cream: #fcfad2;
-  --cream-deep: #f5f0bd;
-  --ink: #3a3126;
-  --ink-sub: #6f6759;
-  /* アクセント */
-  --honey: #d99a2b;
-  --honey-deep: #8a5f14;
+  /* 色ベース（ちいかわマーケット準拠: クリーム×ピンク×ペールイエロー） */
+  --paper: #fcf8e7;
+  --cream: #fffbbf;
+  --cream-deep: #ffe9a8;
+  --ink: #4a3b40;
+  --ink-sub: #8a7a72;
+  /* ちいかわピンク */
+  --pink: #febbbf;
+  --pink-soft: #ffeef0;
+  --pink-deep: #e77277;
+  --pink-dark: #c94f5e;
+  --notice-red: #dd0000;
+  /* アクセント（既存名の値だけ差し替え） */
+  --honey: #e77277;
+  --honey-deep: #c94f5e;
   --green: #5d7f4c;
   --green-deep: #4c6a3e;
-  --brown: #7d5f37;
-  --brown-dark: #4a3a22;
-  --terracotta: #b0492f;
+  --brown: #e7a3ad;
+  --brown-dark: #c94f5e;
+  --terracotta: #dd5f6f;
   /* disabled */
-  --disabled-bg: #d9d4c2;
-  --disabled-text: #6b6552;
-  --disabled-border: #a39c85;
+  --disabled-bg: #e8e2d2;
+  --disabled-text: #8a8272;
+  --disabled-border: #c9c2b2;
   /* 時間帯（whimsy.js が html[data-time] を day/evening/night で切替） */
   --sky-tint: rgba(255, 244, 200, 0);
-  --band-bg: #f7f1d8;
+  --band-bg: #ffeef0;
   --band-ink: var(--ink);
   --hero-bg: image-set(
     url("/assets/pixel/bg-day-768.webp") 1x,
@@ -31,11 +37,11 @@
     url("/assets/pixel/bg-day-768.webp") 1x,
     url("/assets/pixel/bg-day-1536.webp") 2x
   );
-  --page-veil: rgba(255, 253, 246, 0.3);
+  --page-veil: rgba(252, 248, 231, 0.3);
 }
 html[data-time="evening"] {
   --sky-tint: rgba(255, 166, 88, 0.14);
-  --band-bg: #f2dfc0;
+  --band-bg: #ffd9c8;
   --band-ink: var(--ink);
   --hero-bg: image-set(
     url("/assets/pixel/bg-evening-768.webp") 1x,
@@ -85,8 +91,8 @@ html[data-time="night"] {
   --radius-s: 8px;
   --radius-m: 14px;
   --radius-l: 22px;
-  --shadow-card: 0 2px 0 rgba(74, 58, 34, 0.12), 0 10px 24px rgba(74, 58, 34, 0.08);
-  --shadow-pop: 0 6px 0 rgba(74, 58, 34, 0.16), 0 18px 40px rgba(74, 58, 34, 0.14);
+  --shadow-card: 0 2px 0 rgba(201, 79, 94, 0.1), 0 10px 24px rgba(201, 79, 94, 0.08);
+  --shadow-pop: 0 6px 0 rgba(201, 79, 94, 0.14), 0 18px 40px rgba(201, 79, 94, 0.12);
   --press-shadow: 0 4px 0 var(--brown-dark);
   --press-shadow-down: 0 1px 0 var(--brown-dark);
   /* z-index階層表（厳格。この順より上に出さない。購入UIは聖域） */

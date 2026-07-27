@@ -22,8 +22,8 @@ import { isMobile, onBreakpointChange } from './motion.js';
 
 // 旧実装と同じ相対パス（先頭 /assets/...）
 const MODEL_SRC = '/assets/3d/konpeito.glb';
-const MODEL_SCALE_DESKTOP = 1.5;   // 2.2→1.5: 「巨大な謎オブジェ」でなく「こんぺいとうの山」に見えるサイズ
-const MODEL_SCALE_MOBILE = 0.95;   // スマホもPC同様「ちゃんとこんぺいとう」（微粒0.1はほぼ不可視だった）
+const MODEL_SCALE_DESKTOP = 0.35;  // 大きい粒は廃止（オーナー指示）: デスクトップも「小さい金平糖」の紙吹雪感に
+const MODEL_SCALE_MOBILE = 0.1;    // 元の小さい金平糖に復元（7bd29f3 時代の微粒・紙吹雪感）
 
 const KONPEITO_PALETTE = [
   { color: '#5cc8e8' },  // 水色（鮮やか）
@@ -35,7 +35,7 @@ const KONPEITO_PALETTE = [
 ];
 
 const DESKTOP_COUNT = 90;   // 粒を小さくした分、数で密度を出す（InstancedMeshなので描画コスト増は僅少）
-const MOBILE_COUNT = 42;    // 粒を大きくした分、数を絞って物理・描画コストを維持
+const MOBILE_COUNT = 70;    // 元の小さい粒に復元（微粒70粒・紙吹雪感）
 
 // ── 水中物理（クラゲモード / デスクトップ） ──
 const SPRING_K = 5.0;             // ソフトバネ — ふわっと戻る（急に引き戻さない）
@@ -44,7 +44,7 @@ const SPRING_FAR_THRESHOLD = 2.0; // この距離超えたらFAR側が効く
 const DAMPING = 1.2;              // 低粘性 — 漂い続ける（クラゲ）
 const ANGULAR_DAMPING = 0.8;      // 回転もゆっくり減衰（クラゲのヒレ）
 const MAX_ANGULAR_SPEED = 3.0;    // 角速度上限
-const BALL_RADIUS = 0.8;
+const BALL_RADIUS = 0.12;         // デスクトップ小粒化に合わせた衝突半径（見た目スケール0.35のコア球相当）
 const RESTITUTION = 0.15;         // 衝突の弾み
 const MOUSE_HIT_RADIUS = 1.5;     // マウスの打撃範囲
 const MOUSE_HIT_FORCE = 18.0;     // 打撃インパクト
@@ -53,12 +53,9 @@ const DRIFT_FORCE = 0.18;         // 水流の揺らぎ（クラゲの漂い感�
 const FIXED_DT = 1 / 120;
 
 // ── モバイル重力物理 ──
-// 衝突半径は見た目と整合させる: モデルはmaxDim=1に正規化→スケール0.95で
-// 見た目半径≈0.475。こんぺいとうはトゲ星形なのでコア球（トゲ根元）の
-// 半径≈0.31を採用 — トゲ同士は自然に絡み、粒は物理的に積み重なって山になる。
-// （旧0.035は微粒スケール0.07時代の値。0.95に対しては1/14で、42粒全部が
-//   1層の薄い帯に潰れて下端に沈み「山」にならなかった）
-const MOBILE_BALL_RADIUS = 0.31;
+// 元の小さい金平糖（7bd29f3 時代の微粒）に復元: スケール0.1に対しコア球0.035。
+// 紙吹雪のように舞い、ジャイロで傾く箱の中をころがる。
+const MOBILE_BALL_RADIUS = 0.035;
 const MOBILE_DAMPING = 0.15;       // ほぼ無抵抗 — 瞬時に反応
 const MOBILE_ANGULAR_DAMPING = 0.3;
 const MOBILE_RESTITUTION = 0.7;    // 壁で弾む

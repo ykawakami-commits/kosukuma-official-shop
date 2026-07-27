@@ -117,23 +117,55 @@ window.__kosuRevealFallback = setTimeout(() => {
 <p class="notice-line">※発送は注文から3〜5営業日だよ※</p>
 
 <main id="main">
-  <!-- ヒーロー: 聖域の3D金平糖は .hero-fx 内の canvas にマウントされる -->
-  <section class="hero">
-    <div class="hero-fx">
-      <canvas id="hero-3d-canvas"></canvas>
-      <button id="gyro-btn" type="button" hidden>かたむけてあそぶ</button>
-    </div>
-    <div class="hero-inner">
-      <div class="hero-panel">
-        <img id="hero-kuma" src="/assets/kosukuma/front.png" alt="こすくまくん" width="200" height="200">
-        <div class="hero-copy">
-          <h1>こすくまくんのおみせ</h1>
-          <p class="hero-sub">ぼくがすきなものだけ置いてあるよ。むりに買わなくていいよ。ぼくもむりしてないから</p>
-          <a class="btn btn-primary hero-cta" href="#products">おみせを見る</a>
+  <!-- ヒーローカルーセル（ちいかわ式3枚。1枚目: 聖域の3D金平糖は .hero-fx 内の canvas にマウントされる） -->
+  <div class="carousel" id="hero-carousel">
+    <div class="carousel-track">
+      <section class="hero carousel-slide is-active" aria-label="キービジュアル">
+        <div class="hero-fx">
+          <canvas id="hero-3d-canvas"></canvas>
+          <button id="gyro-btn" type="button" hidden>かたむけてあそぶ</button>
         </div>
-      </div>
+        <div class="hero-inner">
+          <div class="hero-panel">
+            <img id="hero-kuma" src="/assets/kosukuma/front.png" alt="こすくまくん" width="200" height="200">
+            <div class="hero-copy">
+              <h1>こすくまくんのおみせ</h1>
+              <p class="hero-sub">ぼくがすきなものだけ置いてあるよ。むりに買わなくていいよ。ぼくもむりしてないから</p>
+              <a class="btn btn-primary hero-cta" href="#products">おみせを見る</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="carousel-slide info-slide" aria-label="発送についてのお知らせ">
+        <div class="slide-card">
+          <h2 class="slide-title">発送についてのお知らせ</h2>
+          <ul class="slide-list">
+            <li>発送は注文から3〜5営業日だよ。すこし待ってね</li>
+            <li>送料は全国一律500円。5,000円以上でタダになるよ</li>
+            <li>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ</li>
+          </ul>
+          <p class="slide-note">ぼくが歩いて届けるわけじゃないから、そのくらい待ってね</p>
+        </div>
+      </section>
+
+      <section class="carousel-slide spot-slide" aria-label="いちおし商品">
+        <div class="slide-card spot-card">
+          <img class="spot-img" src="/assets/img/kosukuma-sticker-main-480.webp" alt="こすくまくんステッカー">
+          <div class="spot-copy">
+            <h2 class="slide-title">ぼくのいちおし</h2>
+            <p>こすくまくんステッカー。はっても はがしても、ぼくはぼくだよ</p>
+            <p class="spot-price">¥780<span class="tax">（税込）</span></p>
+            <a class="btn btn-ghost" href="/products/sticker.html">くわしく見る</a>
+          </div>
+        </div>
+      </section>
     </div>
-  </section>
+    <button class="carousel-arrow prev" type="button" aria-label="前のスライド">‹</button>
+    <button class="carousel-arrow next" type="button" aria-label="次のスライド">›</button>
+    <div class="carousel-dots" role="tablist" aria-label="スライド切り替え"></div>
+    <button class="carousel-pause" type="button" aria-label="自動再生を止める" aria-pressed="false">II</button>
+  </div>
 
   <!-- 商品一覧 -->
   <section class="section reveal" id="products">

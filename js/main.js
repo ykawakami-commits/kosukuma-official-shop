@@ -1,10 +1,12 @@
 // js/main.js — エントリポイント
 import { initUI } from './ui.js';
 import { initWhimsy } from './fx/whimsy.js';
+import { initCarousel } from './fx/carousel.js';
 import { isMobile, prefersReducedMotion } from './fx/motion.js';
 
 initUI();
 const band = initWhimsy();
+initCarousel('hero-carousel');
 
 // コマアニメ遅延ロード（公式ルール: 同一アニメは1ページ1個まで）
 // prefers-reduced-motion 時はアニメを起動しない（静止画像のまま。前庭障害系 a11y）

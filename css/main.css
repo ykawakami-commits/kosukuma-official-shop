@@ -64,7 +64,7 @@ h1, h2, h3, .product-name, .faq-item summary {
 
 /* ── お知らせバー（公式感: 重要告知1件） ── */
 .announce-bar {
-  background: var(--ink); color: var(--paper);
+  background: var(--pink-deep); color: #fff;
   text-align: center; font-size: var(--fs-small);
   padding: var(--space-2) var(--gutter);
   text-wrap: balance; /* ぶら下がり1文字を防ぐ */
@@ -72,21 +72,28 @@ h1, h2, h3, .product-name, .faq-item summary {
 /* 句読点単位でしか折り返さないインラインブロック（アナウンス等の短文用） */
 .u-ib { display: inline-block; }
 
-/* ── ヘッダー（ちいかわ式3ゾーン: 挨拶・ロゴ・アイコン） ── */
+/* ── ヘッダー（秘密基地の画像帯にUIが浮かぶ、ちいかわ式3ゾーン） ── */
 .site-header {
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--gutter);
-  background: var(--cream);
-  border-bottom: 2px solid var(--cream-deep);
+  padding: var(--space-3) var(--gutter);
+  background-image: var(--hero-bg); /* 秘密基地（ドット絵キャンプ）。時間帯で昼/夕/夜に変わる */
+  background-size: cover; background-position: center 30%;
+  image-rendering: pixelated;
+  border-bottom: 2px solid var(--pink-deep);
 }
 .header-greeting {
   justify-self: start;
   background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
   font-size: var(--fs-small); padding: var(--space-1) var(--space-3); line-height: 1.4;
 }
-.header-logo { justify-self: center; display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--ink); }
-.header-logo img { width: 48px; height: 48px; }
+.header-logo {
+  justify-self: center; display: flex; align-items: center; gap: var(--space-2);
+  text-decoration: none; color: var(--ink);
+  background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-l);
+  padding: var(--space-1) var(--space-3);
+}
+.header-logo img { width: 40px; height: 40px; }
 .header-logo .logo-text { font-weight: 700; font-size: var(--fs-h3); }
 .header-logo .logo-official {
   font-size: var(--fs-label); color: var(--paper); background: var(--green-deep);
@@ -126,6 +133,54 @@ h1, h2, h3, .product-name, .faq-item summary {
   margin: 0; padding: var(--space-2) var(--gutter); font-size: var(--fs-small);
 }
 
+/* ── ヒーローカルーセル（ちいかわ式3枚。1枚目に聖域の金平糖） ── */
+.carousel { position: relative; overflow: hidden; }
+.carousel-track { position: relative; height: clamp(320px, 30vw, 400px); }
+.carousel-slide {
+  position: absolute; inset: 0;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--dur-base), visibility var(--dur-base);
+}
+.carousel-slide.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
+.carousel-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-content);
+  width: 40px; height: 40px; border-radius: 999px;
+  border: 2px solid var(--brown-dark); background: var(--paper); color: var(--ink);
+  font-size: 1.4rem; line-height: 1; display: grid; place-items: center; padding: 0 0 2px;
+}
+.carousel-arrow.prev { left: var(--space-2); }
+.carousel-arrow.next { right: var(--space-2); }
+.carousel-dots {
+  position: absolute; bottom: var(--space-2); left: 50%; transform: translateX(-50%);
+  display: flex; gap: var(--space-1); z-index: var(--z-content);
+}
+.carousel-dot {
+  width: 10px; height: 10px; border-radius: 999px; padding: 0;
+  border: 1px solid var(--brown-dark); background: var(--paper);
+}
+.carousel-dot[aria-current="true"] { background: var(--pink-deep); }
+.carousel-pause {
+  position: absolute; right: var(--space-2); bottom: var(--space-2); z-index: var(--z-content);
+  width: 32px; height: 32px; border-radius: var(--radius-s);
+  border: 2px solid var(--brown-dark); background: var(--paper); color: var(--ink); font-weight: 700;
+  font-size: var(--fs-label); padding: 0;
+}
+.slide-card {
+  position: absolute; inset: var(--space-4) var(--gutter);
+  max-width: 640px; margin: 0 auto;
+  background: var(--paper); border: 2px solid var(--pink-deep); border-radius: var(--radius-l);
+  box-shadow: var(--shadow-pop); padding: var(--space-4);
+  overflow: auto;
+}
+.slide-title { font-size: var(--fs-h3); color: var(--pink-dark); margin-bottom: var(--space-2); }
+.slide-list { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); font-size: var(--fs-small); }
+.slide-note { margin-top: var(--space-2); color: var(--ink-sub); font-size: var(--fs-small); }
+.spot-card { display: flex; align-items: center; gap: var(--space-4); }
+.spot-img { width: clamp(120px, 30%, 220px); border-radius: var(--radius-m); background: var(--cream); }
+.spot-copy { min-width: 0; }
+.spot-copy p { font-size: var(--fs-small); }
+.spot-price { font-family: var(--font-num); font-size: var(--fs-price); font-weight: 700; }
+
 /* ── ヒーロー（ドット絵背景×公式こすくま×聖域金平糖） ── */
 .hero { position: relative; overflow: hidden; }
 .hero-fx {
@@ -135,21 +190,22 @@ h1, h2, h3, .product-name, .faq-item summary {
 #hero-3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hero-inner {
   position: relative; z-index: var(--z-content);
+  height: 100%;
   max-width: var(--content-max); margin: 0 auto;
-  padding: var(--space-5) var(--gutter);
-  display: flex; justify-content: center;
+  padding: var(--space-4) var(--gutter);
+  display: flex; justify-content: center; align-items: center;
 }
 .hero-panel {
   display: flex; align-items: center; gap: var(--space-4);
   background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-l);
   box-shadow: var(--shadow-pop);
-  padding: var(--space-4) var(--space-5);
-  max-width: 760px; width: 100%;
+  padding: var(--space-3) var(--space-4);
+  max-width: 680px; width: 100%;
 }
-#hero-kuma { width: clamp(120px, 22vw, 200px); flex: none; }
+#hero-kuma { width: clamp(110px, 18vw, 180px); flex: none; }
 .hero-copy h1 { font-size: var(--fs-hero); }
 .hero-sub { margin-top: var(--space-2); color: var(--ink-sub); }
-.hero-cta { margin-top: var(--space-4); display: inline-block; }
+.hero-cta { margin-top: var(--space-3); display: inline-block; }
 #gyro-btn {
   position: absolute; right: var(--gutter); bottom: var(--space-3); z-index: var(--z-content);
   border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
@@ -185,10 +241,10 @@ h1, h2, h3, .product-name, .faq-item summary {
 .section-lead { color: var(--ink-sub); margin-top: var(--space-2); font-size: var(--fs-small); }
 
 /* ── お知らせ（公式感: 日付＋内容の退屈なリスト。ちいかわ式INFORMATION箱） ── */
-.info-box { background: var(--cream); border: 2px solid var(--cream-deep); border-radius: var(--radius-l); padding: var(--space-4); }
+.info-box { background: #fff; border: 2px solid var(--pink); border-radius: var(--radius-l); padding: var(--space-4); }
 .info-head { text-align: center; margin-bottom: var(--space-2); }
-.info-head h2 { font-size: var(--fs-h3); color: var(--ink-sub); letter-spacing: 0.05em; }
-.news-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--cream-deep); }
+.info-head h2 { font-size: var(--fs-h3); color: var(--pink-dark); letter-spacing: 0.05em; }
+.news-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pink-soft); }
 .news-list li {
   display: flex; gap: var(--space-3); align-items: baseline;
   padding: var(--space-3) 0; border-bottom: 1px solid var(--cream-deep);
@@ -283,10 +339,10 @@ h1, h2, h3, .product-name, .faq-item summary {
 }
 .footer-box {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
-  background: var(--cream); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
+  background: var(--pink-soft); border: 2px solid var(--pink); border-radius: var(--radius-l);
   padding: var(--space-3); text-decoration: none; color: var(--ink); font-weight: 700; font-size: var(--fs-small);
 }
-.footer-box:hover { border-color: var(--brown-dark); }
+.footer-box:hover { border-color: var(--pink-deep); }
 .footer-box img { width: 48px; height: 48px; }
 .footer-band {
   margin-top: var(--space-4);
@@ -298,13 +354,14 @@ h1, h2, h3, .product-name, .faq-item summary {
 .footer-band img, .footer-band #whimsy-kuma-anim { width: clamp(110px, 20vw, 180px); flex: none; }
 #whimsy-line { font-size: var(--fs-small); max-width: 26em; }
 .footer-main {
-  background: var(--ink); color: var(--paper);
+  background: var(--cream); color: var(--ink);
+  border-top: 2px solid var(--cream-deep);
   padding: var(--space-5) var(--gutter);
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4);
   font-size: var(--fs-small);
 }
-.footer-main a { color: var(--cream); }
-.footer-main h3 { font-size: var(--fs-small); color: var(--cream-deep); margin-bottom: var(--space-2); letter-spacing: 0.08em; }
+.footer-main a { color: var(--green-deep); }
+.footer-main h3 { font-size: var(--fs-small); color: var(--pink-dark); margin-bottom: var(--space-2); letter-spacing: 0.08em; }
 .footer-main ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
 .footer-copy { text-align: center; color: var(--ink-sub); font-size: var(--fs-label); padding: var(--space-3); background: var(--paper); }
 
@@ -419,15 +476,20 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
   .card-actions { flex-direction: column; align-items: stretch; }
   .card-actions .btn { width: 100%; }
   .trust-strip { grid-template-columns: repeat(2, 1fr); }
+  .carousel-track { height: 84vw; min-height: 300px; }
+  .slide-card { inset: var(--space-3) var(--gutter); padding: var(--space-3); }
+  .spot-card { gap: var(--space-2); }
+  .spot-img { width: 34%; }
   .hero-inner { padding: var(--space-3) var(--gutter); }
   .hero-panel { padding: var(--space-3); gap: var(--space-2); }
   #hero-kuma { width: 96px; }
-  .hero-cta { margin-top: var(--space-3); }
+  .hero-cta { margin-top: var(--space-2); }
   .site-header { grid-template-columns: auto 1fr auto; }
   .header-greeting { display: none; }
   .header-actions a.icon-btn { display: none; } /* Xボタンはフッターボックスにあるのでモバイルでは畳む */
+  .header-actions .icon-btn { padding: var(--space-1) var(--space-2); font-size: var(--fs-label); }
   .header-logo { justify-self: start; }
-  .header-logo img { width: 36px; height: 36px; }
+  .header-logo img { width: 32px; height: 32px; }
   .header-logo .logo-text { font-size: var(--fs-small); white-space: nowrap; }
   .footer-band { flex-direction: column; text-align: center; gap: var(--space-2); }
   #cart-drawer { max-width: 100vw; }
