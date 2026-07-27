@@ -254,13 +254,13 @@ h1, h2, h3, .product-name, .faq-item summary {
 
 /* ── 商品グリッド（標準EC・退屈。ちいかわ式白カード＋contain画像） ── */
 .product-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
 }
 .product-card {
-  background: var(--paper); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
+  background: #fff; border: 2px solid var(--pink); border-radius: var(--radius-l);
   overflow: hidden; box-shadow: var(--shadow-card); display: flex; flex-direction: column;
 }
-.product-media { position: relative; display: block; background: var(--cream); aspect-ratio: 1; }
+.product-media { position: relative; display: block; background: #fff; aspect-ratio: 1; }
 .product-media img { width: 100%; height: 100%; object-fit: contain; padding: var(--space-2); }
 .status-chip {
   position: absolute; left: var(--space-2); top: var(--space-2);
@@ -276,13 +276,13 @@ h1, h2, h3, .product-name, .faq-item summary {
 }
 .product-body { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
 .product-name {
-  font-size: var(--fs-body);
+  font-size: 0.8125rem; /* ちいかわ実測 13px */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .product-name a { color: var(--ink); text-decoration: none; }
 .product-name a:hover { text-decoration: underline; }
-.product-oneliner { color: var(--ink-sub); font-size: var(--fs-small); min-height: 2.6em; }
-.product-price { font-family: var(--font-num); font-size: var(--fs-price); font-weight: 700; text-align: right; }
+.product-oneliner { color: var(--ink-sub); font-size: var(--fs-label); min-height: 2.6em; }
+.product-price { font-family: var(--font-num); font-size: 1rem; font-weight: 700; text-align: right; }
 .tax { font-size: var(--fs-label); color: var(--ink-sub); font-weight: 400; }
 [data-stock-note] { font-size: var(--fs-label); color: var(--ink-sub); }
 .card-actions { margin-top: auto; display: flex; gap: var(--space-2); align-items: center; }
@@ -459,11 +459,11 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
   .product-detail { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .card-actions { flex-direction: column; align-items: stretch; }
   .card-actions .btn { width: 100%; padding: var(--space-2) var(--space-3); font-size: var(--fs-label); min-height: 40px; }
   .trust-strip { grid-template-columns: repeat(2, 1fr); }
-  .carousel-track { height: 84vw; min-height: 300px; }
+  .carousel-track { height: 380px; } /* ちいかわ実測値 */
   .slide-card { inset: var(--space-3) var(--gutter); padding: var(--space-3); }
   .spot-card { gap: var(--space-2); }
   .spot-img { width: 34%; }
@@ -471,11 +471,15 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
   .hero-panel { padding: var(--space-3); gap: var(--space-2); }
   #hero-kuma { width: 96px; }
   .hero-cta { margin-top: var(--space-2); }
-  .site-header { grid-template-columns: auto 1fr auto; }
+  /* ちいかわ式モバイルヘッダー: ハンバーガー左・ロゴ中央・カート右（48px 1fr 48px） */
+  .site-header { grid-template-columns: 48px 1fr 48px; padding: var(--space-2) 15px; }
   .header-greeting { display: none; }
+  .header-actions { display: contents; }
   .header-actions a.icon-btn { display: none; } /* Xボタンはフッターボックスにあるのでモバイルでは畳む */
-  .header-actions .icon-btn { padding: var(--space-1) var(--space-2); font-size: var(--fs-label); }
-  .header-logo { justify-self: start; }
+  .header-actions .icon-btn { padding: var(--space-1) var(--space-2); font-size: var(--fs-label); justify-self: center; }
+  .header-actions #menu-btn { order: -1; justify-self: start; }
+  .header-actions #cart-toggle { justify-self: end; }
+  .header-logo { justify-self: center; }
   .header-logo img { width: 32px; height: 32px; }
   .header-logo .logo-text { font-size: var(--fs-small); white-space: nowrap; }
   .footer-band { flex-direction: column; text-align: center; gap: var(--space-2); }
