@@ -1,0 +1,3510 @@
+{
+ "_meta": {
+  "project": "kosukuma-official-shop",
+  "branch": "renewal-v2",
+  "generatedAt": "2026-07-28T04:20:42.791Z",
+  "generatedBy": "content inventory (find断片は生成時に全件出現回数検証済み)",
+  "format": {
+   "entry": "{ id, label, page, section, type, value, valueHtml?, note?, related?, file?, find?, group?, }",
+   "single": "group無し: file + find(文字列)。find は対象ファイルに正確に1回出現する既存断片",
+   "group": "group:true: find は [{file, find, count, form?}] の配列。各 find はそのファイルに count 回ちょうど出現し、保存時は全出現を同時置換する（連動グループ）",
+   "form": "plain=地のテキスト / html=<wbr>や.u-ibマークアップ入り / dict-key,dict-value=ui.js辞書（キー=plain形・値=html形、両形を必ず同時更新） / jsonld-number=JSON-LDの数値表現",
+   "type": "text=プレーン文言 / html=マークアップ含む(保存時タグ構造維持・要エスケープ箇所は自動エスケープ) / attr=alt・aria-label・meta content等の属性値 / js=JS文字列リテラル(クォートを壊さない) / js-template=テンプレートリテラル(${...}プレースホルダ削除禁止) / jsonld=JSON-LD文字列値",
+   "validation": "編集サーバは起動時に全エントリの find がファイルに期待回数ちょうど出現するか検証し、崩れたエントリは『要再スキャン』表示にする（黙って壊さない）",
+   "backup": "保存のたびに変更前ファイルを tools/edit/backups/<timestamp>/ にコピーしてから書き込む"
+  },
+  "readOnlyTargets": [
+   "legal/ 配下（特商法・プライバシーポリシー）— 対象外・読み取り専用表示",
+   "js/config.js — PRODUCT_HANDLES（Shopify紐付けキー）・送料閾値。編集UIからは変更禁止",
+   "js/storefront.js / js/cart.js の非文言部分（GraphQL・ロジック）",
+   "HTML の data-handle 属性（Shopify handle。商品名エントリの find はこれに触れない設計）"
+  ],
+  "excludedAsNonUserVisible": [
+   "js/storefront.js 'Storefront APIに届かなかった' — 内部Errorメッセージ。画面には出ず ui.js の汎用トーストに変換される",
+   "meta twitter:site @Kosu_dot_kuma — アカウント設定値（機能）",
+   "canonical / og:url / og:image のURL — 文言ではない（og:image は image-slots.json 参照）",
+   "JSON-LD の availability / 送料額 / 返品日数等の構造化値 — 機能値（価格のみ価格エントリに連動収載）",
+   "ヘッダーカートバッジ '0' — JSが常時上書き",
+   "nav-band / footer-box の img alt=\"\" — 装飾画像の空alt（意味はラベル文字が担う設計。DS準拠）",
+   "お知らせ3件目の装飾括弧（） — 中身は common.footer.mailText / index.contactInfo がカバー",
+   "js/kuma-anim.js / js/fx/motion.js / js/main.js — ユーザー向け文言なし（検証済み）"
+  ]
+ },
+ "entries": [
+  {
+   "id": "common.announce",
+   "label": "アナウンスバー（送料無料告知）",
+   "page": "共通",
+   "section": "アナウンスバー",
+   "type": "html",
+   "value": "¥5,000以上で送料無料だよ。ぼくが運ぶわけじゃないけどね",
+   "valueHtml": "<span class=\"u-ib\">¥5,000以上で送料無料だよ。</span><span class=\"u-ib\">ぼくが運ぶわけじゃないけどね</span>",
+   "note": "送料無料閾値5,000円は js/config.js FREE_SHIPPING_THRESHOLD_JPY・特商法とも連動（数字を変える時は要同時更新）",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<div class=\"announce-bar\"><span class=\"u-ib\">¥5,000以上で送料無料だよ。</span><span class=\"u-ib\">ぼくが運ぶわけじゃないけどね</span></div>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<div class=\"announce-bar\"><span class=\"u-ib\">¥5,000以上で送料無料だよ。</span><span class=\"u-ib\">ぼくが運ぶわけじゃないけどね</span></div>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<div class=\"announce-bar\"><span class=\"u-ib\">¥5,000以上で送料無料だよ。</span><span class=\"u-ib\">ぼくが運ぶわけじゃないけどね</span></div>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<div class=\"announce-bar\"><span class=\"u-ib\">¥5,000以上で送料無料だよ。</span><span class=\"u-ib\">ぼくが運ぶわけじゃないけどね</span></div>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.skiplink",
+   "label": "スキップリンク",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "text",
+   "value": "本文へスキップ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">本文へスキップ</a>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">本文へスキップ</a>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">本文へスキップ</a>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">本文へスキップ</a>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.greeting",
+   "label": "ヘッダー挨拶",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "html",
+   "value": "いらっしゃい。見るだけでもいいよ",
+   "valueHtml": "いらっしゃい。<br>見るだけでもいいよ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<p class=\"header-greeting\">いらっしゃい。<br>見るだけでもいいよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p class=\"header-greeting\">いらっしゃい。<br>見るだけでもいいよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p class=\"header-greeting\">いらっしゃい。<br>見るだけでもいいよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p class=\"header-greeting\">いらっしゃい。<br>見るだけでもいいよ</p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.logoAlt",
+   "label": "ヘッダーロゴ画像alt",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "attr",
+   "value": "こすくまくん",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "alt=\"こすくまくん\" width=\"48\" height=\"48\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"こすくまくん\" width=\"48\" height=\"48\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"こすくまくん\" width=\"48\" height=\"48\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"こすくまくん\" width=\"48\" height=\"48\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.logoText",
+   "label": "ロゴ店名",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "text",
+   "value": "こすくまくんのおみせ",
+   "related": [
+    "index.head.title",
+    "index.hero.h1"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"logo-text\">こすくまくんのおみせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"logo-text\">こすくまくんのおみせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"logo-text\">こすくまくんのおみせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"logo-text\">こすくまくんのおみせ</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.official",
+   "label": "「公式」バッジ",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "text",
+   "value": "公式",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"logo-official\">公式</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"logo-official\">公式</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"logo-official\">公式</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"logo-official\">公式</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.label.koushikiX",
+   "label": "「公式X」ラベル（ヘッダー＋フッター箱・連動）",
+   "page": "共通",
+   "section": "ヘッダー/フッター",
+   "type": "text",
+   "value": "公式X",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "</svg>公式X</a>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "</svg>公式X</a>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "</svg>公式X</a>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "</svg>公式X</a>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "<span>公式X</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span>公式X</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span>公式X</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span>公式X</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "index.header.xAriaLabel",
+   "label": "ヘッダーXリンク aria-label（トップ版）",
+   "page": "index",
+   "section": "ヘッダー",
+   "type": "attr",
+   "value": "公式X（旧Twitter）",
+   "file": "index.html",
+   "find": "aria-label=\"公式X（旧Twitter）\""
+  },
+  {
+   "id": "products.header.xAriaLabel",
+   "label": "ヘッダーXリンク aria-label（商品ページ版）",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "attr",
+   "value": "公式X",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "aria-label=\"公式X\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "aria-label=\"公式X\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "aria-label=\"公式X\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.cartOpenAria",
+   "label": "カートボタン aria-label",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "attr",
+   "value": "カートを開く",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "aria-label=\"カートを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "aria-label=\"カートを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "aria-label=\"カートを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "aria-label=\"カートを開く\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.label.register",
+   "label": "「レジ」ラベル（ヘッダー＋カートドロワー見出し・連動）",
+   "page": "共通",
+   "section": "ヘッダー/カート",
+   "type": "text",
+   "value": "レジ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "</svg>レジ<span",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "</svg>レジ<span",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "</svg>レジ<span",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "</svg>レジ<span",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>レジ</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h2>レジ</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h2>レジ</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h2>レジ</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.header.menuAria",
+   "label": "メニューボタン aria-label",
+   "page": "共通",
+   "section": "ヘッダー",
+   "type": "attr",
+   "value": "メニューを開く",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "aria-label=\"メニューを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "aria-label=\"メニューを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "aria-label=\"メニューを開く\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "aria-label=\"メニューを開く\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.label.menu",
+   "label": "「メニュー」ラベル（ボタン＋ダイアログ見出し＋aria・連動)",
+   "page": "共通",
+   "section": "ヘッダー/メニュー",
+   "type": "text",
+   "value": "メニュー",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "</svg>メニュー</button>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "</svg>メニュー</button>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "</svg>メニュー</button>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "</svg>メニュー</button>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>メニュー</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h2>メニュー</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h2>メニュー</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h2>メニュー</h2>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "<dialog id=\"menu-dialog\" aria-label=\"メニュー\">",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<dialog id=\"menu-dialog\" aria-label=\"メニュー\">",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<dialog id=\"menu-dialog\" aria-label=\"メニュー\">",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<dialog id=\"menu-dialog\" aria-label=\"メニュー\">",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.aria",
+   "label": "ナビバンド aria-label",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "attr",
+   "value": "サイト内ナビゲーション",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "aria-label=\"サイト内ナビゲーション\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "aria-label=\"サイト内ナビゲーション\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "aria-label=\"サイト内ナビゲーション\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "aria-label=\"サイト内ナビゲーション\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.products",
+   "label": "ナビ「売ってるもの」（ナビ＋メニュー＋トップ見出し・連動）",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "text",
+   "value": "売ってるもの",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">売ってるもの</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">売ってるもの</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">売ってるもの</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">売ってるもの</a>",
+     "count": 2
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>売ってるもの</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.news",
+   "label": "ナビ「お知らせ」（ナビ＋メニュー＋トップ見出し・連動）",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "text",
+   "value": "お知らせ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">お知らせ</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">お知らせ</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">お知らせ</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">お知らせ</a>",
+     "count": 2
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>お知らせ</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.about",
+   "label": "ナビ「こすくまくんについて」（連動）",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "text",
+   "value": "こすくまくんについて",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">こすくまくんについて</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">こすくまくんについて</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">こすくまくんについて</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">こすくまくんについて</a>",
+     "count": 2
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>こすくまくんについて</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.guide",
+   "label": "ナビ「とどくまでの話」（ナビ＋メニュー＋フッター規約＋フッター箱＋トップ見出し・連動）",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "text",
+   "value": "とどくまでの話",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">とどくまでの話</a>",
+     "count": 3
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">とどくまでの話</a>",
+     "count": 3
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">とどくまでの話</a>",
+     "count": 3
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">とどくまでの話</a>",
+     "count": 3
+    },
+    {
+     "file": "index.html",
+     "find": "<span>とどくまでの話</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span>とどくまでの話</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span>とどくまでの話</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span>とどくまでの話</span>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "<h2>とどくまでの話</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.nav.faq",
+   "label": "ナビ「よくある質問」（ナビ＋メニュー＋フッター箱・連動）",
+   "page": "共通",
+   "section": "ナビゲーション",
+   "type": "text",
+   "value": "よくある質問",
+   "related": [
+    "index.faq.heading"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">よくある質問</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">よくある質問</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">よくある質問</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">よくある質問</a>",
+     "count": 2
+    },
+    {
+     "file": "index.html",
+     "find": "<span>よくある質問</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span>よくある質問</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span>よくある質問</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span>よくある質問</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.noticeLine",
+   "label": "発送告知行",
+   "page": "共通",
+   "section": "告知",
+   "type": "text",
+   "value": "※発送は注文から3〜5営業日だよ※",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<p class=\"notice-line\">※発送は注文から3〜5営業日だよ※</p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p class=\"notice-line\">※発送は注文から3〜5営業日だよ※</p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p class=\"notice-line\">※発送は注文から3〜5営業日だよ※</p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p class=\"notice-line\">※発送は注文から3〜5営業日だよ※</p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.contactBox",
+   "label": "フッター箱「お問い合わせ」",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "お問い合わせ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span>お問い合わせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span>お問い合わせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span>お問い合わせ</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span>お問い合わせ</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.whimsyDefault",
+   "label": "フッターバンド一言（初期値）",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "……",
+   "note": "表示時は js/fx/whimsy.js の時間帯文言（js.whimsy.*）で上書きされる",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<p id=\"whimsy-line\">……</p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p id=\"whimsy-line\">……</p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p id=\"whimsy-line\">……</p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p id=\"whimsy-line\">……</p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.whimsyImgAlt",
+   "label": "フッターバンドこすくま画像alt",
+   "page": "共通",
+   "section": "フッター",
+   "type": "attr",
+   "value": "こすくまくん",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "alt=\"こすくまくん\" width=\"160\" height=\"160\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"こすくまくん\" width=\"160\" height=\"160\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"こすくまくん\" width=\"160\" height=\"160\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"こすくまくん\" width=\"160\" height=\"160\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.opsHeading",
+   "label": "フッター見出し「運営」",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "運営",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<h3>運営</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h3>運営</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h3>運営</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h3>運営</h3>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.company",
+   "label": "会社名（フッター運営＋コピーライト＋JSON-LD・連動）",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "株式会社こす.くま",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "株式会社こす.くま<br>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "株式会社こす.くま<br>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "株式会社こす.くま<br>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "株式会社こす.くま<br>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "u-nw\">株式会社こす.くま</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "u-nw\">株式会社こす.くま</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "u-nw\">株式会社こす.くま</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "u-nw\">株式会社こす.くま</span>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "\"name\": \"株式会社こす.くま\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.address",
+   "label": "運営住所",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "東京都目黒区東山3丁目7-11 大橋会館205",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<br>東京都目黒区東山3丁目7-11 大橋会館205<br>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<br>東京都目黒区東山3丁目7-11 大橋会館205<br>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<br>東京都目黒区東山3丁目7-11 大橋会館205<br>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<br>東京都目黒区東山3丁目7-11 大橋会館205<br>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.mailText",
+   "label": "メールアドレス表記（フッター/お知らせ/FAQ・連動）",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "info@kosukuma.com",
+   "note": "表記のみ。mailto: の宛先や再入荷リンクの subject は対象外（機能）",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">info@kosukuma.com</a>",
+     "count": 3
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">info@kosukuma.com</a>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">info@kosukuma.com</a>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">info@kosukuma.com</a>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.snsHeading",
+   "label": "フッター見出し「公式SNS」",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "公式SNS",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<h3>公式SNS</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h3>公式SNS</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h3>公式SNS</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h3>公式SNS</h3>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.xLink",
+   "label": "フッターXリンク文言",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "X（旧Twitter）@Kosu_dot_kuma",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">X（旧Twitter）@Kosu_dot_kuma</a>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">X（旧Twitter）@Kosu_dot_kuma</a>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">X（旧Twitter）@Kosu_dot_kuma</a>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">X（旧Twitter）@Kosu_dot_kuma</a>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.snsNote",
+   "label": "フッターSNS一言",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "ぼくの日々はこっちだよ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<li>ぼくの日々はこっちだよ</li>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<li>ぼくの日々はこっちだよ</li>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<li>ぼくの日々はこっちだよ</li>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<li>ぼくの日々はこっちだよ</li>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.rulesHeading",
+   "label": "フッター見出し「お店のルール」",
+   "page": "共通",
+   "section": "フッター",
+   "type": "text",
+   "value": "お店のルール",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<h3>お店のルール</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h3>お店のルール</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h3>お店のルール</h3>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h3>お店のルール</h3>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.footer.tokushoho",
+   "label": "「特定商取引法に基づく表記」リンク（フッター＋メニュー・連動）",
+   "page": "共通",
+   "section": "フッター/メニュー",
+   "type": "text",
+   "value": "特定商取引法に基づく表記",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">特定商取引法に基づく表記</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">特定商取引法に基づく表記</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">特定商取引法に基づく表記</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">特定商取引法に基づく表記</a>",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "common.footer.privacy",
+   "label": "「プライバシーポリシー」リンク（フッター＋メニュー・連動）",
+   "page": "共通",
+   "section": "フッター/メニュー",
+   "type": "text",
+   "value": "プライバシーポリシー",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">プライバシーポリシー</a>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">プライバシーポリシー</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">プライバシーポリシー</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">プライバシーポリシー</a>",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "common.footer.copy",
+   "label": "コピーライト後半の一言",
+   "page": "共通",
+   "section": "フッター",
+   "type": "html",
+   "value": "この店の言葉はぜんぶ、ぼくが言ってるよ。間違ってたらごめんね",
+   "valueHtml": "<span class=\"u-ib\">この店の言葉はぜんぶ、</span><span class=\"u-ib\">ぼくが言ってるよ。</span><span class=\"u-ib\">間違ってたらごめんね</span>",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "／ <span class=\"u-ib\">この店の言葉はぜんぶ、</span><span class=\"u-ib\">ぼくが言ってるよ。</span><span class=\"u-ib\">間違ってたらごめんね</span></p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "／ <span class=\"u-ib\">この店の言葉はぜんぶ、</span><span class=\"u-ib\">ぼくが言ってるよ。</span><span class=\"u-ib\">間違ってたらごめんね</span></p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "／ <span class=\"u-ib\">この店の言葉はぜんぶ、</span><span class=\"u-ib\">ぼくが言ってるよ。</span><span class=\"u-ib\">間違ってたらごめんね</span></p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "／ <span class=\"u-ib\">この店の言葉はぜんぶ、</span><span class=\"u-ib\">ぼくが言ってるよ。</span><span class=\"u-ib\">間違ってたらごめんね</span></p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.dialog.close",
+   "label": "「とじる」（メニュー/カート両ダイアログ・連動）",
+   "page": "共通",
+   "section": "ダイアログ",
+   "type": "text",
+   "value": "とじる",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "</svg>とじる</button>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "</svg>とじる</button>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "</svg>とじる</button>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "</svg>とじる</button>",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "common.cart.aria",
+   "label": "カートドロワー aria-label",
+   "page": "共通",
+   "section": "カート",
+   "type": "attr",
+   "value": "カート",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<dialog id=\"cart-drawer\" aria-label=\"カート\">",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<dialog id=\"cart-drawer\" aria-label=\"カート\">",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<dialog id=\"cart-drawer\" aria-label=\"カート\">",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<dialog id=\"cart-drawer\" aria-label=\"カート\">",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.cart.emptyImgAlt",
+   "label": "カート空画像alt",
+   "page": "共通",
+   "section": "カート",
+   "type": "attr",
+   "value": "レジ係のこすくまくん",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "alt=\"レジ係のこすくまくん\"",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"レジ係のこすくまくん\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"レジ係のこすくまくん\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"レジ係のこすくまくん\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.cart.emptyText",
+   "label": "カート空メッセージ",
+   "page": "共通",
+   "section": "カート",
+   "type": "html",
+   "value": "まだ何も入ってないよ。ぼくの店、見るだけでもいいんだよ。ぼくもよくやる",
+   "valueHtml": "<span class=\"u-ib\">まだ何も入ってないよ。</span><span class=\"u-ib\">ぼくの店、</span><span class=\"u-ib\">見るだけでもいいんだよ。</span><span class=\"u-ib\">ぼくもよくやる</span>",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"u-ib\">まだ何も入ってないよ。</span><span class=\"u-ib\">ぼくの店、</span><span class=\"u-ib\">見るだけでもいいんだよ。</span><span class=\"u-ib\">ぼくもよくやる</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"u-ib\">まだ何も入ってないよ。</span><span class=\"u-ib\">ぼくの店、</span><span class=\"u-ib\">見るだけでもいいんだよ。</span><span class=\"u-ib\">ぼくもよくやる</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"u-ib\">まだ何も入ってないよ。</span><span class=\"u-ib\">ぼくの店、</span><span class=\"u-ib\">見るだけでもいいんだよ。</span><span class=\"u-ib\">ぼくもよくやる</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"u-ib\">まだ何も入ってないよ。</span><span class=\"u-ib\">ぼくの店、</span><span class=\"u-ib\">見るだけでもいいんだよ。</span><span class=\"u-ib\">ぼくもよくやる</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.cart.total",
+   "label": "「合計」ラベル",
+   "page": "共通",
+   "section": "カート",
+   "type": "text",
+   "value": "合計",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span>合計</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span>合計</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span>合計</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span>合計</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.cart.checkout",
+   "label": "「レジにすすむ」ボタン",
+   "page": "共通",
+   "section": "カート",
+   "type": "text",
+   "value": "レジにすすむ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">レジにすすむ</button>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">レジにすすむ</button>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">レジにすすむ</button>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">レジにすすむ</button>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.cart.note",
+   "label": "ドロワー注記（Shopify委任）",
+   "page": "共通",
+   "section": "カート",
+   "type": "text",
+   "value": "ここから先はShopifyさんの担当だよ。ぼくより確かだよ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<p class=\"drawer-note\">ここから先はShopifyさんの担当だよ。ぼくより確かだよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p class=\"drawer-note\">ここから先はShopifyさんの担当だよ。ぼくより確かだよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p class=\"drawer-note\">ここから先はShopifyさんの担当だよ。ぼくより確かだよ</p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p class=\"drawer-note\">ここから先はShopifyさんの担当だよ。ぼくより確かだよ</p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.checked.heading",
+   "label": "見出し「最近チェックした商品」",
+   "page": "共通",
+   "section": "最近チェック",
+   "type": "text",
+   "value": "最近チェックした商品",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<h2>最近チェックした商品</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h2>最近チェックした商品</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h2>最近チェックした商品</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h2>最近チェックした商品</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.checked.cap",
+   "label": "英字キャプション CHECKED ITEMS",
+   "page": "共通",
+   "section": "最近チェック",
+   "type": "text",
+   "value": "CHECKED ITEMS",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<p class=\"section-cap\">CHECKED ITEMS</p>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p class=\"section-cap\">CHECKED ITEMS</p>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p class=\"section-cap\">CHECKED ITEMS</p>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p class=\"section-cap\">CHECKED ITEMS</p>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.related.heading",
+   "label": "見出し「他の商品」",
+   "page": "共通",
+   "section": "関連商品",
+   "type": "text",
+   "value": "他の商品",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "<h2>他の商品</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h2>他の商品</h2>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h2>他の商品</h2>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.breadcrumb.aria",
+   "label": "パンくず aria-label",
+   "page": "共通",
+   "section": "パンくず",
+   "type": "attr",
+   "value": "パンくず",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "aria-label=\"パンくず\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "aria-label=\"パンくず\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "aria-label=\"パンくず\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.breadcrumb.home",
+   "label": "パンくず「おみせ」",
+   "page": "共通",
+   "section": "パンくず",
+   "type": "text",
+   "value": "おみせ",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": ">おみせ</a> › ",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">おみせ</a> › ",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">おみせ</a> › ",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.spec.shipping",
+   "label": "スペック表: 発送",
+   "page": "共通",
+   "section": "スペック表",
+   "type": "html",
+   "value": "発送｜注文から3〜5営業日で発送",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "<tr><th>発送</th><td>注文から3〜5営業日で発送</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<tr><th>発送</th><td>注文から3〜5営業日で発送</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<tr><th>発送</th><td>注文から3〜5営業日で発送</td></tr>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.spec.postage",
+   "label": "スペック表: 送料",
+   "page": "共通",
+   "section": "スペック表",
+   "type": "html",
+   "value": "送料｜全国一律500円（5,000円以上で無料）",
+   "note": "金額は特商法・announce・js/config.js と連動する数字",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "<tr><th>送料</th><td>全国一律500円（5,000円以上で無料）</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<tr><th>送料</th><td>全国一律500円（5,000円以上で無料）</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<tr><th>送料</th><td>全国一律500円（5,000円以上で無料）</td></tr>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.spec.returns",
+   "label": "スペック表: 返品",
+   "page": "共通",
+   "section": "スペック表",
+   "type": "html",
+   "value": "返品｜到着後7日以内",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "<tr><th>返品</th><td>到着後7日以内</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<tr><th>返品</th><td>到着後7日以内</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<tr><th>返品</th><td>到着後7日以内</td></tr>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.spec.payment",
+   "label": "スペック表: 支払い",
+   "page": "共通",
+   "section": "スペック表",
+   "type": "html",
+   "value": "支払い｜Shopifyのページでお支払い",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "<tr><th>支払い</th><td>Shopifyのページでお支払い</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<tr><th>支払い</th><td>Shopifyのページでお支払い</td></tr>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<tr><th>支払い</th><td>Shopifyのページでお支払い</td></tr>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "products.guideKumaAlt",
+   "label": "案内係こすくま画像alt",
+   "page": "共通",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "案内係のこすくまくん",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"案内係のこすくまくん\"",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"案内係のこすくまくん\"",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"案内係のこすくまくん\"",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "product.sticker.name",
+   "label": "商品名: こすくまくんステッカー（カード/見出し/alt/パンくず/JSON-LD・連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "こすくまくんステッカー",
+   "note": "data-handle=\"こすくまくんステッカー\"（Shopify紐付けキー）と sticker.html の title/meta/og、index のいちおしスライド（index.spot.lead）は別管理。名前を変える時はそれらも要確認",
+   "related": [
+    "sticker.head.title",
+    "sticker.head.description",
+    "index.spot.lead"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "\"name\": \"こすくまくんステッカー\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": "alt=\"こすくまくんステッカー\"",
+     "count": 2,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": ">こすくまくんステッカー</a>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "\"name\": \"こすくまくんステッカー\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": " › こすくまくんステッカー</nav>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<h1>こすくまくんステッカー</h1>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"こすくまくんステッカー\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"こすくまくんステッカー\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">こすくまくんステッカー</a>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"こすくまくんステッカー\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">こすくまくんステッカー</a>",
+     "count": 1,
+     "form": "plain"
+    }
+   ]
+  },
+  {
+   "id": "product.ultra.name",
+   "label": "商品名: ウルトラプレミアムTシャツ（<wbr>折返し辞書と連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "ウルトラプレミアムTシャツ",
+   "valueHtml": "ウルトラ<wbr>プレミアム<wbr>Tシャツ",
+   "note": "ui.js NAME_BREAK_HTML 辞書のキー（plain）と値（<wbr>入り）は静的カードと完全一致が必須。片方だけ変えると402px2カラムで折返しが壊れる。plain形とhtml形を必ず同時更新",
+   "related": [
+    "ultra.head.title",
+    "ultra.head.description"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "\"name\": \"ウルトラプレミアムTシャツ\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": "alt=\"ウルトラプレミアムTシャツ\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": ">ウルトラ<wbr>プレミアム<wbr>Tシャツ</a>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"ウルトラプレミアムTシャツ\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">ウルトラ<wbr>プレミアム<wbr>Tシャツ</a>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "\"name\": \"ウルトラプレミアムTシャツ\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": " › ウルトラプレミアムTシャツ</nav>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<h1>ウルトラプレミアムTシャツ</h1>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"ウルトラプレミアムTシャツ\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"ウルトラプレミアムTシャツ\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">ウルトラ<wbr>プレミアム<wbr>Tシャツ</a>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "  'ウルトラプレミアムTシャツ': 'ウルトラ<wbr>プレミアム<wbr>Tシャツ',",
+     "count": 1,
+     "form": "dict"
+    }
+   ]
+  },
+  {
+   "id": "product.helmet.name",
+   "label": "商品名: こすくまデコヘルメット（連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "こすくまデコヘルメット",
+   "note": "data-handle と deco-helmet.html の title/meta/og は別管理",
+   "related": [
+    "helmet.head.title",
+    "helmet.head.description"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "\"name\": \"こすくまデコヘルメット\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": "alt=\"こすくまデコヘルメット\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "index.html",
+     "find": ">こすくまデコヘルメット</a>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "alt=\"こすくまデコヘルメット\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">こすくまデコヘルメット</a>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "alt=\"こすくまデコヘルメット\"",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">こすくまデコヘルメット</a>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "\"name\": \"こすくまデコヘルメット\",",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": " › こすくまデコヘルメット</nav>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<h1>こすくまデコヘルメット</h1>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "alt=\"こすくまデコヘルメット\"",
+     "count": 1,
+     "form": "plain"
+    }
+   ]
+  },
+  {
+   "id": "product.sticker.oneliner",
+   "label": "ひとこと: ステッカー（静的カード＋詳細＋ui.js辞書・連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "はっても はがしても、ぼくはぼくだよ",
+   "valueHtml": "<span class=\"u-ib\">はっても はがしても、</span><span class=\"u-ib\">ぼくはぼくだよ</span>",
+   "note": "ui.js ONELINER_SEG_HTML のキーは detail-oneliner の textContent と完全一致が必須（最近チェック欄の折返しが壊れる）。plain形とhtml形（u-ib区切り）を必ず同時更新。index のいちおしスライド内にも同一html断片あり（count 2）",
+   "related": [
+    "sticker.head.description",
+    "sticker.head.ogDescription"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"u-ib\">はっても はがしても、</span><span class=\"u-ib\">ぼくはぼくだよ</span>",
+     "count": 2,
+     "form": "html"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"u-ib\">はっても はがしても、</span><span class=\"u-ib\">ぼくはぼくだよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"u-ib\">はっても はがしても、</span><span class=\"u-ib\">ぼくはぼくだよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<p class=\"detail-oneliner\">はっても はがしても、ぼくはぼくだよ</p>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "  'はっても はがしても、ぼくはぼくだよ':",
+     "count": 1,
+     "form": "dict-key"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "    '<span class=\"u-ib\">はっても はがしても、</span><span class=\"u-ib\">ぼくはぼくだよ</span>',",
+     "count": 1,
+     "form": "dict-value"
+    }
+   ]
+  },
+  {
+   "id": "product.ultra.oneliner",
+   "label": "ひとこと: Tシャツ（連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "15万円。たかい？ ぼくもそう思うよ",
+   "valueHtml": "<span class=\"u-ib\">15万円。たかい？</span> <span class=\"u-ib\">ぼくもそう思うよ</span>",
+   "note": "ui.js辞書キー＝detail-oneliner完全一致必須。ultra.balloon にも似た文言あり（別エントリ）",
+   "related": [
+    "ultra.head.description",
+    "ultra.balloon"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"u-ib\">15万円。たかい？</span> <span class=\"u-ib\">ぼくもそう思うよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"u-ib\">15万円。たかい？</span> <span class=\"u-ib\">ぼくもそう思うよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"u-ib\">15万円。たかい？</span> <span class=\"u-ib\">ぼくもそう思うよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<p class=\"detail-oneliner\">15万円。たかい？ ぼくもそう思うよ</p>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "  '15万円。たかい？ ぼくもそう思うよ':",
+     "count": 1,
+     "form": "dict-key"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "    '<span class=\"u-ib\">15万円。たかい？</span> <span class=\"u-ib\">ぼくもそう思うよ</span>',",
+     "count": 1,
+     "form": "dict-value"
+    }
+   ]
+  },
+  {
+   "id": "product.helmet.oneliner",
+   "label": "ひとこと: デコヘルメット（連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "頭はまもるよ。心はまもってくれないよ",
+   "valueHtml": "<span class=\"u-ib\">頭はまもるよ。</span><span class=\"u-ib\">心はまもってくれないよ</span>",
+   "note": "ui.js辞書キー＝detail-oneliner完全一致必須",
+   "related": [
+    "helmet.head.description"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"u-ib\">頭はまもるよ。</span><span class=\"u-ib\">心はまもってくれないよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"u-ib\">頭はまもるよ。</span><span class=\"u-ib\">心はまもってくれないよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"u-ib\">頭はまもるよ。</span><span class=\"u-ib\">心はまもってくれないよ</span>",
+     "count": 1,
+     "form": "html"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<p class=\"detail-oneliner\">頭はまもるよ。心はまもってくれないよ</p>",
+     "count": 1,
+     "form": "plain"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "  '頭はまもるよ。心はまもってくれないよ':",
+     "count": 1,
+     "form": "dict-key"
+    },
+    {
+     "file": "js/ui.js",
+     "find": "    '<span class=\"u-ib\">頭はまもるよ。</span><span class=\"u-ib\">心はまもってくれないよ</span>',",
+     "count": 1,
+     "form": "dict-value"
+    }
+   ]
+  },
+  {
+   "id": "product.sticker.price",
+   "label": "価格表示: ステッカー ¥780（静的フォールバック・連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "¥780",
+   "note": "画面表示はロード後 Shopify 実データで上書きされる（真実はShopify管理画面）。ここを変えても請求額は変わらない。JSON-LD側は数値（780）",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span data-price>¥780</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span data-price>¥780</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span data-price>¥780</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span data-price>¥780</span>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "u-nw\">¥780<span",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "\"price\": 780,",
+     "count": 1,
+     "form": "jsonld-number"
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "\"price\": 780,",
+     "count": 1,
+     "form": "jsonld-number"
+    }
+   ]
+  },
+  {
+   "id": "product.ultra.price",
+   "label": "価格表示: Tシャツ ¥150,000（連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "¥150,000",
+   "note": "同上（Shopifyが真実）。ひとこと『15万円。』（product.ultra.oneliner）とも意味連動",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span data-price>¥150,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span data-price>¥150,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span data-price>¥150,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span data-price>¥150,000</span>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "\"price\": 150000,",
+     "count": 1,
+     "form": "jsonld-number"
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "\"price\": 150000,",
+     "count": 1,
+     "form": "jsonld-number"
+    }
+   ]
+  },
+  {
+   "id": "product.helmet.price",
+   "label": "価格表示: デコヘルメット ¥109,000（連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "¥109,000",
+   "note": "同上（Shopifyが真実）",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span data-price>¥109,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span data-price>¥109,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span data-price>¥109,000</span>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span data-price>¥109,000</span>",
+     "count": 1
+    },
+    {
+     "file": "index.html",
+     "find": "\"price\": 109000,",
+     "count": 1,
+     "form": "jsonld-number"
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "\"price\": 109000,",
+     "count": 1,
+     "form": "jsonld-number"
+    }
+   ]
+  },
+  {
+   "id": "common.taxLabel",
+   "label": "「（税込）」ラベル（全価格＋ui.jsテンプレ・連動）",
+   "page": "共通",
+   "section": "商品",
+   "type": "text",
+   "value": "（税込）",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"tax\">（税込）</span>",
+     "count": 4
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "<span class=\"tax\">（税込）</span>",
+     "count": 3
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "<span class=\"tax\">（税込）</span>",
+     "count": 3
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "<span class=\"tax\">（税込）</span>",
+     "count": 3
+    },
+    {
+     "file": "js/ui.js",
+     "find": "<span class=\"tax\">（税込）</span>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.btn.addToCart",
+   "label": "「カートに入れる」ボタン（静的＋ui.js hydration/テンプレ・連動）",
+   "page": "共通",
+   "section": "購入導線",
+   "type": "text",
+   "value": "カートに入れる",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "data-add-to-cart>カートに入れる</button>",
+     "count": 1
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "data-add-to-cart>カートに入れる</button>",
+     "count": 1
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "data-add-to-cart>カートに入れる</button>",
+     "count": 1
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "data-add-to-cart>カートに入れる</button>",
+     "count": 1
+    },
+    {
+     "file": "js/ui.js",
+     "find": "data-add-to-cart>カートに入れる</button>",
+     "count": 1
+    },
+    {
+     "file": "js/ui.js",
+     "find": "btn.textContent = 'カートに入れる';",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.btn.soldout",
+   "label": "「うりきれ」表示（静的ボタン＋ui.jsボタン/チップ・連動）",
+   "page": "共通",
+   "section": "購入導線",
+   "type": "text",
+   "value": "うりきれ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": " disabled>うりきれ</button>",
+     "count": 2
+    },
+    {
+     "file": "products/sticker.html",
+     "find": " disabled>うりきれ</button>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": " disabled>うりきれ</button>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": " disabled>うりきれ</button>",
+     "count": 2
+    },
+    {
+     "file": "js/ui.js",
+     "find": "textContent = 'うりきれ';",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "common.btn.details",
+   "label": "「くわしく」リンク（静的＋ui.jsテンプレ・連動）",
+   "page": "共通",
+   "section": "購入導線",
+   "type": "text",
+   "value": "くわしく",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": ">くわしく</a>",
+     "count": 3
+    },
+    {
+     "file": "products/sticker.html",
+     "find": ">くわしく</a>",
+     "count": 2
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": ">くわしく</a>",
+     "count": 2
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": ">くわしく</a>",
+     "count": 2
+    },
+    {
+     "file": "js/ui.js",
+     "find": ">くわしく</a>",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.restock",
+   "label": "再入荷リンク（全カード＋ui.jsテンプレ・連動）",
+   "page": "共通",
+   "section": "購入導線",
+   "type": "html",
+   "value": "再入荷のお知らせを聞いてみる",
+   "valueHtml": "再入荷のお知らせを<wbr>聞いてみる",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "再入荷のお知らせを<wbr>聞いてみる",
+     "count": 3
+    },
+    {
+     "file": "products/sticker.html",
+     "find": "再入荷のお知らせを<wbr>聞いてみる",
+     "count": 3
+    },
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "再入荷のお知らせを<wbr>聞いてみる",
+     "count": 3
+    },
+    {
+     "file": "products/deco-helmet.html",
+     "find": "再入荷のお知らせを<wbr>聞いてみる",
+     "count": 3
+    },
+    {
+     "file": "js/ui.js",
+     "find": "再入荷のお知らせを<wbr>聞いてみる",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "common.stock.instock",
+   "label": "在庫チップ「あるよ」",
+   "page": "js",
+   "section": "購入導線",
+   "type": "js",
+   "value": "あるよ",
+   "file": "js/ui.js",
+   "find": "chip.textContent = 'あるよ';"
+  },
+  {
+   "id": "common.stock.note",
+   "label": "在庫メモ「戻ってきたら、ここで言うよ」",
+   "page": "js",
+   "section": "購入導線",
+   "type": "js",
+   "value": "戻ってきたら、ここで言うよ",
+   "note": "デコヘルメットの本文/吹き出しにも同じ言い回しあり（別エントリ）",
+   "related": [
+    "helmet.story",
+    "helmet.balloon"
+   ],
+   "file": "js/ui.js",
+   "find": "note.textContent = '戻ってきたら、ここで言うよ';"
+  },
+  {
+   "id": "js.cart.decreaseAria",
+   "label": "数量マイナス aria-label（テンプレート）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js-template",
+   "value": "（商品名） をへらす",
+   "note": "${...} プレースホルダ（商品名）は削除禁止",
+   "file": "js/ui.js",
+   "find": "`${line.merchandise.product.title} をへらす`"
+  },
+  {
+   "id": "js.cart.increaseAria",
+   "label": "数量プラス aria-label（テンプレート）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js-template",
+   "value": "（商品名） をふやす",
+   "note": "${...} プレースホルダ（商品名）は削除禁止",
+   "file": "js/ui.js",
+   "find": "`${line.merchandise.product.title} をふやす`"
+  },
+  {
+   "id": "js.cart.removeBtn",
+   "label": "明細削除ボタン「ぽいってする」",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "ぽいってする",
+   "file": "js/ui.js",
+   "find": "remove.textContent = 'ぽいってする';"
+  },
+  {
+   "id": "js.cart.meterRest",
+   "label": "送料メーター（あと◯円）テンプレート",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js-template",
+   "value": "あと（金額）で送料無料だよ",
+   "note": "${...} プレースホルダ（金額）は削除禁止",
+   "file": "js/ui.js",
+   "find": "`あと${formatMoney({ amount: rest, currencyCode: 'JPY' })}で送料無料だよ`"
+  },
+  {
+   "id": "js.cart.meterFree",
+   "label": "送料メーター（達成）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "送料、タダになったよ。おめでとう。ぼくも嬉しいよ",
+   "file": "js/ui.js",
+   "find": "'送料、タダになったよ。おめでとう。ぼくも嬉しいよ'"
+  },
+  {
+   "id": "js.toast.removed",
+   "label": "トースト: 削除完了",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "ぽいってしたよ",
+   "file": "js/ui.js",
+   "find": "toast('ぽいってしたよ');"
+  },
+  {
+   "id": "js.toast.clampUpdate",
+   "label": "トースト: 数量クランプ（変更時）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "それは全部は用意できなかったよ。ある分だけにしといた",
+   "file": "js/ui.js",
+   "find": "'それは全部は用意できなかったよ。ある分だけにしといた'"
+  },
+  {
+   "id": "js.toast.fail",
+   "label": "トースト: 汎用失敗（2箇所同一・連動）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "うまくいかなかったよ。もう一回ためしてみて",
+   "group": true,
+   "find": [
+    {
+     "file": "js/ui.js",
+     "find": "toast('うまくいかなかったよ。もう一回ためしてみて');",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "js.toast.checkoutNotReady",
+   "label": "トースト: レジ未準備",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "レジの用意がまだみたい。もう一回ためしてみて",
+   "file": "js/ui.js",
+   "find": "toast('レジの用意がまだみたい。もう一回ためしてみて');"
+  },
+  {
+   "id": "js.toast.loading",
+   "label": "トースト: 読み込み中",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "もうちょっと待って。いま読み込み中だよ",
+   "file": "js/ui.js",
+   "find": "toast('もうちょっと待って。いま読み込み中だよ');"
+  },
+  {
+   "id": "js.toast.added",
+   "label": "トースト: カート追加",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "カートに入れたよ",
+   "file": "js/ui.js",
+   "find": "'カートに入れたよ'"
+  },
+  {
+   "id": "js.toast.clampAdd",
+   "label": "トースト: 数量クランプ（追加時）",
+   "page": "js",
+   "section": "カートJS",
+   "type": "js",
+   "value": "それは全部は用意できなかったよ。ある分だけ入れといた",
+   "file": "js/ui.js",
+   "find": "'それは全部は用意できなかったよ。ある分だけ入れといた'"
+  },
+  {
+   "id": "js.whimsy.morning",
+   "label": "時間帯の一言: 朝（5-10時）",
+   "page": "js",
+   "section": "フッターJS",
+   "type": "js",
+   "value": "おはよう。ぼくはまだ半分ねてるよ",
+   "file": "js/fx/whimsy.js",
+   "find": "morning: 'おはよう。ぼくはまだ半分ねてるよ',"
+  },
+  {
+   "id": "js.whimsy.day",
+   "label": "時間帯の一言: 昼（10-16時）",
+   "page": "js",
+   "section": "フッターJS",
+   "type": "js",
+   "value": "昼だよ。ぼくは金平糖の食べる順番を考えてるよ",
+   "file": "js/fx/whimsy.js",
+   "find": "day: '昼だよ。ぼくは金平糖の食べる順番を考えてるよ',"
+  },
+  {
+   "id": "js.whimsy.evening",
+   "label": "時間帯の一言: 夕（16-19時）",
+   "page": "js",
+   "section": "フッターJS",
+   "type": "js",
+   "value": "夕方って、なんとなく人を褒めたくなるよ。今日も生きてたよ。えらいよ",
+   "file": "js/fx/whimsy.js",
+   "find": "evening: '夕方って、なんとなく人を褒めたくなるよ。今日も生きてたよ。えらいよ',"
+  },
+  {
+   "id": "js.whimsy.night",
+   "label": "時間帯の一言: 夜（19-5時）",
+   "page": "js",
+   "section": "フッターJS",
+   "type": "js",
+   "value": "夜だよ。焚き火の前だと本音がぽろりって出るよ。……ぼくはまあまあ楽しかったよ",
+   "file": "js/fx/whimsy.js",
+   "find": "night: '夜だよ。焚き火の前だと本音がぽろりって出るよ。……ぼくはまあまあ楽しかったよ',"
+  },
+  {
+   "id": "js.whimsy.sleepAlt",
+   "label": "昼寝こすくま alt（1割の遊び）",
+   "page": "js",
+   "section": "ヒーローJS",
+   "type": "js",
+   "value": "昼寝しているこすくまくん",
+   "file": "js/fx/whimsy.js",
+   "find": "hero.alt = '昼寝しているこすくまくん';"
+  },
+  {
+   "id": "js.carousel.dotAria",
+   "label": "カルーセルドット aria-label（テンプレート）",
+   "page": "js",
+   "section": "カルーセルJS",
+   "type": "js-template",
+   "value": "（N）枚目を表示",
+   "note": "${...} プレースホルダ（枚数）は削除禁止",
+   "file": "js/fx/carousel.js",
+   "find": "`${i + 1}枚目を表示`"
+  },
+  {
+   "id": "common.carousel.pauseAria",
+   "label": "「自動再生を止める」（HTML初期値＋carousel.js・連動）",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "自動再生を止める",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "aria-label=\"自動再生を止める\"",
+     "count": 1
+    },
+    {
+     "file": "js/fx/carousel.js",
+     "find": ": '自動再生を止める');",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "js.carousel.resumeAria",
+   "label": "「自動再生を再開する」",
+   "page": "js",
+   "section": "カルーセルJS",
+   "type": "js",
+   "value": "自動再生を再開する",
+   "file": "js/fx/carousel.js",
+   "find": "? '自動再生を再開する'"
+  },
+  {
+   "id": "common.gyro.button",
+   "label": "ジャイロボタン「かたむけてあそぶ」（HTML＋hero-3d.js復元値・連動）",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "text",
+   "value": "かたむけてあそぶ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "hidden>かたむけてあそぶ</button>",
+     "count": 1
+    },
+    {
+     "file": "js/fx/hero-3d.js",
+     "find": "= 'かたむけてあそぶ';",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "id": "js.gyro.enabled",
+   "label": "ジャイロ許可後「ころがして あそんでね」",
+   "page": "js",
+   "section": "ヒーローJS",
+   "type": "js",
+   "value": "ころがして あそんでね",
+   "file": "js/fx/hero-3d.js",
+   "find": "= 'ころがして あそんでね';"
+  },
+  {
+   "id": "js.gyro.denied",
+   "label": "ジャイロ拒否「きょかがなかったよ」",
+   "page": "js",
+   "section": "ヒーローJS",
+   "type": "js",
+   "value": "きょかがなかったよ",
+   "file": "js/fx/hero-3d.js",
+   "find": "= 'きょかがなかったよ';"
+  },
+  {
+   "id": "index.head.title",
+   "label": "トップ <title>＋og:title（連動）",
+   "page": "index",
+   "section": "head",
+   "type": "text",
+   "value": "こすくまくんのおみせ｜公式グッズショップ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "こすくまくんのおみせ｜公式グッズショップ",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "index.head.description",
+   "label": "トップ meta description＋og:description（連動）",
+   "page": "index",
+   "section": "head",
+   "type": "attr",
+   "value": "こすくまくんの公式グッズのおみせだよ。ぼくがすきなものだけ置いてあるよ。",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "content=\"こすくまくんの公式グッズのおみせだよ。ぼくがすきなものだけ置いてあるよ。\"",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "index.jsonld.storeName",
+   "label": "JSON-LD ストア名",
+   "page": "index",
+   "section": "head",
+   "type": "jsonld",
+   "value": "こすくまくんのおみせ",
+   "related": [
+    "common.header.logoText"
+   ],
+   "file": "index.html",
+   "find": "\"name\": \"こすくまくんのおみせ\","
+  },
+  {
+   "id": "index.carousel.regionAria",
+   "label": "カルーセル aria-label",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "お知らせとおすすめ",
+   "file": "index.html",
+   "find": "aria-label=\"お知らせとおすすめ\""
+  },
+  {
+   "id": "index.hero.slideAria",
+   "label": "ヒーロースライド aria-label",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "attr",
+   "value": "キービジュアル",
+   "file": "index.html",
+   "find": "aria-label=\"キービジュアル\""
+  },
+  {
+   "id": "index.hero.imgAlt",
+   "label": "ヒーローこすくま画像alt",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "attr",
+   "value": "こすくまくん",
+   "file": "index.html",
+   "find": "alt=\"こすくまくん\" width=\"200\" height=\"200\""
+  },
+  {
+   "id": "index.hero.h1",
+   "label": "ヒーロー見出し（h1）",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "html",
+   "value": "こすくまくんのおみせ",
+   "valueHtml": "こすくまくんの<wbr>おみせ",
+   "related": [
+    "common.header.logoText",
+    "index.head.title"
+   ],
+   "file": "index.html",
+   "find": "<h1>こすくまくんの<wbr>おみせ</h1>"
+  },
+  {
+   "id": "index.hero.sub",
+   "label": "ヒーローサブコピー",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "html",
+   "value": "ぼくがすきなものだけ置いてあるよ。むりに買わなくていいよ。ぼくもむりしてないから",
+   "valueHtml": "<span class=\"u-ib\">ぼくがすきなものだけ置いてあるよ。</span><span class=\"u-ib\">むりに買わなくていいよ。</span><span class=\"u-ib\">ぼくもむりしてないから</span>",
+   "file": "index.html",
+   "find": "<p class=\"hero-sub\"><span class=\"u-ib\">ぼくがすきなものだけ置いてあるよ。</span><span class=\"u-ib\">むりに買わなくていいよ。</span><span class=\"u-ib\">ぼくもむりしてないから</span></p>"
+  },
+  {
+   "id": "index.hero.cta",
+   "label": "ヒーローCTA「おみせを見る」",
+   "page": "index",
+   "section": "ヒーロー",
+   "type": "text",
+   "value": "おみせを見る",
+   "file": "index.html",
+   "find": ">おみせを見る</a>"
+  },
+  {
+   "id": "index.slide2.title",
+   "label": "スライド2見出し「発送についてのお知らせ」（aria連動）",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "text",
+   "value": "発送についてのお知らせ",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "発送についてのお知らせ",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "index.slide2.item1",
+   "label": "スライド2: 発送日数",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "html",
+   "value": "発送は注文から3〜5営業日だよ。すこし待ってね",
+   "valueHtml": "<span class=\"u-ib\">発送は注文から3〜5営業日だよ。</span><span class=\"u-ib\">すこし待ってね</span>",
+   "related": [
+    "index.news.item2",
+    "common.noticeLine"
+   ],
+   "file": "index.html",
+   "find": "<li><span class=\"u-ib\">発送は注文から3〜5営業日だよ。</span><span class=\"u-ib\">すこし待ってね</span></li>"
+  },
+  {
+   "id": "index.slide2.item2",
+   "label": "スライド2: 送料",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "html",
+   "value": "送料は全国一律500円。5,000円以上でタダになるよ",
+   "valueHtml": "<span class=\"u-ib\">送料は全国一律500円。</span><span class=\"u-ib\">5,000円以上でタダになるよ</span>",
+   "file": "index.html",
+   "find": "<li><span class=\"u-ib\">送料は全国一律500円。</span><span class=\"u-ib\">5,000円以上でタダになるよ</span></li>"
+  },
+  {
+   "id": "index.contactInfo",
+   "label": "お問い合わせ案内文（スライド2＋お知らせ・連動）",
+   "page": "index",
+   "section": "カルーセル/お知らせ",
+   "type": "html",
+   "value": "お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ",
+   "valueHtml": "<span class=\"u-ib\">お問い合わせはメールで</span><span class=\"u-ib\">24時間受け付けてるよ。</span><span class=\"u-ib\">返事は営業日に、</span><span class=\"u-ib\">中の人が書くよ</span>",
+   "related": [
+    "index.faq3.a"
+   ],
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<span class=\"u-ib\">お問い合わせはメールで</span><span class=\"u-ib\">24時間受け付けてるよ。</span><span class=\"u-ib\">返事は営業日に、</span><span class=\"u-ib\">中の人が書くよ</span>",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "index.slide2.note",
+   "label": "スライド2注記",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "html",
+   "value": "ぼくが歩いて届けるわけじゃないから、そのくらい待ってね",
+   "valueHtml": "<span class=\"u-ib\">ぼくが歩いて届けるわけじゃないから、</span><span class=\"u-ib\">そのくらい待ってね</span>",
+   "file": "index.html",
+   "find": "<p class=\"slide-note\"><span class=\"u-ib\">ぼくが歩いて届けるわけじゃないから、</span><span class=\"u-ib\">そのくらい待ってね</span></p>"
+  },
+  {
+   "id": "index.spot.aria",
+   "label": "スライド3 aria-label",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "いちおし商品",
+   "file": "index.html",
+   "find": "aria-label=\"いちおし商品\""
+  },
+  {
+   "id": "index.spot.heading",
+   "label": "スライド3見出し「ぼくのいちおし」",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "text",
+   "value": "ぼくのいちおし",
+   "file": "index.html",
+   "find": "<h2 class=\"slide-title\">ぼくのいちおし</h2>"
+  },
+  {
+   "id": "index.spot.lead",
+   "label": "スライド3 商品名呼び出し「こすくまくんステッカー。」",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "html",
+   "value": "こすくまくんステッカー。",
+   "note": "続くひとこと部分は product.sticker.oneliner が管理（このエントリは名前呼び出しのみ）",
+   "related": [
+    "product.sticker.name",
+    "product.sticker.oneliner"
+   ],
+   "file": "index.html",
+   "find": "<p><span class=\"u-ib\">こすくまくんステッカー。</span>"
+  },
+  {
+   "id": "index.spot.cta",
+   "label": "スライド3 CTA「くわしく見る」",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "text",
+   "value": "くわしく見る",
+   "file": "index.html",
+   "find": ">くわしく見る</a>"
+  },
+  {
+   "id": "index.carousel.prevAria",
+   "label": "カルーセル前へ aria-label",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "前のスライド",
+   "file": "index.html",
+   "find": "aria-label=\"前のスライド\""
+  },
+  {
+   "id": "index.carousel.nextAria",
+   "label": "カルーセル次へ aria-label",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "次のスライド",
+   "file": "index.html",
+   "find": "aria-label=\"次のスライド\""
+  },
+  {
+   "id": "index.carousel.dotsAria",
+   "label": "カルーセルドット枠 aria-label",
+   "page": "index",
+   "section": "カルーセル",
+   "type": "attr",
+   "value": "スライド切り替え",
+   "file": "index.html",
+   "find": "aria-label=\"スライド切り替え\""
+  },
+  {
+   "id": "index.products.cap",
+   "label": "英字キャプション ITEMS",
+   "page": "index",
+   "section": "商品一覧",
+   "type": "text",
+   "value": "ITEMS",
+   "file": "index.html",
+   "find": "<p class=\"section-cap\">ITEMS</p>"
+  },
+  {
+   "id": "index.products.lead",
+   "label": "商品一覧リード",
+   "page": "index",
+   "section": "商品一覧",
+   "type": "text",
+   "value": "3つだけだよ。多いと迷うでしょ。ぼくが迷うから",
+   "file": "index.html",
+   "find": "<p class=\"section-lead\">3つだけだよ。多いと迷うでしょ。ぼくが迷うから</p>"
+  },
+  {
+   "id": "index.news.cap",
+   "label": "英字キャプション INFORMATION",
+   "page": "index",
+   "section": "お知らせ",
+   "type": "text",
+   "value": "INFORMATION",
+   "file": "index.html",
+   "find": "<p class=\"section-cap\">INFORMATION</p>"
+  },
+  {
+   "id": "index.news.dates",
+   "label": "お知らせ日付（3件共通・連動）",
+   "page": "index",
+   "section": "お知らせ",
+   "type": "html",
+   "value": "2026.07.26",
+   "note": "現在3件とも同一日付のため連動グループ。個別日付にする場合は台帳の再スキャンが必要。datetime属性も同時更新すること",
+   "group": true,
+   "find": [
+    {
+     "file": "index.html",
+     "find": "<time datetime=\"2026-07-26\">2026.07.26</time>",
+     "count": 3
+    }
+   ]
+  },
+  {
+   "id": "index.news.item1",
+   "label": "お知らせ1: リニューアル",
+   "page": "index",
+   "section": "お知らせ",
+   "type": "html",
+   "value": "おみせが新しくなったよ。ぼくもまだ見慣れてなくて、ときどき迷うよ",
+   "valueHtml": "おみせが新しくなったよ。ぼくもまだ見慣れてなくて、<span class=\"u-ib\">ときどき迷うよ</span>",
+   "file": "index.html",
+   "find": "おみせが新しくなったよ。ぼくもまだ見慣れてなくて、<span class=\"u-ib\">ときどき迷うよ</span>"
+  },
+  {
+   "id": "index.news.item2",
+   "label": "お知らせ2: 発送日数",
+   "page": "index",
+   "section": "お知らせ",
+   "type": "html",
+   "value": "発送は注文から3〜5営業日だよ。すこし待ってね",
+   "valueHtml": "発送は注文から3〜5営業日だよ。<span class=\"u-ib\">すこし待ってね</span>",
+   "related": [
+    "index.slide2.item1",
+    "common.noticeLine"
+   ],
+   "file": "index.html",
+   "find": "<p>発送は注文から3〜5営業日だよ。<span class=\"u-ib\">すこし待ってね</span></p>"
+  },
+  {
+   "id": "index.about.text",
+   "label": "aboutプロフィール文",
+   "page": "index",
+   "section": "こすくまくんについて",
+   "type": "html",
+   "value": "ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。……たぶんね",
+   "valueHtml": "ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。<span class=\"u-ib\">……たぶんね</span>",
+   "file": "index.html",
+   "find": "<p class=\"about-text\">ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。<span class=\"u-ib\">……たぶんね</span></p>"
+  },
+  {
+   "id": "index.guide.postage",
+   "label": "ガイド箱: 送料",
+   "page": "index",
+   "section": "とどくまでの話",
+   "type": "html",
+   "value": "送料｜全国一律500円だよ。5,000円以上でタダになるよ",
+   "note": "金額は announce・スペック表・js/config.js と連動する数字",
+   "file": "index.html",
+   "find": "<div class=\"guide-item\"><h3>送料</h3><p>全国一律500円だよ。<span class=\"u-ib\">5,000円以上で</span><span class=\"u-ib\">タダになるよ</span></p></div>"
+  },
+  {
+   "id": "index.guide.shipping",
+   "label": "ガイド箱: 発送",
+   "page": "index",
+   "section": "とどくまでの話",
+   "type": "html",
+   "value": "発送｜注文から3〜5営業日で送るよ。そのくらい待ってね",
+   "file": "index.html",
+   "find": "<div class=\"guide-item\"><h3>発送</h3><p>注文から3〜5営業日で送るよ。<span class=\"u-ib\">そのくらい</span><span class=\"u-ib\">待ってね</span></p></div>"
+  },
+  {
+   "id": "index.guide.returns",
+   "label": "ガイド箱: 返品",
+   "page": "index",
+   "section": "とどくまでの話",
+   "type": "html",
+   "value": "返品｜届いてから7日以内なら返品できるよ。詳しくは特商法のページを見てね",
+   "file": "index.html",
+   "find": "<div class=\"guide-item\"><h3>返品</h3><p>届いてから7日以内なら返品できるよ。詳しくは<span class=\"u-nw\">特商法</span>のページを見てね</p></div>"
+  },
+  {
+   "id": "index.guide.payment",
+   "label": "ガイド箱: 支払い",
+   "page": "index",
+   "section": "とどくまでの話",
+   "type": "html",
+   "value": "支払い｜Shopifyのページで支払うよ。ぼくはお金に触らない主義だよ",
+   "file": "index.html",
+   "find": "<div class=\"guide-item\"><h3>支払い</h3><p>Shopifyのページで<span class=\"u-ib\">支払うよ。</span><span class=\"u-ib\">ぼくは</span><span class=\"u-ib\">お金に触らない</span><span class=\"u-ib\">主義だよ</span></p></div>"
+  },
+  {
+   "id": "index.faq.heading",
+   "label": "FAQ見出し",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "よくある質問と、ぼくの返事",
+   "file": "index.html",
+   "find": "<h2>よくある質問と、ぼくの返事</h2>"
+  },
+  {
+   "id": "index.faq1.q",
+   "label": "FAQ1 質問（再入荷）",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "売り切れた商品は、また入るの？",
+   "file": "index.html",
+   "find": "<summary>売り切れた商品は、また入るの？</summary>"
+  },
+  {
+   "id": "index.faq1.a",
+   "label": "FAQ1 回答",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "html",
+   "value": "たぶんね。決まったらこの店の「お知らせ」で言うよ。約束はしないよ。ぼく、約束苦手だから",
+   "file": "index.html",
+   "find": "<p class=\"faq-a\">たぶんね。決まったらこの店の「お知らせ」で<span class=\"u-ib\">言うよ。</span>約束はしないよ。ぼく、約束苦手だから</p>"
+  },
+  {
+   "id": "index.faq2.q",
+   "label": "FAQ2 質問（ギフト包装）",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "ギフト包装はできる？",
+   "file": "index.html",
+   "find": "<summary>ギフト包装はできる？</summary>"
+  },
+  {
+   "id": "index.faq2.a",
+   "label": "FAQ2 回答",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "今はできないよ。ごめんね。ぼくも不器用だから、包装も不器用なんだ",
+   "file": "index.html",
+   "find": "<p class=\"faq-a\">今はできないよ。ごめんね。ぼくも不器用だから、包装も不器用なんだ</p>"
+  },
+  {
+   "id": "index.faq3.q",
+   "label": "FAQ3 質問（問い合わせ）",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "問い合わせはどこから？",
+   "file": "index.html",
+   "find": "<summary>問い合わせはどこから？</summary>"
+  },
+  {
+   "id": "index.faq3.a",
+   "label": "FAQ3 回答（メールアドレス部分は連動エントリ側）",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "html",
+   "value": "（info@kosukuma.com） へメールしてね。24時間受け付けてるよ。返事は営業日に、中の人が書くよ",
+   "related": [
+    "common.footer.mailText",
+    "index.contactInfo"
+   ],
+   "file": "index.html",
+   "find": "</a> へメールしてね。<span class=\"u-ib\">24時間受け付けてるよ。</span><span class=\"u-ib\">返事は営業日に、</span><span class=\"u-ib\">中の人が書くよ</span></p>"
+  },
+  {
+   "id": "index.faq4.q",
+   "label": "FAQ4 質問（金平糖）",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "text",
+   "value": "金平糖は売ってないの？",
+   "file": "index.html",
+   "find": "<summary>金平糖は売ってないの？</summary>"
+  },
+  {
+   "id": "index.faq4.a",
+   "label": "FAQ4 回答",
+   "page": "index",
+   "section": "よくある質問",
+   "type": "html",
+   "value": "ぼくのだよ。売り物じゃないよ。……わけてあげたいのは山々だけどね",
+   "file": "index.html",
+   "find": "<p class=\"faq-a\">ぼくのだよ。売り物じゃないよ。……<span class=\"u-ib\">わけてあげたいのは山々だけどね</span></p>"
+  },
+  {
+   "id": "sticker.head.title",
+   "label": "ステッカー <title>＋og:title（連動）",
+   "page": "sticker",
+   "section": "head",
+   "type": "text",
+   "value": "こすくまくんステッカー｜こすくまくんのおみせ",
+   "group": true,
+   "find": [
+    {
+     "file": "products/sticker.html",
+     "find": "こすくまくんステッカー｜こすくまくんのおみせ",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "sticker.head.description",
+   "label": "ステッカー meta description",
+   "page": "sticker",
+   "section": "head",
+   "type": "attr",
+   "value": "こすくまくんステッカー。はっても はがしても、ぼくはぼくだよ。",
+   "file": "products/sticker.html",
+   "find": "content=\"こすくまくんステッカー。はっても はがしても、ぼくはぼくだよ。\""
+  },
+  {
+   "id": "sticker.head.ogDescription",
+   "label": "ステッカー og:description",
+   "page": "sticker",
+   "section": "head",
+   "type": "attr",
+   "value": "はっても はがしても、ぼくはぼくだよ。",
+   "file": "products/sticker.html",
+   "find": "content=\"はっても はがしても、ぼくはぼくだよ。\""
+  },
+  {
+   "id": "sticker.thumbs.alt1",
+   "label": "サムネ1 alt",
+   "page": "sticker",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "ステッカー 画像1",
+   "file": "products/sticker.html",
+   "find": "alt=\"ステッカー 画像1\""
+  },
+  {
+   "id": "sticker.thumbs.alt2",
+   "label": "サムネ2 alt",
+   "page": "sticker",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "ステッカー 画像2",
+   "file": "products/sticker.html",
+   "find": "alt=\"ステッカー 画像2\""
+  },
+  {
+   "id": "sticker.thumbs.alt3",
+   "label": "サムネ3 alt",
+   "page": "sticker",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "ステッカー 画像3",
+   "file": "products/sticker.html",
+   "find": "alt=\"ステッカー 画像3\""
+  },
+  {
+   "id": "sticker.story",
+   "label": "ステッカー商品ストーリー",
+   "page": "sticker",
+   "section": "商品詳細",
+   "type": "html",
+   "value": "ぼくの顔がはってある、ただのシールだよ。それなのに、はったものがちょっと元気そうに見えるの、ふしぎだよ。PCでも水筒でも、すきなところにどうぞ。はる場所は君が決めていいよ。ぼくはどこにいても、ぼくだから",
+   "file": "products/sticker.html",
+   "find": "<p class=\"detail-story\">ぼくの顔がはってある、ただのシールだよ。それなのに、はったものがちょっと元気そうに見えるの、ふしぎだよ。PCでも水筒でも、すきなところにどうぞ。はる場所は君が<span class=\"u-nw\">決めていいよ。</span>ぼくはどこにいても、ぼくだから</p>"
+  },
+  {
+   "id": "sticker.balloon",
+   "label": "案内係の吹き出し（ステッカー）",
+   "page": "sticker",
+   "section": "商品詳細",
+   "type": "html",
+   "value": "これ、ぼくのいちおしだよ。買えとは言わないけど",
+   "file": "products/sticker.html",
+   "find": "<p class=\"balloon\">これ、ぼくのいちおしだよ。<span class=\"u-ib\">買えとは言わないけど</span></p>"
+  },
+  {
+   "id": "ultra.head.title",
+   "label": "Tシャツ <title>＋og:title（連動）",
+   "page": "ultra-tshirt",
+   "section": "head",
+   "type": "text",
+   "value": "ウルトラプレミアムTシャツ｜こすくまくんのおみせ",
+   "group": true,
+   "find": [
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "ウルトラプレミアムTシャツ｜こすくまくんのおみせ",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "ultra.head.description",
+   "label": "Tシャツ meta description＋og:description（連動）",
+   "page": "ultra-tshirt",
+   "section": "head",
+   "type": "attr",
+   "value": "15万円。たかい？ ぼくもそう思うよ。",
+   "group": true,
+   "find": [
+    {
+     "file": "products/ultra-tshirt.html",
+     "find": "content=\"15万円。たかい？ ぼくもそう思うよ。\"",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "ultra.thumbs.alt1",
+   "label": "サムネ1 alt",
+   "page": "ultra-tshirt",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "Tシャツ 画像1",
+   "file": "products/ultra-tshirt.html",
+   "find": "alt=\"Tシャツ 画像1\""
+  },
+  {
+   "id": "ultra.thumbs.alt2",
+   "label": "サムネ2 alt",
+   "page": "ultra-tshirt",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "Tシャツ 画像2",
+   "file": "products/ultra-tshirt.html",
+   "find": "alt=\"Tシャツ 画像2\""
+  },
+  {
+   "id": "ultra.story",
+   "label": "Tシャツ商品ストーリー",
+   "page": "ultra-tshirt",
+   "section": "商品詳細",
+   "type": "text",
+   "value": "ぼくのからだとおなじ素材で作った……わけないよ。ふつうに、いいTシャツだよ。値段はちょっと言いすぎたかもしれない。それで売り切れたんだから、世の中おもしろいよ。ほしいって言ってくれた人たちへ。ありがとう。ぼくがいちばん驚いてるよ",
+   "file": "products/ultra-tshirt.html",
+   "find": "<p class=\"detail-story\">ぼくのからだとおなじ素材で作った……わけないよ。ふつうに、いいTシャツだよ。値段はちょっと言いすぎたかもしれない。それで売り切れたんだから、世の中おもしろいよ。ほしいって言ってくれた人たちへ。ありがとう。ぼくがいちばん驚いてるよ</p>"
+  },
+  {
+   "id": "ultra.balloon",
+   "label": "案内係の吹き出し（Tシャツ）",
+   "page": "ultra-tshirt",
+   "section": "商品詳細",
+   "type": "html",
+   "value": "たかい？ ぼくもそう思うよ。それなのに売り切れた。世の中おもしろいよ",
+   "related": [
+    "product.ultra.oneliner"
+   ],
+   "file": "products/ultra-tshirt.html",
+   "find": "<p class=\"balloon\">たかい？ ぼくもそう思うよ。<span class=\"u-ib\">それなのに売り切れた。</span><span class=\"u-ib\">世の中おもしろいよ</span></p>"
+  },
+  {
+   "id": "helmet.head.title",
+   "label": "デコヘルメット <title>＋og:title（連動）",
+   "page": "deco-helmet",
+   "section": "head",
+   "type": "text",
+   "value": "こすくまデコヘルメット｜こすくまくんのおみせ",
+   "group": true,
+   "find": [
+    {
+     "file": "products/deco-helmet.html",
+     "find": "こすくまデコヘルメット｜こすくまくんのおみせ",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "helmet.head.description",
+   "label": "デコヘルメット meta description＋og:description（連動）",
+   "page": "deco-helmet",
+   "section": "head",
+   "type": "attr",
+   "value": "頭はまもるよ。心はまもってくれないよ。",
+   "group": true,
+   "find": [
+    {
+     "file": "products/deco-helmet.html",
+     "find": "content=\"頭はまもるよ。心はまもってくれないよ。\"",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "id": "helmet.thumbs.alt1",
+   "label": "サムネ alt",
+   "page": "deco-helmet",
+   "section": "商品詳細",
+   "type": "attr",
+   "value": "デコヘルメット",
+   "file": "products/deco-helmet.html",
+   "find": "alt=\"デコヘルメット\""
+  },
+  {
+   "id": "helmet.story",
+   "label": "デコヘルメット商品ストーリー",
+   "page": "deco-helmet",
+   "section": "商品詳細",
+   "type": "html",
+   "value": "デコを守るヘルメットだよ。ぼくのデコはつるつるだけど、君のデコは大事にしてね。……いま、この子は旅に出てるよ。戻ってきたら、ここで言うよ",
+   "related": [
+    "common.stock.note"
+   ],
+   "file": "products/deco-helmet.html",
+   "find": "<p class=\"detail-story\">デコを守るヘルメットだよ。ぼくのデコはつるつるだけど、君のデコは<span class=\"u-nw\">大事にしてね。</span>……いま、この子は旅に出てるよ。戻ってきたら、ここで言うよ</p>"
+  },
+  {
+   "id": "helmet.balloon",
+   "label": "案内係の吹き出し（デコヘルメット）",
+   "page": "deco-helmet",
+   "section": "商品詳細",
+   "type": "text",
+   "value": "いま旅に出てるよ。戻ってきたら、ここで言うよ",
+   "related": [
+    "common.stock.note"
+   ],
+   "file": "products/deco-helmet.html",
+   "find": "<p class=\"balloon\">いま旅に出てるよ。戻ってきたら、ここで言うよ</p>"
+  },
+  {
+   "id": "notfound.title",
+   "label": "404 <title>",
+   "page": "404",
+   "section": "head",
+   "type": "text",
+   "value": "ページがないよ｜こすくまくんのおみせ",
+   "file": "404.html",
+   "find": "<title>ページがないよ｜こすくまくんのおみせ</title>"
+  },
+  {
+   "id": "notfound.imgAlt",
+   "label": "404画像alt",
+   "page": "404",
+   "section": "404",
+   "type": "attr",
+   "value": "地図を持って道に迷っているこすくまくん",
+   "file": "404.html",
+   "find": "alt=\"地図を持って道に迷っているこすくまくん\""
+  },
+  {
+   "id": "notfound.h1",
+   "label": "404見出し",
+   "page": "404",
+   "section": "404",
+   "type": "text",
+   "value": "そのページ、ないよ",
+   "file": "404.html",
+   "find": "<h1>そのページ、ないよ</h1>"
+  },
+  {
+   "id": "notfound.text",
+   "label": "404本文",
+   "page": "404",
+   "section": "404",
+   "type": "html",
+   "value": "ぼくもさっき探した。なかった。ページを探す旅に出たまま、ぼくもまだ戻ってないよ",
+   "valueHtml": "ぼくもさっき探した。なかった。<br><span class=\"u-ib\">ページを探す旅に出たまま、</span><span class=\"u-ib\">ぼくもまだ戻ってないよ</span>",
+   "file": "404.html",
+   "find": "<p>ぼくもさっき探した。なかった。<br><span class=\"u-ib\">ページを探す旅に出たまま、</span><span class=\"u-ib\">ぼくもまだ戻ってないよ</span></p>"
+  },
+  {
+   "id": "notfound.cta",
+   "label": "404「おみせに戻る」",
+   "page": "404",
+   "section": "404",
+   "type": "text",
+   "value": "おみせに戻る",
+   "file": "404.html",
+   "find": ">おみせに戻る</a>"
+  }
+ ]
+}

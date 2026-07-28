@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>こすくまくんのおみせ 編集ツール</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="stylesheet" href="/_edit/ui.css">
+</head>
+<body>
+<header class="topbar">
+  <img class="topbar-kuma" src="/assets/kosukuma/front.png" alt="">
+  <h1>こすくまくんのおみせ <span>編集ツール</span></h1>
+  <div class="summary" id="summary">読み込み中…</div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-active" data-tab="text">テキスト</button>
+    <button class="tab" data-tab="images">画像</button>
+    <button class="tab" data-tab="deploy">デプロイ</button>
+  </nav>
+</header>
+
+<main class="layout">
+  <section class="workspace">
+    <!-- テキストタブ -->
+    <div class="pane" id="pane-text">
+      <div class="pane-toolbar">
+        <input type="search" id="search" placeholder="文言・ラベルで絞り込み…">
+        <button class="btn btn-primary" id="save-all" disabled>変更を全部保存</button>
+      </div>
+      <p class="pane-hint">保存すると実ファイル（HTML/JS）に即反映され、右のプレビューが自動で更新されます。変更前のファイルは tools/edit/backups/ に自動退避されます。</p>
+      <div id="entry-list" class="entry-list"><p class="loading">台帳を読み込んでいます…</p></div>
+    </div>
+
+    <!-- 画像タブ -->
+    <div class="pane" id="pane-images" hidden>
+      <p class="pane-hint">こすくまくん画像が入る全スロット。アップロードすると自動でWebP/PNGに変換し、スロット寸法（srcset用の別サイズ含む）にリサイズして差し替えます。元の画像は tools/edit/backups/ に退避されます。</p>
+      <div id="slot-list" class="slot-list"><p class="loading">スロットを読み込んでいます…</p></div>
+    </div>
+
+    <!-- デプロイタブ -->
+    <div class="pane" id="pane-deploy" hidden>
+      <div class="deploy-actions">
+        <button class="btn" id="btn-e2e">E2Eテストだけ実行</button>
+        <button class="btn btn-primary" id="btn-deploy">E2E → プレビューにデプロイ</button>
+        <button class="btn btn-danger" id="btn-stop" hidden>中止</button>
+        <span class="deploy-status" id="deploy-status"></span>
+      </div>
+      <div class="deploy-info" id="deploy-info"></div>
+      <pre class="deploy-log" id="deploy-log"></pre>
+    </div>
+  </section>
+
+  <aside class="preview">
+    <div class="preview-toolbar">
+      <span id="page-buttons"></span>
+      <span class="preview-right">
+        <button class="btn btn-sm" id="device-toggle" title="スマホ幅(402px)で表示">スマホ表示</button>
+        <button class="btn btn-sm" id="reload-preview">↺ 再読込</button>
+        <a class="btn btn-sm" id="open-tab" href="/" target="_blank">別タブで開く</a>
+      </span>
+    </div>
+    <div class="preview-frame-wrap" id="frame-wrap">
+      <iframe id="preview-frame" src="/" title="サイトプレビュー"></iframe>
+    </div>
+  </aside>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+<script src="/_edit/ui.js"></script>
+</body>
+</html>
