@@ -38,6 +38,9 @@ const BG_STYLE =
 
 // ── 生成対象 ──
 const TARGETS = {
+  // ── pose:*（廃止 2026-07-28）: assets/gen は廃止済み。ライブページは assets/pose/*.webp を
+  //    参照する（背景ベタ焼き・配置先トークン色一致）。新規生成は tools/gen-poses.mjs へ。
+  //    ここの pose:* を再実行しても assets/gen に出力されるだけでサイトには反映されない。
   'pose:shopkeeper': {
     kind: 'pose', out: 'kuma-shopkeeper',
     brief: 'Kosukuma standing calmly behind a small wooden market-stall counter, front view, deadpan relaxed face, one paw resting on the counter. A tiny wooden shop stall feeling, but the stall itself is minimal so Kosukuma is the clear main subject.',
@@ -70,23 +73,25 @@ const TARGETS = {
     kind: 'bg', out: 'bg-night',
     brief: 'The same camper-van-by-the-river scene at night: deep dark blue sky with small stars, the scene lit mainly by a warm glowing campfire in front of the van and soft warm window light from the van, moonlit river reflections.',
   },
-  // ── UI素材（ボタン・アイコン。ドット絵・透過・中央は文字を載せるためフラット） ──
-  'ui:btn-primary': {
-    kind: 'ui', out: 'ui-btn-primary', width: 640,
-    brief: 'A single 16-bit pixel art rounded-rectangle button shaped like a small wooden shop sign plank: warm honey-brown wood, thick dark chocolate outline, a slightly lighter perfectly FLAT empty center panel (absolutely no text, no icons, no symbols, no decorations in the center — it is a blank area for HTML text overlay), subtle wood grain only near the edges, gentle top highlight. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
-  },
-  'ui:btn-ghost': {
-    kind: 'ui', out: 'ui-btn-ghost', width: 640,
-    brief: 'A single 16-bit pixel art rounded-rectangle button made of plain cream paper with a thin dark outline: soft warm off-white paper, perfectly FLAT empty center (absolutely no text, no icons, no decorations in the center), very subtle paper texture near the edges only. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
-  },
-  'ui:icon-cart': {
-    kind: 'ui', out: 'ui-icon-cart', width: 192,
-    brief: 'A 16-bit pixel art small wooden shopping basket icon holding a few colorful konpeito (tiny star-shaped sugar candies in pastel pink, blue, yellow, green), thick dark outline, simple and readable at favicon size, centered, transparent background.',
-  },
-  'ui:icon-menu': {
-    kind: 'ui', out: 'ui-icon-menu', width: 192,
-    brief: 'A 16-bit pixel art small wooden signpost icon with three blank horizontal wooden planks stacked on one post, warm brown wood, thick dark outline, simple and readable at favicon size, centered, transparent background.',
-  },
+  // ── UI素材（廃止 2026-07-28）: ドット/ピクセル風UIは全廃（DS §7-2-2）。
+  //    アイコンはインラインSVG（.ui-icon）、ボタンはCSS 3種規格（§6-2）に移行済みのため
+  //    ビットマップUIの再生成は禁止。参照素材は tools/refs/dot-illust/ に退避済み。
+  // 'ui:btn-primary': {
+  //   kind: 'ui', out: 'ui-btn-primary', width: 640,
+  //   brief: 'A single 16-bit pixel art rounded-rectangle button shaped like a small wooden shop sign plank: warm honey-brown wood, thick dark chocolate outline, a slightly lighter perfectly FLAT empty center panel (absolutely no text, no icons, no symbols, no decorations in the center — it is a blank area for HTML text overlay), subtle wood grain only near the edges, gentle top highlight. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
+  // },
+  // 'ui:btn-ghost': {
+  //   kind: 'ui', out: 'ui-btn-ghost', width: 640,
+  //   brief: 'A single 16-bit pixel art rounded-rectangle button made of plain cream paper with a thin dark outline: soft warm off-white paper, perfectly FLAT empty center (absolutely no text, no icons, no decorations in the center), very subtle paper texture near the edges only. Wide landscape shape roughly 3:1. Transparent background outside the button shape.',
+  // },
+  // 'ui:icon-cart': {
+  //   kind: 'ui', out: 'ui-icon-cart', width: 192,
+  //   brief: 'A 16-bit pixel art small wooden shopping basket icon holding a few colorful konpeito (tiny star-shaped sugar candies in pastel pink, blue, yellow, green), thick dark outline, simple and readable at favicon size, centered, transparent background.',
+  // },
+  // 'ui:icon-menu': {
+  //   kind: 'ui', out: 'ui-icon-menu', width: 192,
+  //   brief: 'A 16-bit pixel art small wooden signpost icon with three blank horizontal wooden planks stacked on one post, warm brown wood, thick dark outline, simple and readable at favicon size, centered, transparent background.',
+  // },
 };
 
 // ── SELECT（比較選抜）: qcLoop.ts SELECT_SYSTEM 移植 ──
@@ -175,7 +180,7 @@ async function runTarget(id) {
   const refPaths = isPose
     ? ['01-front.png', '02-threequarter.png', '04-gorogoro.png', '06-charsheet.png'].map((f) => path.join(REF_IDENTITY, f))
     : isUi
-      ? ['maptile_wood_01.png', 'nature_star_yellow.png', 'effect_kirakira_01_yellow.png', 'food_hachimitsu_01.png'].map((f) => path.join(ROOT, 'assets/dot-illust', f))
+      ? ['maptile_wood_01.png', 'nature_star_yellow.png', 'effect_kirakira_01_yellow.png', 'food_hachimitsu_01.png'].map((f) => path.join(ROOT, 'tools/refs/dot-illust', f))
       : [path.join(REF_STYLE, 'base-map-day.png')];
   const UI_STYLE =
     " STYLE: crisp 16-bit pixel art matching the reference pixel items (chunky visible pixels, thick dark outlines, limited palette), on a TRANSPARENT background (alpha channel). Absolutely NO text or letters anywhere in the image.";

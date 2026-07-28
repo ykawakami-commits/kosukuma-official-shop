@@ -22,14 +22,15 @@ js/kuma-anim.js     こすくまコマアニメ（遅延ロード。同一アニ
 js/fx/motion.js     ブレークポイント(640/900)とreduced-motionの単一情報源
 js/fx/whimsy.js     時間帯の遊び（帯判定/フッター一言/姿切替。装飾領域のみ）
 js/fx/hero-3d.js    3D金平糖物理（聖域・ヒーロー内限定。requestIdleCallbackで遅延）
-assets/gen/         生成こすくまポーズ（webp。shopkeeper/campfire/sleeping/register/guide/lost）
+assets/pose/        生成こすくまポーズ（webp。campfire/sleeping/register/guide/lost/box-*。背景は配置先トークン色ベタ焼き・PNGマスターは tools/gen-masters/）
 assets/pixel/       時間帯ドット絵背景（昼/夕/夜 × 768/1536 webp）
 assets/img/         商品画像（WebP/srcset焼き済み）
 assets/kosukuma/    公式素体・アニメフレーム
 assets/3d/          konpeito.glb（3D金平糖モデル）
 assets/vendor/      three.js等セルフホスト
 tools/optimize-images.mjs  商品画像→WebP/srcset生成（npm run images）
-tools/gen-kosukuma.mjs     ポーズ/背景の事前生成（npm run gen。サイト実行時には生成しない）
+tools/gen-kosukuma.mjs     背景の事前生成（npm run gen。pose:*は廃止 → gen-poses.mjs。サイト実行時には生成しない）
+tools/gen-poses.mjs        ポーズ生成・採用（候補生成→Read目視審査→adoptで背景スナップ+WebP化）
 tools/e2e.mjs       購入導線E2E 36項目（npm run e2e）
 _headers            キャッシュ/セキュリティヘッダ（Cloudflare Pages）
 ```

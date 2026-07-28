@@ -57,11 +57,11 @@
     <span class="logo-official">公式</span>
   </a>
   <div class="header-actions">
-    <a class="icon-btn" href="https://x.com/Kosu_dot_kuma" rel="noopener" aria-label="公式X">X</a>
+    <a class="icon-btn" href="https://x.com/Kosu_dot_kuma" rel="noopener" aria-label="公式X"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 4.5l15 15M19.5 4.5l-5 5.7M9.5 13.7l-5 5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>公式X</a>
     <button class="icon-btn" id="cart-toggle" type="button" aria-label="カートを開く">
-      <img src="/assets/gen/ui-icon-cart.webp" alt="" width="18" height="18">レジ<span class="badge" id="cart-count" hidden>0</span>
+      <svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h14l-1.4 8.2a2.2 2.2 0 0 1-2.17 1.8H8.57a2.2 2.2 0 0 1-2.17-1.8L5 9.5Z M8.8 9.5V7.8a3.2 3.2 0 0 1 6.4 0v1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>レジ<span class="badge" id="cart-count" hidden>0</span>
     </button>
-    <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く"><img src="/assets/gen/ui-icon-menu.webp" alt="" width="18" height="18">メニュー</button>
+    <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>メニュー</button>
   </div>
 </header>
 
@@ -86,7 +86,6 @@
       <div class="main-img">
         <img id="detail-main" src="/assets/img/kosukuma-sticker-main-1280.webp" alt="こすくまくんステッカー">
         <span class="status-chip" hidden></span>
-        <span data-soldout-stamp hidden></span>
       </div>
       <div class="detail-thumbs">
         <button class="detail-thumb" type="button" aria-selected="true" data-full="/assets/img/kosukuma-sticker-main-1280.webp"><img src="/assets/img/kosukuma-sticker-main-480.webp" alt="ステッカー 画像1"></button>
@@ -97,25 +96,34 @@
     <div class="detail-info">
       <h1>こすくまくんステッカー</h1>
       <p class="detail-oneliner">はっても はがしても、ぼくはぼくだよ</p>
-      <p class="detail-price"><span data-price>¥780</span><span class="tax">（税込）</span></p>
+      <p class="detail-price"><span class="u-nw"><span data-price>¥780</span><span class="tax">（税込）</span></span></p>
       <p data-stock-note></p>
-      <p class="detail-story">ぼくの顔がはってある、ただのシールだよ。それなのに、はったものがちょっと元気そうに見えるの、ふしぎだよ。PCでも水筒でも、すきなところにどうぞ。はる場所は君が決めていいよ。ぼくはどこにいても、ぼくだから</p>
+      <div class="card-actions">
+        <button class="btn btn-primary" type="button" data-add-to-cart>カートに入れる</button>
+      </div>
+      <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
+      <p class="detail-story">ぼくの顔がはってある、ただのシールだよ。それなのに、はったものがちょっと元気そうに見えるの、ふしぎだよ。PCでも水筒でも、すきなところにどうぞ。はる場所は君が<span class="u-nw">決めていいよ。</span>ぼくはどこにいても、ぼくだから</p>
       <table class="spec-table">
         <tr><th>発送</th><td>注文から3〜5営業日で発送</td></tr>
         <tr><th>送料</th><td>全国一律500円（5,000円以上で無料）</td></tr>
         <tr><th>返品</th><td>到着後7日以内</td></tr>
         <tr><th>支払い</th><td>Shopifyのページでお支払い</td></tr>
       </table>
-      <div class="card-actions">
-        <button class="btn btn-primary" type="button" data-add-to-cart>カートに入れる</button>
-      </div>
-      <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
       <div class="detail-kuma">
-        <img src="/assets/gen/kuma-guide.webp" alt="案内係のこすくまくん">
-        <p class="balloon">これ、ぼくのいちおしだよ。買えとは言わないけど</p>
+        <img src="/assets/pose/guide.webp" alt="案内係のこすくまくん">
+        <p class="balloon">これ、ぼくのいちおしだよ。<span class="u-ib">買えとは言わないけど</span></p>
       </div>
     </div>
   </article>
+
+  <!-- 最近チェックした商品（localStorage。空なら非表示） -->
+  <section class="section" id="checked" hidden>
+    <div class="section-head">
+      <h2>最近チェックした商品</h2>
+      <p class="section-cap">CHECKED ITEMS</p>
+    </div>
+    <div class="product-grid" id="checked-grid"></div>
+  </section>
 
   <!-- 他の商品 -->
   <section class="section" id="related">
@@ -127,36 +135,34 @@
         <a class="product-media" href="/products/ultra-tshirt.html">
           <img src="/assets/img/kosukuma-ultra-tshirt-1-800.webp" srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="ウルトラプレミアムTシャツ" loading="lazy">
           <span class="status-chip" hidden></span>
-          <span data-soldout-stamp hidden></span>
         </a>
         <div class="product-body">
-          <h3 class="product-name"><a href="/products/ultra-tshirt.html">ウルトラプレミアムTシャツ</a></h3>
-          <p class="product-oneliner">15万円。たかい？ ぼくもそう思うよ</p>
-          <p class="product-price"><span data-price>¥150,000</span><span class="tax">（税込）</span></p>
+          <h3 class="product-name"><a href="/products/ultra-tshirt.html">ウルトラ<wbr>プレミアム<wbr>Tシャツ</a></h3>
+          <p class="product-oneliner"><span class="u-ib">15万円。たかい？</span> <span class="u-ib">ぼくもそう思うよ</span></p>
+          <p class="product-price"><span class="u-nw"><span data-price>¥150,000</span><span class="tax">（税込）</span></span></p>
           <p data-stock-note></p>
           <div class="card-actions">
             <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
             <a class="btn btn-ghost" href="/products/ultra-tshirt.html">くわしく</a>
           </div>
-          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
         </div>
       </article>
       <article class="product-card" data-handle="こすくまデコヘルメット">
         <a class="product-media" href="/products/deco-helmet.html">
           <img src="/assets/img/kosukuma-deco-helmet-800.webp" srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="こすくまデコヘルメット" loading="lazy">
           <span class="status-chip" hidden></span>
-          <span data-soldout-stamp hidden></span>
         </a>
         <div class="product-body">
           <h3 class="product-name"><a href="/products/deco-helmet.html">こすくまデコヘルメット</a></h3>
-          <p class="product-oneliner">頭はまもるよ。心はまもってくれないよ</p>
-          <p class="product-price"><span data-price>¥109,000</span><span class="tax">（税込）</span></p>
+          <p class="product-oneliner"><span class="u-ib">頭はまもるよ。</span><span class="u-ib">心はまもってくれないよ</span></p>
+          <p class="product-price"><span class="u-nw"><span data-price>¥109,000</span><span class="tax">（税込）</span></span></p>
           <p data-stock-note></p>
           <div class="card-actions">
             <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
             <a class="btn btn-ghost" href="/products/deco-helmet.html">くわしく</a>
           </div>
-          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
         </div>
       </article>
     </div>
@@ -164,21 +170,22 @@
 </main>
 
 <footer>
+  <!-- 4箱それぞれ専用の新規生成イラスト（白 #ffffff ベタ焼き＝ box背景 --surface と継ぎ目ゼロ）。装飾画像のため alt=""（意味はラベル文字が担う） -->
   <div class="footer-boxes">
     <a class="footer-box" href="/#guide">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-shipping.webp" alt="" width="56" height="56">
       <span>とどくまでの話</span>
     </a>
     <a class="footer-box" href="/#faq">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-question.webp" alt="" width="56" height="56">
       <span>よくある質問</span>
     </a>
     <a class="footer-box" href="https://x.com/Kosu_dot_kuma" rel="noopener">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-sns.webp" alt="" width="56" height="56">
       <span>公式X</span>
     </a>
     <a class="footer-box" href="mailto:info@kosukuma.com">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-mail.webp" alt="" width="56" height="56">
       <span>お問い合わせ</span>
     </a>
   </div>
@@ -208,13 +215,13 @@
       </ul>
     </div>
   </div>
-  <p class="footer-copy">© 2026 株式会社こす.くま ／ この店の言葉はぜんぶ、ぼくが言ってるよ。間違ってたらごめんね</p>
+  <p class="footer-copy">© 2026 <span class="u-nw">株式会社こす.くま</span> ／ <span class="u-ib">この店の言葉はぜんぶ、</span><span class="u-ib">ぼくが言ってるよ。</span><span class="u-ib">間違ってたらごめんね</span></p>
 </footer>
 
 <dialog id="menu-dialog" aria-label="メニュー">
   <div class="dialog-head">
     <h2>メニュー</h2>
-    <button class="icon-btn" type="button" data-close>とじる</button>
+    <button class="icon-btn" type="button" data-close><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>とじる</button>
   </div>
   <div class="dialog-body">
     <nav>
@@ -234,12 +241,12 @@
 <dialog id="cart-drawer" aria-label="カート">
   <div class="dialog-head">
     <h2>レジ</h2>
-    <button class="icon-btn" type="button" data-close>とじる</button>
+    <button class="icon-btn" type="button" data-close><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>とじる</button>
   </div>
   <div class="dialog-body">
     <div class="cart-empty" hidden>
-      <img class="drawer-kuma" src="/assets/gen/kuma-register.webp" alt="レジ係のこすくまくん">
-      <p>まだ何も入ってないよ。ぼくの店、見るだけでもいいんだよ。ぼくもよくやる</p>
+      <img class="drawer-kuma" src="/assets/pose/register.webp" alt="レジ係のこすくまくん">
+      <p><span class="u-ib">まだ何も入ってないよ。</span><span class="u-ib">ぼくの店、</span><span class="u-ib">見るだけでもいいんだよ。</span><span class="u-ib">ぼくもよくやる</span></p>
     </div>
     <div id="cart-items"></div>
     <div id="shipping-meter" hidden>

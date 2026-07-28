@@ -27,7 +27,7 @@ export function initWhimsy() {
   // フッターの姿（夜は main.js が utouto アニメを #whimsy-kuma-anim にマウントする）
   const img = document.getElementById('whimsy-kuma-img');
   const animSlot = document.getElementById('whimsy-kuma-anim');
-  if (band === 'evening' && img) img.src = '/assets/gen/kuma-campfire.webp';
+  if (band === 'evening' && img) img.src = '/assets/pose/campfire.webp';
   if (band === 'night') {
     if (img) img.hidden = true;
     if (animSlot) animSlot.hidden = false;
@@ -37,7 +37,7 @@ export function initWhimsy() {
   if (Math.random() < 0.1) {
     const hero = document.getElementById('hero-kuma');
     if (hero) {
-      hero.src = '/assets/gen/kuma-sleeping.webp';
+      hero.src = '/assets/pose/sleeping.webp';
       hero.alt = '昼寝しているこすくまくん';
     }
   }

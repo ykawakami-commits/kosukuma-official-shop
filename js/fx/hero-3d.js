@@ -16,14 +16,45 @@
 // - 画面外に出てもデスクトップしか止めていなかった
 //   → 両モードとも IntersectionObserver で .hero が画面外なら rAF と物理を完全停止。
 
+// ─────────────────────────────────────────────────────────────────────────
+// 金平糖配置規則 v1（2026-07-28 制定 — 密度・間隔・重なりの規範）
+//
+// 1. 粒径（小粒のみ）: 粒の見かけ径は 9〜14px。14px超 = 大粒禁止（聖域）。
+//    スケールは理論式でなく実測で較正する（下の MODEL_SCALE 較正コメント参照。
+//    測定系 = tools/_measure-konpeito.mjs: canvas ON/OFF差分 → 最大内接円の直径）。
+// 2. 個数（密度）: デスクトップ 160 / モバイル 80。
+//    - デスクトップ: 高さ250pxのヒーロー帯に均一散布し「賑やかだが商品を邪魔しない」密度。
+//    - モバイル: 重力モードで床に堆積するため、粒数が多いと融合した塊が見かけ14px超の
+//      「大粒」として実測される（2026-07-28 差し戻し(b)）。床1〜2層に収まる80粒を上限とする。
+// 3. 初期配置（間隔）: 層化サンプリングで均一散布（クラスタ禁止）。散布域を
+//    ceil(sqrt(count))×ceil(count/cols) のセルに分割し、シャッフルした空きセルへ
+//    1セル1粒＋セル内±40%ジッター。純ランダムの偶発クラスタ・偏りを構造的に排除する。
+// 4. 重なり: BALL_RADIUS の物理衝突 + presim が最終的な重なりゼロを保証する。
+//    層化配置は presim の収束を速める初期値であり、衝突解決の代替ではない。
+// 5. 静止時挙動（現行挙動を規則として固定）:
+//    - デスクトップ = バネ(basePosition)+微ドリフトで漂う（クラゲモード）
+//    - モバイル = 重力落下で底に堆積。ジャイロ許可後は傾きに追従（ジャイロ連動は聖域・必須維持）
+// 6. 色: 金平糖パレット（KONPEITO_PALETTE）は fx層(z-fx=1)専用。
+//    UI層(z-content以上)への金平糖パレット持込は禁止（デザインシステム §7-4）。
+// ─────────────────────────────────────────────────────────────────────────
+
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { isMobile, onBreakpointChange } from './motion.js';
 
 // 旧実装と同じ相対パス（先頭 /assets/...）
 const MODEL_SRC = '/assets/3d/konpeito.glb';
-const MODEL_SCALE_DESKTOP = 0.35;  // 大きい粒は廃止（オーナー指示）: デスクトップも「小さい金平糖」の紙吹雪感に
-const MODEL_SCALE_MOBILE = 0.1;    // 元の小さい金平糖に復元（7bd29f3 時代の微粒・紙吹雪感）
+// スケールは理論式でなく実測で較正する（2026-07-28 批評官差し戻しの教訓）:
+// 理論式 見かけpx = scale × (キャンバス高 / 可視域4.66world単位) は GLB形状・遠近(zクランプ±0.3)・
+// 粒サイズ揺らぎ(×1.15)・重なり合成の影響で実測より約1.6倍小さく出る。
+// 実測（canvas ON/OFF差分→距離変換、tools/_measure-konpeito.mjs）: scale0.24 × 高220px で
+// 最大内接径 17.7〜20.8px を観測 → 実測係数 ≈ 74〜87px/scale（高さに比例して伸びる）。
+// 大粒禁止 = 見かけ14px上限厳守のため、上限側係数87で逆算:
+//   DESKTOP(高250px): 87×(250/220)=99px/scale → 0.13 で実測最大 10.5px（上限14px未満・余裕込み）
+//   MOBILE (高260px): 重力モードは底に積もり、粒の重なりブロブが単体より大きく測れる
+//                     （0.13で実測13.7px=余裕0.3のみ）→ 0.12 に下げて実測~12.6px相当を確保
+const MODEL_SCALE_DESKTOP = 0.13;
+const MODEL_SCALE_MOBILE = 0.12;
 
 const KONPEITO_PALETTE = [
   { color: '#5cc8e8' },  // 水色（鮮やか）
@@ -34,8 +65,10 @@ const KONPEITO_PALETTE = [
   { color: '#e8e0d8' },  // 白（少し温かみ）
 ];
 
-const DESKTOP_COUNT = 90;   // 粒を小さくした分、数で密度を出す（InstancedMeshなので描画コスト増は僅少）
-const MOBILE_COUNT = 70;    // 元の小さい粒に復元（微粒70粒・紙吹雪感）
+const DESKTOP_COUNT = 160;  // 配置規則v1 §2: 250px帯への均一散布の適正密度（InstancedMeshなので描画コストは僅少）
+// モバイルは重力モードで床(幅~402px)に積もる。200粒だと約4層に積み重なり、粒同士が融合した
+// 塊が「大粒」として実測される（差し戻し(b)の再発リスク）→ 床1〜2層に収まる80粒へ密度調整
+const MOBILE_COUNT = 80;
 
 // ── 水中物理（クラゲモード / デスクトップ） ──
 const SPRING_K = 5.0;             // ソフトバネ — ふわっと戻る（急に引き戻さない）
@@ -44,7 +77,7 @@ const SPRING_FAR_THRESHOLD = 2.0; // この距離超えたらFAR側が効く
 const DAMPING = 1.2;              // 低粘性 — 漂い続ける（クラゲ）
 const ANGULAR_DAMPING = 0.8;      // 回転もゆっくり減衰（クラゲのヒレ）
 const MAX_ANGULAR_SPEED = 3.0;    // 角速度上限
-const BALL_RADIUS = 0.12;         // デスクトップ小粒化に合わせた衝突半径（見た目スケール0.35のコア球相当）
+const BALL_RADIUS = 0.065;        // 微粒化に合わせた衝突半径（衝突球の直径=見た目スケール0.13。本番の 0.07/0.035 と同比率）
 const RESTITUTION = 0.15;         // 衝突の弾み
 const MOUSE_HIT_RADIUS = 1.5;     // マウスの打撃範囲
 const MOUSE_HIT_FORCE = 18.0;     // 打撃インパクト
@@ -53,14 +86,20 @@ const DRIFT_FORCE = 0.18;         // 水流の揺らぎ（クラゲの漂い感�
 const FIXED_DT = 1 / 120;
 
 // ── モバイル重力物理 ──
-// 元の小さい金平糖（7bd29f3 時代の微粒）に復元: スケール0.1に対しコア球0.035。
+// 本番 pages.dev モバイルの微粒仕様（衝突球の直径=見た目スケール、本番の 0.07/0.035 と同比率）。
 // 紙吹雪のように舞い、ジャイロで傾く箱の中をころがる。
-const MOBILE_BALL_RADIUS = 0.035;
+const MOBILE_BALL_RADIUS = 0.065;
 const MOBILE_DAMPING = 0.15;       // ほぼ無抵抗 — 瞬時に反応
 const MOBILE_ANGULAR_DAMPING = 0.3;
 const MOBILE_RESTITUTION = 0.7;    // 壁で弾む
 const MOBILE_GRAVITY = 40.0;       // 超重力 — 微傾きで即ザーッと流れる
 const MOBILE_MASS = 0.8;           // 超軽量 — 瞬発力MAX
+// 物理床の持ち上げ量（world単位）。床をヒーロー下端ちょうどに置くと、静止粒の中心が
+// 床+衝突半径0.065に来て、見かけ半径(≈0.07world)＋遠近(zクランプ+0.3側で×1.06)の分だけ
+// 粒の下半分が容器境界でクリップされ未完成に見える（2026-07 audit minor）。
+// 0.2world ≈ 11px（可視域4.663world / 高さ260px換算）持ち上げ、底に積もった粒を全周可視にする。
+// 個数・散布・密度・静止挙動は配置規則v1のまま（位置オフセットのみ）。
+const FLOOR_LIFT = 0.2;
 
 // プレシミュ回数（モバイルはメインスレッドブロック緩和のため200上限）
 const PRESIM_DESKTOP = 600;
@@ -276,9 +315,10 @@ class Hero3D {
 
     // .hero-fx の可視領域そのものが箱。旧実装のナビバー分オフセットは
     // 新レイアウト（ヘッダーは .hero の外）では不要なので廃止。
+    // 下の壁（床）だけ FLOOR_LIFT 上げる — 底に積もった粒が下端境界で半分欠けるのを防ぐ
     const wallDefs = [
       { x: 0, y:  h + wallThick, hx: w + 1, hy: wallThick, hz: wallDepth }, // 上
-      { x: 0, y: -h - wallThick, hx: w + 1, hy: wallThick, hz: wallDepth }, // 下
+      { x: 0, y: -h - wallThick + FLOOR_LIFT, hx: w + 1, hy: wallThick, hz: wallDepth }, // 下（床）
       { x: -w - wallThick, y: 0, hx: wallThick, hy: h + 1, hz: wallDepth }, // 左
       { x:  w + wallThick, y: 0, hx: wallThick, hy: h + 1, hz: wallDepth }, // 右
     ];
@@ -355,13 +395,26 @@ class Hero3D {
       const { halfW: hw, halfH: hh } = this._getVisibleArea();
       this._bodyHandleToIdx = new Map();
 
+      // 配置規則v1 §3: 層化サンプリング。散布域（±0.8×可視域）をセルに分割し、
+      // シャッフルしたセルへ1粒ずつ＋セル内±40%ジッター（±40%＋中心0.5でセル内に収まり、
+      // 隣接粒の中心間隔は最低0.2セル確保）。count未満の空きセルもシャッフルで散るため
+      // 端に空白帯ができない。偶発クラスタ・偏りを構造的に排除する。
+      const cols = Math.ceil(Math.sqrt(count));
+      const rows = Math.ceil(count / cols);
+      const cellW = (hw * 1.6) / cols;
+      const cellH = (hh * 1.6) / rows;
+      const cells = shuffle(Array.from({ length: cols * rows }, (_, k) => k));
+
       for (let i = 0; i < count; i++) {
         const ci = colorIndices[i];
         const meshInfo = this.instancedMeshes.find((info) => info.colorIdx === ci);
         colorInstanceMap.push({ meshInfo, localIdx: instanceCounters[ci]++ });
 
-        const bx = rand(-hw * 0.8, hw * 0.8);
-        const by = rand(-hh * 0.8, hh * 0.8);
+        const cell = cells[i];
+        const cellX = -hw * 0.8 + ((cell % cols) + 0.5) * cellW;
+        const cellY = -hh * 0.8 + (Math.floor(cell / cols) + 0.5) * cellH;
+        const bx = cellX + rand(-0.4, 0.4) * cellW;
+        const by = cellY + rand(-0.4, 0.4) * cellH;
         const bz = rand(-0.05, 0.05);
 
         const linDamp = this.mobile ? MOBILE_DAMPING : DAMPING;
@@ -590,7 +643,10 @@ class Hero3D {
       let clamped = false;
       if (pos.x < -halfW + margin) { cx = -halfW + margin; clamped = true; }
       if (pos.x >  halfW - margin) { cx =  halfW - margin; clamped = true; }
-      if (pos.y < -halfH + margin) { cy = -halfH + margin; clamped = true; }
+      // 下側のトンネリング保険は持ち上げた床面(-halfH+FLOOR_LIFT)に合わせる
+      // （旧値-halfH+marginのままだと、床を突き抜けた粒が床下に留まり半欠けで見え続ける。
+      //  静止中心は床面+0.065なので通常時にこのクランプは発火しない）
+      if (pos.y < -halfH + FLOOR_LIFT) { cy = -halfH + FLOOR_LIFT; clamped = true; }
       if (pos.y >  halfH - margin) { cy =  halfH - margin; clamped = true; }
       if (clamped) {
         o.body.setTranslation({ x: cx, y: cy, z: pos.z }, true);
@@ -673,18 +729,13 @@ class Hero3D {
         this.world.step();
       }
     } else {
-      // デスクトップ: 中心引力+衝突+壁で分散
-      const PRESIM_ATTRACTION = 3.0;
+      // デスクトップ: 衝突+壁だけで重なりを解消し、スポーン位置のまま紙吹雪として散らす。
+      // 旧・中心引力(PRESIM_ATTRACTION)は大粒時代の名残 — 微粒に掛けると全粒が
+      // 中央の .hero-panel（z-content）の裏へ集まり、1粒も見えなくなるため廃止。
       for (let step = 0; step < PRESIM_DESKTOP; step++) {
         for (const o of objs) {
           o.body.resetForces(true);
           const pos = o.body.translation();
-          const dx = -pos.x, dy = -pos.y, dz = -pos.z;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          if (dist > 0.01) {
-            const f = PRESIM_ATTRACTION / dist;
-            o.body.addForce({ x: dx * f, y: dy * f, z: dz * f }, true);
-          }
           if (Math.abs(pos.z) > 0.3) {
             const vel = o.body.linvel();
             o.body.setTranslation({ x: pos.x, y: pos.y, z: Math.sign(pos.z) * 0.3 }, true);
@@ -729,6 +780,19 @@ class Hero3D {
       const gx = Math.sin(gammaRad) * MOBILE_GRAVITY;
       const gy = -Math.sin(betaRad) * MOBILE_GRAVITY;
       this.world.gravity = { x: gx, y: gy, z: 0 };
+
+      // Rapier は world.gravity の変更ではスリープ中のボディを起こさない
+      // （2026-07-28 vendored rapier3d-compat 単体で実証: 静定→sleeping=true の球は
+      //   重力を横向きに変えても永久静止、wakeUp() 呼び出しで即流動）。
+      // モバイルは静定後に全粒が眠るため、これがないとジャイロ連動（聖域）が
+      // 「一度静止したら二度と傾きに反応しない」状態になる。
+      // 傾きが実質変化したフレームだけ眠っている粒を起こす（毎フレームwakeUpは
+      // スリープ省電力の放棄になるため差分検知。閾値0.5 ≈ 重力40の0.7°相当）。
+      const gPrev = this._lastGyroGravity;
+      if (!gPrev || Math.abs(gx - gPrev.x) + Math.abs(gy - gPrev.y) > 0.5) {
+        for (const o of objs) { if (o.body.isSleeping()) o.body.wakeUp(); }
+        this._lastGyroGravity = { x: gx, y: gy };
+      }
     }
 
     // ── マウスのワールド座標 ──

@@ -1,12 +1,12 @@
 /* css/main.css — コンポーネントCSS。トークンは css/tokens.css を使う（生値禁止） */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); /* stickyヘッダー70px下にアンカー着地 */ }
 body {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-body);
   color: var(--ink);
-  background: var(--cream);
+  background: var(--paper);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -17,14 +17,14 @@ body::before {
   background-size: cover; background-position: center top;
   image-rendering: pixelated;
 }
-/* 可読性のヴェール（世界の上に薄く掛ける） */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: -1;
-  background: var(--page-veil); pointer-events: none;
-}
+/* レイヤー分離（DS §7-1）: 半透明ヴェールは廃止。文字は必ず不透明サーフェス上に置き、
+   ドット絵の世界はヒーロー領域と .world-window の「窓」だけで見せる */
 img { max-width: 100%; height: auto; display: block; }
-a { color: var(--green-deep); }
+/* 本文リンク（§6-2 Text link）。nav・カード名リンクは各セレクタで --ink を維持 */
+a { color: var(--honey-deep); text-decoration: underline; }
 button { font-family: inherit; cursor: pointer; }
+/* フォーカス可視化（§8-2）: 全対話要素。honey面上でも墨アウトラインで視認可。フォーカス消し禁止 */
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 main { display: block; }
 h1, h2, h3 { line-height: 1.35; margin: 0; }
 p { margin: 0; }
@@ -37,6 +37,7 @@ p { margin: 0; }
      line-break: strict の禁則処理＋ text-wrap: pretty で最終行の短切れを防ぐ） ── */
 h1, h2, h3, .product-name, .faq-item summary {
   word-break: keep-all;
+  word-break: auto-phrase; /* Chrome向け漸進強化（DS §4-1）: 文節単位で折る。非対応ブラウザは keep-all のまま */
   line-break: strict;
   overflow-wrap: break-word; /* 保険: どうしても収まらない長文句のみ許す */
   text-wrap: balance;
@@ -44,11 +45,19 @@ h1, h2, h3, .product-name, .faq-item summary {
 .hero-sub, .product-oneliner, .detail-oneliner, .detail-story, .guide-item p,
 .faq-a, .news-list p, .trust-item, .about-text, .balloon, #whimsy-line,
 .footer-main li, .footer-main p, .cart-empty p, .drawer-note, .spec-table th, .spec-table td,
-.ci-title, .toast {
+.ci-title, .toast,
+.slide-list li, .slide-note, .section-lead, .notice-line, .footer-copy, .spot-copy p {
+  /* auto-phrase は本文にも掛ける（行頭助詞・文節途中折れの根絶）。
+     keep-all フォールバックは本文には置かない — 非対応ブラウザは normal のまま
+    （文全体の巨大単語化を避ける）。Chrome系のみ文節折りに漸進強化される */
+  word-break: auto-phrase;
   line-break: strict;
   overflow-wrap: break-word;
   text-wrap: pretty;
 }
+/* メール/URLリンクは行内に収まらない時だけ途中で折る（あふれ防止の最終保険。
+   直前の和文に折り返し機会があるため、収まる限りはひとかたまりで次行へ送られる） */
+.faq-a a, .news-list a, .footer-main a { overflow-wrap: anywhere; }
 /* keep-all の長文句（「Shopifyの…」「info@…」等）が grid/flex 子の min-width:auto と衝突し、
    min-content 幅で列を膨らませ横スクロール化する事故の防止（402px実測）。
    min-width:0 で縮ませ、どうしても収まらない文句だけ上の overflow-wrap 保険に任せる */
@@ -64,54 +73,62 @@ h1, h2, h3, .product-name, .faq-item summary {
 
 /* ── お知らせバー（公式感: 重要告知1件） ── */
 .announce-bar {
-  background: var(--pink-deep); color: #fff;
-  text-align: center; font-size: var(--fs-small);
-  padding: var(--space-2) var(--gutter);
+  background: var(--cream-deep); color: var(--ink); /* ink on cream-deep = 13.36 AAA（§3-2） */
+  min-height: var(--announce-h);
+  /* flex+wrap: PCでは .u-ib 2句が1行に並び44px、SPでは句読点単位で2行に折返し（min-heightが伸びる）。
+     旧gridは2句を常に各行へ積んでPCでも2段になっていた */
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; align-content: center;
+  text-align: center; font-size: var(--fs-announce);
+  padding: 0 var(--gutter); /* 縦はgrid中央寄せに任せ、44pxを厳守（SP折返し時はmin-heightが伸びる） */
+  border-bottom: var(--line-hair);
   text-wrap: balance; /* ぶら下がり1文字を防ぐ */
 }
 /* 句読点単位でしか折り返さないインラインブロック（アナウンス等の短文用） */
 .u-ib { display: inline-block; }
+/* 途中分断禁止トークン（価格+（税込）・固有名詞等）の結合 */
+.u-nw { white-space: nowrap; }
 
-/* ── ヘッダー（秘密基地の画像帯にUIが浮かぶ、ちいかわ式3ゾーン。スクロールで上端に張り付く） ── */
+/* ── ヘッダー（不透明ブランド面・ちいかわ式3ゾーン構造のみ。スクロールで上端に張り付く） ── */
 .site-header {
   position: sticky; top: 0; z-index: var(--z-header);
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--gutter);
-  background-image: var(--hero-bg); /* 秘密基地（ドット絵キャンプ）。時間帯で昼/夕/夜に変わる */
-  background-size: cover; background-position: center 30%;
-  image-rendering: pixelated;
-  border-bottom: 2px solid var(--pink-deep);
+  height: var(--header-h);
+  padding: 0 var(--header-pad-x);
+  background: var(--cream); /* §7-1: 文字ゾーンは不透明サーフェス。ドット絵はヘッダーに使わない */
+  border-bottom: 2px solid var(--ink);
 }
 .header-greeting {
   justify-self: start;
-  background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+  background: var(--paper); border: var(--line-brand); border-radius: var(--radius-m);
   font-size: var(--fs-small); padding: var(--space-1) var(--space-3); line-height: 1.4;
 }
 .header-logo {
   justify-self: center; display: flex; align-items: center; gap: var(--space-2);
   text-decoration: none; color: var(--ink);
-  background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-l);
+  background: var(--paper); border: var(--line-brand); border-radius: var(--radius-l);
   padding: var(--space-1) var(--space-3);
 }
 .header-logo img { width: 40px; height: 40px; }
 .header-logo .logo-text { font-weight: 700; font-size: var(--fs-h3); }
 .header-logo .logo-official {
-  font-size: var(--fs-label); color: var(--paper); background: var(--green-deep);
+  font-size: var(--fs-label); color: var(--surface); background: var(--wood); /* 白 on wood = 7.95 AAA（§3-2） */
   border-radius: var(--radius-s); padding: 2px 8px; letter-spacing: 0.08em;
+  flex: none; white-space: nowrap; /* flex圧縮で「公/式」と縦割れするのを禁止（402px実測） */
 }
 .header-actions { justify-self: end; display: flex; gap: var(--space-2); align-items: center; }
 .icon-btn {
   position: relative; display: inline-flex; align-items: center; gap: var(--space-1);
-  border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+  border: var(--line-brand); border-radius: var(--radius-m);
   background: var(--paper); color: var(--ink);
-  padding: var(--space-2) var(--space-3); font-size: var(--fs-small); font-weight: 700;
+  padding: var(--space-2) var(--space-3); min-height: 44px; font-size: var(--fs-label); font-weight: 700;
   text-decoration: none; white-space: nowrap;
 }
-.icon-btn img { width: 18px; height: 18px; image-rendering: pixelated; }
+/* 自作ラインアイコン（§6-4）: 表示24px・currentColor継承（hover/disabledも親色に追従） */
+.ui-icon { width: 24px; height: 24px; flex: none; display: block; }
 .badge {
   position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px;
-  border-radius: 999px; background: var(--terracotta); color: var(--paper);
+  border-radius: 999px; background: var(--notice); color: var(--paper); /* paper on notice = 実測6.09 AA（§3-2表外の新設ペア） */
   font-size: var(--fs-label); display: grid; place-items: center; padding: 0 5px;
 }
 .badge[hidden] { display: none; }
@@ -119,61 +136,70 @@ h1, h2, h3, .product-name, .faq-item summary {
 /* ── ナビ帯 ── */
 .nav-band {
   display: flex; align-items: center; gap: var(--space-3);
-  background: var(--cream-deep); padding: var(--space-2) var(--gutter);
+  height: var(--navband-h);
+  background: var(--cream); padding: var(--space-2) var(--gutter);
   overflow-x: auto;
 }
-.nav-kuma { flex: none; }
+.nav-kuma { flex: none; width: 28px; height: 28px; }
 .nav-band ul { display: flex; gap: var(--space-4); list-style: none; margin: 0; padding: 0; white-space: nowrap; }
 .nav-band a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: var(--fs-small); }
 .nav-band a:hover { text-decoration: underline; }
 
-/* ── 告知行 ── */
+/* ── 告知行（§7-1: ピクセル背景への文字直置き禁止 → 不透明の紙帯にする） ── */
 .notice-line {
-  text-align: center; color: var(--terracotta); font-weight: 700;
-  background: var(--cream); border-bottom: 2px solid var(--cream-deep);
-  margin: 0; padding: var(--space-2) var(--gutter); font-size: var(--fs-small);
+  text-align: center; color: var(--notice); font-weight: 700; /* notice on paper = 6.10 AA+（§3-2） */
+  background: var(--paper);
+  margin: 0; padding: var(--space-1) var(--gutter); font-size: var(--fs-small);
 }
 
-/* ── ヒーローカルーセル（ちいかわ式3枚。1枚目に聖域の金平糖） ── */
-.carousel { position: relative; overflow: hidden; }
-.carousel-track { position: relative; height: clamp(320px, 30vw, 400px); }
-.carousel-slide {
-  position: absolute; inset: 0;
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity var(--dur-base), visibility var(--dur-base);
+/* ── ヒーローカルーセル（ちいかわ式3枚。1枚目に聖域の金平糖。横スライド式） ── */
+.carousel { position: relative; overflow: hidden; padding-top: 16px; }
+.carousel-track {
+  display: flex;
+  /* ファーストビュー確保のための縮小値。250px = パネル実測~194px + ドット/一時停止の下部余白
+     （220pxではパネルがトラックを占有しドットがパネル枠に重なった）。
+     1366x768でカード可視高 実測112px / 1280x800で144px（要件: 80px以上） */
+  height: 250px;
+  transition: transform 500ms cubic-bezier(0, 1, 0.75, 1.1);
 }
-.carousel-slide.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
+.carousel-slide { flex: 0 0 100%; position: relative; }
 .carousel-arrow {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-content);
-  width: 40px; height: 40px; border-radius: 999px;
-  border: 2px solid var(--brown-dark); background: var(--paper); color: var(--ink);
-  font-size: 1.4rem; line-height: 1; display: grid; place-items: center; padding: 0 0 2px;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: var(--line-brand); background: var(--surface); color: var(--ink); /* 線は墨に一元化（§6-1） */
+  line-height: 1; display: grid; place-items: center; padding: 0;
 }
-.carousel-arrow.prev { left: var(--space-2); }
-.carousel-arrow.next { right: var(--space-2); }
+.carousel-arrow.prev { left: 16px; }
+.carousel-arrow.next { right: 16px; }
 .carousel-dots {
   position: absolute; bottom: var(--space-2); left: 50%; transform: translateX(-50%);
   display: flex; gap: var(--space-1); z-index: var(--z-content);
 }
 .carousel-dot {
-  width: 10px; height: 10px; border-radius: 999px; padding: 0;
-  border: 1px solid var(--brown-dark); background: var(--paper);
+  width: 8px; height: 8px; border-radius: 999px; padding: 0;
+  border: none; background: rgba(43, 33, 22, 0.25); /* 非活性も無彩グレーでなく墨の気配 */
 }
-.carousel-dot[aria-current="true"] { background: var(--pink-deep); }
+.carousel-dot[aria-current="true"] { background: var(--ink); transform: scale(1.2); }
+/* 一時停止: トラック右下の44pxオーバーレイ（通常フロー廃止で縦56px削減。
+   ドット .carousel-dots は中央寄せなので右端配置とは重ならない） */
 .carousel-pause {
-  position: absolute; right: var(--space-2); bottom: var(--space-2); z-index: var(--z-content);
-  width: 32px; height: 32px; border-radius: var(--radius-s);
-  border: 2px solid var(--brown-dark); background: var(--paper); color: var(--ink); font-weight: 700;
-  font-size: var(--fs-label); padding: 0;
+  position: absolute; right: 12px; bottom: 8px; z-index: var(--z-content);
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 5px;
+  border: var(--line-brand); background: var(--surface); color: var(--ink);
+  padding: 0;
 }
+.carousel-pause .icon-play { display: none; }
+.carousel-pause.is-active .icon-pause { display: none; }
+.carousel-pause.is-active .icon-play { display: block; }
 .slide-card {
   position: absolute; inset: var(--space-4) var(--gutter);
   max-width: 640px; margin: 0 auto;
-  background: var(--paper); border: 2px solid var(--pink-deep); border-radius: var(--radius-l);
+  background: var(--paper); border: var(--line-brand); border-radius: var(--radius-l);
   box-shadow: var(--shadow-pop); padding: var(--space-4);
   overflow: auto;
 }
-.slide-title { font-size: var(--fs-h3); color: var(--pink-dark); margin-bottom: var(--space-2); }
+.slide-title { font-size: var(--fs-h3); color: var(--wood); margin-bottom: var(--space-2); } /* wood on paper = 7.55 AAA（§3-2） */
 .slide-list { margin: 0; padding-left: 1.2em; display: grid; gap: var(--space-1); font-size: var(--fs-small); }
 .slide-note { margin-top: var(--space-2); color: var(--ink-sub); font-size: var(--fs-small); }
 .spot-card { display: flex; align-items: center; gap: var(--space-4); }
@@ -198,18 +224,20 @@ h1, h2, h3, .product-name, .faq-item summary {
 }
 .hero-panel {
   display: flex; align-items: center; gap: var(--space-4);
-  background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-l);
+  /* bg は --paper #fdf9ec 固定（pose-sleeping の焼き込み背景と一致） */
+  background: var(--paper); border: var(--line-brand); border-radius: var(--radius-l);
   box-shadow: var(--shadow-pop);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3);
   max-width: 680px; width: 100%;
 }
-#hero-kuma { width: clamp(110px, 18vw, 180px); flex: none; }
+#hero-kuma { width: clamp(88px, 12vw, 120px); flex: none; }
 .hero-copy h1 { font-size: var(--fs-hero); }
-.hero-sub { margin-top: var(--space-2); color: var(--ink-sub); }
-.hero-cta { margin-top: var(--space-3); display: inline-block; }
+/* サブコピーはfs-small: パネルを縦194px以内に収め、250pxトラック内でドット帯(下16px)と分離する */
+.hero-sub { margin-top: var(--space-1); color: var(--ink-sub); font-size: var(--fs-small); }
+.hero-cta { margin-top: var(--space-2); display: inline-block; }
 #gyro-btn {
   position: absolute; right: var(--gutter); bottom: var(--space-3); z-index: var(--z-content);
-  border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+  border: var(--line-brand); border-radius: var(--radius-m);
   background: var(--cream); color: var(--ink); padding: var(--space-2) var(--space-3);
   font-size: var(--fs-small); font-weight: 700;
 }
@@ -226,84 +254,156 @@ h1, h2, h3, .product-name, .faq-item summary {
 }
 .trust-strip .trust-item small { display: block; color: var(--ink-sub); font-weight: 400; font-size: var(--fs-label); }
 
-/* ── セクション共通 ── */
-.section { max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter) 0; }
+/* ── セクション共通（縦リズム: 上下対称72px。隣接セクションのpadding積み上げ方式） ──
+   背景はDS §7-1（レイヤー分離則）: 文字をピクセル背景に直置きしない。コンテンツゾーンは
+   全幅の不透明な紙面とし、ドット絵の世界はヒーロー領域と .world-window の「窓」だけで見せる。
+   inline padding の max() は「全幅不透明 × 内容は content-max 中央固定」を1セレクタで両立する
+   （旧 max-width:1400 + margin:auto と同一ジオメトリ。1400px超のフランク露出をゼロにする） */
+.section {
+  margin: 0;
+  padding: var(--space-7) max(var(--gutter), calc((100% - var(--content-max)) / 2 + var(--gutter)));
+  background: var(--paper);
+}
+/* 世界の窓（§7-1）: ピクセル世界を見せる全幅の帯。背景透過・テキスト/子要素なし・aria-hidden */
+.world-window { height: clamp(160px, 20vw, 280px); background: transparent; }
+/* #news のみ非対称（ちいかわ実測: INFORMATION前を深く・後を浅く） */
+#news { padding-top: 96px; padding-bottom: 24px; }
+/* 見出しは箱なしのプレーン中央テキスト2段（ちいかわ構造準拠） */
 .section-head {
-  margin: 0 auto var(--space-4); text-align: center;
-  background: var(--cream); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
-  padding: var(--space-2) var(--space-4); display: table;
+  margin: 0 auto 48px; text-align: center;
 }
 .section-head h2 { font-size: var(--fs-h2); }
-.section-head:has(.section-cap) h2 { font-size: var(--fs-h3); color: var(--ink-sub); letter-spacing: 0.05em; }
+.section-head:has(.section-cap) h2 {
+  font-size: 0.875rem; /* 指示書14px */
+  font-weight: 500;
+  color: var(--ink-sub); letter-spacing: 0.05em;
+}
 .section-cap {
-  font-family: var(--font-num); font-size: var(--fs-h2); font-weight: 700;
-  letter-spacing: 0.18em; margin-top: var(--space-1);
+  font-family: var(--font-num); /* P0で--font-numはM PLUS Rounded 1c化済み */
+  font-size: 1.625rem; /* 26px */
+  font-weight: 700;
+  letter-spacing: 0.1em; line-height: 1; margin-top: var(--space-1);
 }
 .section-lead { color: var(--ink-sub); margin-top: var(--space-2); font-size: var(--fs-small); }
 
 /* ── お知らせ（公式感: 日付＋内容の退屈なリスト。ちいかわ式INFORMATION箱） ── */
-.info-box { background: #fff; border: 2px solid var(--pink); border-radius: var(--radius-l); padding: var(--space-4); }
-.info-head { text-align: center; margin-bottom: var(--space-2); }
-.info-head h2 { font-size: var(--fs-h3); color: var(--pink-dark); letter-spacing: 0.05em; }
-.news-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pink-soft); }
-.news-list li {
-  display: flex; gap: var(--space-3); align-items: baseline;
-  padding: var(--space-3) 0; border-bottom: 1px solid var(--cream-deep);
+.info-box {
+  background: var(--surface); border: var(--line-brand);
+  border-radius: var(--radius-l); /* 角丸22pxは指示書一貫性のため維持 */
+  padding: 48px 72px; max-width: 1100px; margin-inline: auto;
 }
-.news-list time { flex: none; font-family: var(--font-num); font-size: var(--fs-small); color: var(--ink-sub); }
+.info-head { text-align: center; margin-bottom: 48px; }
+.info-head h2 {
+  /* 2段見出しの様式を館内統一（#products側 .section-head:has(.section-cap) h2 と同一: 和文14px fw500 グレー） */
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--ink-sub); letter-spacing: 0.05em;
+}
+.news-list { list-style: none; margin: 0; padding: 0; }
+.news-list li {
+  display: flex; flex-direction: column; /* DOM順 time→p で日付が上段（HTML変更不要） */
+  padding: var(--space-3) 24px;
+  border-bottom: 1px solid var(--cream-deep); /* 線色は既存トークン（--cream-deep）維持 */
+}
+.news-list li:last-child { border-bottom: none; }
+.news-list time { font-family: var(--font-num); font-size: 0.875rem; color: var(--ink-sub); margin-bottom: 0.5em; }
 
-/* ── 商品グリッド（標準EC・退屈。ちいかわ式白カード＋contain画像） ── */
+/* ── 商品グリッド（標準EC・退屈。ちいかわ式白カード＋contain画像）──
+   トップ #products / #checked / #related の全カードが同一グリッド・同一ルール:
+   PC 3列 gap12 / ≤900 2列 / ≤640 2列 gap 32×12（縦広め・ちいかわ型§6） */
 .product-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
 }
 .product-card {
-  background: #fff; border: 2px solid var(--pink); border-radius: var(--radius-l);
-  overflow: hidden; box-shadow: var(--shadow-card); display: flex; flex-direction: column;
+  background: var(--surface); border: var(--line-brand); border-radius: var(--radius-l);
+  overflow: hidden; display: flex; flex-direction: column; /* 影なし（構造準拠: 枠線のみ。線は墨に一元化 §6-1） */
+  transition: transform var(--dur-quick), box-shadow var(--dur-quick);
 }
-.product-media { position: relative; display: block; background: #fff; aspect-ratio: 1; }
-.product-media img { width: 100%; height: 100%; object-fit: contain; padding: var(--space-2); }
+/* hover は §6-1 の上限そのまま: 浮き2px + shadow-pop のみ（全カード共通） */
+.product-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop); }
+/* 画像は絶対配置で正方形を厳守（縦長画像の min-content 高さが aspect-ratio を破り
+   カードごとに画像域の高さが変わる事故の防止 — デコヘルメット800pxで実測+102px） */
+.product-media { position: relative; display: block; background: var(--surface); aspect-ratio: 1; }
+.product-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: var(--space-2); }
 .status-chip {
   position: absolute; left: var(--space-2); top: var(--space-2);
-  background: var(--paper); border: 1px solid var(--brown-dark); border-radius: 999px;
+  background: var(--paper); border: var(--line-brand); border-radius: 999px;
   font-size: var(--fs-label); font-weight: 700; padding: 2px 10px;
 }
-.status-chip.is-instock { color: var(--green-deep); }
-.status-chip.is-soldout { color: var(--terracotta); }
-[data-soldout-stamp] {
-  position: absolute; right: var(--space-2); top: var(--space-2);
-  background: var(--terracotta); color: var(--paper); border-radius: var(--radius-s);
-  font-size: var(--fs-label); font-weight: 700; padding: 3px 10px; transform: rotate(6deg);
+/* §6-3 意味論: 色だけで意味を伝えない（文言「あるよ/うりきれ」併記が担保）。
+   moss on moss-soft = 実測5.09 AA（§3-2表外の新設ペア） / disabled-text on disabled-bg = 5.20 AA */
+.status-chip.is-instock { background: var(--moss-soft); color: var(--moss); }
+.status-chip.is-soldout { background: var(--disabled-bg); color: var(--disabled-text); }
+/* 売り切れスタンプは全廃（§6-3 G7: 状態表示は .status-chip 左上ピルの1箇所のみ） */
+/* カード内部は行固定グリッド: name/oneliner/stock に高さを予約して
+   3枚のカードの .card-actions を常に同一Y座標に揃える。
+   末尾 [restock] は再入荷リンクの固定スロット（表示されてもレイアウトが跳ねない） */
+.product-body {
+  padding: var(--space-3); flex: 1;
+  display: grid;
+  grid-template-rows: [name] auto [oneliner] auto [price] auto [stock] auto [actions] 1fr [restock] minmax(1.5em, auto);
+  /* 列を minmax(0,1fr) に固定: 暗黙 auto 列だと keep-all の不可分句（<wbr>辞書に無い
+     将来の商品名等）が min-content で列ごと押し広げ、カード中身全部が右端クリップされる
+     （402px実測+20px）。列幅=カード内寸に固定し、収まらない句は各要素側の折返し保険に任せる */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
 }
-.product-body { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
 .product-name {
   font-size: 0.8125rem; /* ちいかわ実測 13px */
+  font-weight: 500;
+  line-height: 1.3; min-height: 2.6em; /* 2行分を常に予約（1行名でも高さ不変） */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .product-name a { color: var(--ink); text-decoration: none; }
 .product-name a:hover { text-decoration: underline; }
-.product-oneliner { color: var(--ink-sub); font-size: var(--fs-label); min-height: 2.6em; }
-.product-price { font-family: var(--font-num); font-size: 1rem; font-weight: 700; text-align: right; }
+/* oneliner も name と同じ「2行分固定」規律: lh1.3×2行=2.6em ちょうどに収まるよう clamp。
+   （lh1.7のままだとSPの2行折返しが3.4em＞min-heightになり actions のYが揃わない） */
+.product-oneliner {
+  color: var(--ink-sub); font-size: var(--fs-label);
+  line-height: 1.3; min-height: 2.6em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* 価格は全ビューポート同寸（§4-1: SPでも価格を縮小しない）・右揃え */
+.product-price { font-family: var(--font-num); font-size: 1.25rem; font-weight: 700; text-align: right; }
 .tax { font-size: var(--fs-label); color: var(--ink-sub); font-weight: 400; }
 [data-stock-note] { font-size: var(--fs-label); color: var(--ink-sub); }
-.card-actions { margin-top: auto; display: flex; gap: var(--space-2); align-items: center; }
-.restock-link { font-size: var(--fs-small); }
+/* 空でも「戻ってきたら、ここで言うよ」1行分（lh1.7）と同じ高さを確保（カード内整列用） */
+.product-body [data-stock-note] { min-height: 1.7em; }
+.card-actions {
+  display: grid; grid-template-columns: 1fr auto; gap: var(--space-2);
+  align-items: start; align-content: start;
+}
+/* DSタップ規格44px。売り切れ（disabled）も同寸。
+   line-height明示: <button>(UA normal)と<a>(継承1.7)で高さが3px割れるのを防ぎ両ボタン同寸に */
+.card-actions .btn { min-height: 44px; line-height: 1.4; }
+/* 再入荷リンクの語中折れ防止（402px/カード幅160px実測: 「聞い｜てみる」で折れていた）:
+   keep-all で和文を不可分にし、マークアップ側の <wbr>（…お知らせを｜聞いてみる）だけを折返し点にする。
+   .u-ib 分節は inline-block 化で <a> の下線が途切れるためテキストリンクには使わない。
+   overflow-wrap は万一セグメントが収まらない極狭幅での溢れ保険 */
+.restock-link {
+  font-size: var(--fs-small);
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: break-word;
+}
 
-/* ── ボタン（購入UIは聖域。画像生成した木の看板/紙ボタンにテキストを載せる） ── */
+/* ── ボタン（DS §6-2: 3種のみ。木目/看板ビットマップUIは全廃 — §7-2-1） ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
-  border: none; background-color: transparent;
-  background-repeat: no-repeat; background-position: center; background-size: 100% 100%;
+  border: var(--line-brand); border-radius: var(--radius-m);
+  background: var(--surface); color: var(--ink);
   font-weight: 700; font-size: var(--fs-small);
   padding: var(--space-3) var(--space-5); text-decoration: none;
   min-height: 44px; white-space: nowrap;
-  transition: transform var(--dur-quick) var(--ease-pop);
+  transition: transform var(--dur-quick) var(--ease-pop), box-shadow var(--dur-quick) var(--ease-pop);
 }
-.btn:active { transform: translateY(2px); }
-.btn-primary { background-image: url("/assets/gen/ui-btn-primary.webp"); color: var(--brown-dark); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35); }
-.btn-ghost { background-image: url("/assets/gen/ui-btn-ghost.webp"); color: var(--ink); }
+/* Primary: honey塗り + 墨枠 + 墨文字（ink on honey = 8.80 AAA。白抜き禁止 §3-2）+ 押し込み影 */
+.btn-primary { background: var(--honey); color: var(--ink); box-shadow: var(--press-shadow); }
+.btn-primary:active { transform: translateY(2px); box-shadow: var(--press-shadow-down); }
+.btn-ghost { background: var(--surface); color: var(--ink); }
+.btn-ghost:active { transform: translateY(2px); }
 .btn:disabled, .btn-primary:disabled {
-  background-image: url("/assets/gen/ui-btn-ghost.webp");
-  color: var(--disabled-text); filter: grayscale(0.7) opacity(0.8);
+  background: var(--disabled-bg); color: var(--disabled-text); border-color: var(--disabled-border);
+  box-shadow: none; transform: none;
   cursor: not-allowed;
 }
 
@@ -312,7 +412,9 @@ h1, h2, h3, .product-name, .faq-item summary {
   display: flex; gap: var(--space-4); align-items: center;
   background: var(--cream); border-radius: var(--radius-l); padding: var(--space-4);
 }
-.about-wrap .about-anim { width: clamp(120px, 24vw, 220px); flex: none; }
+/* コマアニメはネイティブ160px（全ソース中の最高解像度）を超えて表示しない — 拡大による画質劣化ゼロ */
+.about-wrap .about-anim { width: clamp(120px, 20vw, 160px); flex: none; }
+.about-wrap .about-anim img { image-rendering: auto; } /* pixelated 継承の保険（ドット絵は body::before 専用） */
 .about-text { color: var(--ink); }
 
 /* ── guide（標準ECのお買い物ガイド） ── */
@@ -329,50 +431,75 @@ h1, h2, h3, .product-name, .faq-item summary {
 .faq-item summary {
   cursor: pointer; font-weight: 700; padding: var(--space-3) 0; list-style: none;
 }
-.faq-item summary::before { content: "Q. "; color: var(--green-deep); }
+.faq-item summary::before { content: "Q. "; color: var(--moss); } /* moss on paper = 5.80 AA+（§3-2） */
 .faq-item .faq-a { padding: 0 0 var(--space-3) 1.6em; color: var(--ink-sub); font-size: var(--fs-small); }
 .faq-item .faq-a::before { content: "A. "; color: var(--honey-deep); font-weight: 700; margin-left: -2.2em; margin-right: 0.6em; }
 
 /* ── フッター（ガイドボックス＋時間帯バンド＋公式情報） ── */
+/* #faq（mainの最終セクション）の下端余白はフッター側の96pxリズムに譲る（二重余白防止） */
+#faq { padding-block-end: 0; }
+footer { background: var(--paper); } /* §7-1: フッター各層も不透明ゾーン（露出は直前の .world-window だけ） */
 .footer-boxes {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3);
-  max-width: var(--content-max); margin: 0 auto; padding: var(--space-5) var(--gutter) 0;
+  max-width: var(--content-max); margin: 0 auto; padding: 96px var(--gutter); /* ちいかわ式: 上下対称96px */
 }
+/* 白面 --surface = 専用イラスト（#ffffff ベタ焼き）と一致し継ぎ目ゼロ。ラベルは --ink（白面 15.77 AAA） */
 .footer-box {
   display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
-  background: var(--pink-soft); border: 2px solid var(--pink); border-radius: var(--radius-l);
+  background: var(--surface); border: var(--line-brand); border-radius: var(--radius-m);
   padding: var(--space-3); text-decoration: none; color: var(--ink); font-weight: 700; font-size: var(--fs-small);
+  transition: transform var(--dur-quick), box-shadow var(--dur-quick);
 }
-.footer-box:hover { border-color: var(--pink-deep); }
-.footer-box img { width: 48px; height: 48px; }
+/* hover は不透明のまま浮き2px+shadow-pop（§6-1。opacity減はコントラスト低下のため廃止）。
+   下線なしバナー型リンクのため視認手掛かりはこの浮き＋グローバル :focus-visible 墨アウトラインが担う */
+.footer-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop); }
+.footer-box img { width: 56px; height: 56px; }
+/* ラベルの行箱を整数px化（13.6px×1.7=23.12px → 24px）。箱の総高さが
+   16×2+2×2+56+8+24=124px の整数になり、SP 2x2グリッド2段目のサブピクセル描画ずれ
+   （dpr2 402px で index↔製品ページ間に出た1段割れ）を構造的に防ぐ */
+.footer-box span { line-height: 24px; }
 .footer-band {
-  margin-top: var(--space-4);
   background: var(--band-bg); color: var(--band-ink);
   display: flex; align-items: center; justify-content: center; gap: var(--space-4);
-  padding: var(--space-5) var(--gutter);
+  padding: var(--space-4) var(--gutter); /* 余白を絞って画像主体の構図に */
+  min-height: calc(240px + 2 * var(--space-4)); /* 昼(静止画240px)↔夜(アニメ160px)で帯の高さが跳ねないよう静止画基準で予約 */
   transition: background var(--dur-base);
 }
-.footer-band img, .footer-band #whimsy-kuma-anim { width: clamp(110px, 20vw, 180px); flex: none; }
+/* 静止画（front.png=596px / campfire=600pxネイティブ）: 240px×Retina2x=480 ≤ ネイティブなので劣化なし。
+   > 直下限定 — #whimsy-kuma-anim 内のコマアニメimg（160px上限）に適用しない */
+.footer-band > img { width: clamp(160px, 24vw, 240px); flex: none; }
+/* コマアニメ（utouto）はネイティブ160pxが上限 — 拡大禁止（縮小のみ640px以下で許可） */
+.footer-band #whimsy-kuma-anim { width: 160px; flex: none; }
+.footer-band #whimsy-kuma-anim img { image-rendering: auto; }
 #whimsy-line { font-size: var(--fs-small); max-width: 26em; }
 .footer-main {
-  background: var(--cream); color: var(--ink);
-  border-top: 2px solid var(--cream-deep);
-  padding: var(--space-5) var(--gutter);
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  border-top: var(--line-hair);
+  padding: 50px var(--gutter) 25px;
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+  text-align: center;
   font-size: var(--fs-small);
 }
-.footer-main a { color: var(--green-deep); }
-.footer-main h3 { font-size: var(--fs-small); color: var(--pink-dark); margin-bottom: var(--space-2); letter-spacing: 0.08em; }
-.footer-main ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
-.footer-copy { text-align: center; color: var(--ink-sub); font-size: var(--fs-label); padding: var(--space-3); background: var(--paper); }
+.footer-main h3 { font-size: var(--fs-small); color: var(--wood); margin-bottom: var(--space-2); letter-spacing: 0.08em; } /* wood on paper = 7.55 AAA */
+.footer-main ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+  font-size: 0.8125rem; /* ちいかわ実測 13px */
+}
+.footer-main li:not(:last-child)::after { content: "｜"; margin: 0 0.5em; color: var(--ink-sub); }
+/* SNSアイコン行（DOMにアイコンが入った場合の受け皿。現状はテキストリンク運用） */
+.footer-main ul img { width: 40px; height: 40px; }
+.footer-main ul:has(img) { gap: 16px; }
+.footer-copy { text-align: center; color: var(--ink); font-size: 0.75rem; padding: 0 var(--gutter) 25px; background: var(--paper); }
 
 /* ── ダイアログ（メニュー・カート） ── */
 dialog {
-  border: 2px solid var(--brown-dark); border-radius: var(--radius-l);
+  border: var(--line-brand); border-radius: var(--radius-l);
   background: var(--paper); color: var(--ink); padding: 0;
   max-width: min(92vw, 420px); width: 100%;
 }
-dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
+dialog::backdrop { background: rgba(43, 33, 22, 0.45); } /* 墨の気配（ピンク/褐色系の着色廃止） */
 .dialog-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: var(--space-3) var(--space-4); border-bottom: 2px solid var(--cream-deep);
@@ -393,14 +520,14 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
 .ci-title { font-size: var(--fs-small); font-weight: 700; }
 .ci-qty { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
 .ci-qty button {
-  width: 28px; height: 28px; border: 2px solid var(--brown-dark); border-radius: var(--radius-s);
+  width: 28px; height: 28px; border: var(--line-brand); border-radius: var(--radius-s);
   background: var(--paper); font-weight: 700; line-height: 1;
 }
 .ci-price { font-family: var(--font-num); font-weight: 700; }
 .ci-remove { border: none; background: none; color: var(--ink-sub); font-size: var(--fs-label); text-decoration: underline; padding: 0; margin-top: var(--space-1); }
 #shipping-meter { margin: var(--space-4) 0; }
 #shipping-meter-bar-wrap { height: 10px; background: var(--cream-deep); border-radius: 999px; overflow: hidden; margin-top: var(--space-1); }
-#shipping-meter-bar { height: 100%; width: 0%; background: var(--green); border-radius: 999px; transition: width var(--dur-base); }
+#shipping-meter-bar { height: 100%; width: 0%; background: var(--moss); border-radius: 999px; transition: width var(--dur-base); }
 #shipping-meter-label { font-size: var(--fs-small); }
 .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin: var(--space-3) 0; }
 #cart-total-price { font-family: var(--font-num); font-size: var(--fs-price); font-weight: 700; }
@@ -417,79 +544,179 @@ dialog::backdrop { background: rgba(58, 49, 38, 0.45); }
 .toast.show { opacity: 1; transform: translateY(0); }
 
 /* ── 商品詳細ページ ── */
+/* パンくず: 背景ピル/中央寄せを撤去し、コンテンツ幅に左寄せのプレーン行（ちいかわ準拠） */
 .breadcrumb {
-  display: table; margin: var(--space-3) auto 0; padding: var(--space-1) var(--space-3);
-  background: var(--cream); border-radius: var(--radius-m);
-  font-size: var(--fs-small); color: var(--ink-sub);
+  margin: 0; background: var(--paper); /* §7-1: 全幅の不透明紙帯 */
+  padding: 1.5em max(var(--gutter), calc((100% - var(--content-max)) / 2 + var(--gutter)));
+  font-size: 0.875rem; color: var(--ink-sub);
+  white-space: nowrap; overflow-x: auto;
 }
-.breadcrumb a { color: var(--green-deep); }
+/* 2カラム55:45+8px（ちいかわ実測）。箱（背景/枠/角丸/padding:28px）は撤去し、左右は var(--gutter) の余白のみ */
 .product-detail {
-  max-width: var(--content-max); margin: var(--space-3) auto 0; padding: var(--space-4);
-  width: calc(100% - 2 * var(--gutter)); box-sizing: border-box;
-  background: var(--paper); border: 2px solid var(--cream-deep); border-radius: var(--radius-l);
-  display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--space-5); align-items: start;
+  /* §7-1: 半透明ヴェール廃止 → 本文は全幅の不透明 --paper 上に（内容は .section と同じ max() 中央固定） */
+  margin: 0; background: var(--paper);
+  padding: var(--space-3) max(var(--gutter), calc((100% - var(--content-max)) / 2 + var(--gutter))) 0;
+  display: grid; grid-template-columns: 55fr 45fr; column-gap: 8px; align-items: start;
 }
-.detail-media .main-img { background: var(--cream); border-radius: var(--radius-l); overflow: hidden; border: 2px solid var(--cream-deep); position: relative; }
+/* ちいかわの2カラム境界は841pxだが、聖域ブレークポイント（640/900のみ）へ読み替えて901px以上を2カラム扱いにする */
+@media (min-width: 901px) {
+  .detail-info { padding-left: 50px; max-width: 600px; }
+  /* 両カラムsticky（短い方が追従）。z-indexはautoのまま＝content(10)未満で階層表に抵触しない */
+  .detail-media, .detail-info { position: sticky; top: 30px; }
+}
+/* メイン画像は正方形統一（contain）。data-img-fit の個別分岐は不要化（HTML属性は残置） */
+.detail-media .main-img {
+  background: var(--cream); border-radius: var(--radius-l); overflow: hidden;
+  border: 2px solid var(--cream-deep); position: relative;
+  aspect-ratio: 1 / 1;
+}
+.main-img img { width: 100%; height: 100%; object-fit: contain; }
 .detail-thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
 .detail-thumb { width: 72px; height: 72px; border: 2px solid var(--cream-deep); border-radius: var(--radius-s); background: var(--cream); padding: 0; overflow: hidden; }
-.detail-thumb[aria-selected="true"] { border-color: var(--brown-dark); }
-.main-img[data-img-fit="contain"] img { object-fit: contain; }
-.detail-info { display: flex; flex-direction: column; gap: var(--space-3); }
-.detail-info h1 { font-size: var(--fs-h2); }
+.detail-thumb[aria-selected="true"] { border-color: var(--ink); }
+/* 余白リズム: gapをやめ兄弟間15px。カート導線と説明の前だけ25px（カード用 margin-top:auto は詳細ページでは解除） */
+.detail-info { display: flex; flex-direction: column; }
+.detail-info > * + * { margin-top: 15px; }
+.detail-info .card-actions, .detail-info .detail-story { margin-top: 25px; }
+.detail-info h1 { font-size: 1.75rem; line-height: 1.3; }
 .detail-oneliner { color: var(--ink-sub); }
 .detail-price { font-family: var(--font-num); font-size: var(--fs-price); font-weight: 700; }
-.detail-price .tax { font-size: var(--fs-label); font-weight: 400; color: var(--ink-sub); }
-.detail-story { background: var(--cream); border-radius: var(--radius-m); padding: var(--space-3); }
+.detail-price .tax { font-size: 65%; font-weight: 400; color: var(--ink-sub); padding-left: 0.5em; }
+/* カート導線: フル幅ボタン（最大440px）。様式は §6-2 Primary（honey塗り+墨枠+墨文字）。
+   詳細ページはボタン1個なので1列（カード用 1fr auto の空トラック分の gap を出さない） */
+.detail-info .card-actions { width: 100%; max-width: 440px; grid-template-columns: 1fr; }
+.detail-info .card-actions .btn { width: 100%; min-height: 47px; font-size: 1rem; }
+/* 説明は背景箱を撤去してプレーン本文に */
+.detail-story { line-height: 1.7; }
 .spec-table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
 .spec-table th, .spec-table td { text-align: left; padding: var(--space-2); border-bottom: 1px solid var(--cream-deep); vertical-align: top; }
 .spec-table th { color: var(--ink-sub); font-weight: 400; width: 7em; }
 .detail-kuma { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-2); }
 .detail-kuma img { width: 96px; flex: none; }
 .detail-kuma .balloon {
-  background: var(--paper); border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
+  background: var(--paper); border: var(--line-brand); border-radius: var(--radius-m);
   padding: var(--space-2) var(--space-3); font-size: var(--fs-small); position: relative;
 }
 
+/* ── 商品ページ「他の商品」: クリーム全幅帯＋DT4列（ちいかわ準拠。#related は商品3ページのみに存在） ── */
+#related {
+  max-width: none; /* .section の中央箱をやめ全幅帯にする（内側で内容幅を再現） */
+  background: var(--cream); /* こすくま体色のゾーニング帯 */
+  padding: 72px var(--gutter);
+}
+#related .section-head { margin-bottom: 48px; }
+/* グリッド列はトップと同一ルール（.product-grid の 3/2/2 列）。ここでは内容幅の中央固定だけ行う */
+#related .product-grid {
+  max-width: var(--content-max); margin-inline: auto;
+}
+
 /* ── レスポンシブ（640px / 900px 固定） ── */
+/* カード内2ボタン横並び（1fr auto・nowrap）の min-content は実測約346px＝カード外寸382px要。
+   これを満たす帯は 816〜900px と 1270px以上しかなく、641〜815 / 901〜1269 では
+   「くわしく」右端が最大119px裁断されていた（744実測32px / 901実測119px。静的カードも同罪）。
+   → 1279px以下はSPと同じ縦積み全幅に統一（価格・ボタンの途中分断ゼロの根治。
+   ≥1280はカード385px以上で横並びが収まるため据え置き＝監査済みの見た目を維持） */
+@media (max-width: 1279px) {
+  .card-actions { grid-template-columns: 1fr; }
+}
 @media (max-width: 900px) {
+  /* 641〜900: 中央ロゴ+右アクションのmin-contentが優先され左1frが60px台まで潰れ、
+     あいさつが1〜2文字ずつの縦組みに崩壊する（744px実測9行）→ SPと同型で非表示にする。
+     greeting消滅で自動配置がずれてロゴが左1fr列に落ちるため、列を明示ピン留めする
+     （≤640では logo=中央1fr列で同値・actionsは display:contents で無効化されるため安全） */
+  .header-greeting { display: none; }
+  .header-logo { grid-column: 2; }
+  .header-actions { grid-column: 3; }
+  /* ヒーロー圧縮（両BP共通・641〜900のタブレット帯を含む）: gutter20ではパネル右端が
+     一時停止ボタン(右下44px)のx帯に届くため、コンパクトパネル+下60px操作ストリップ構図で
+     角衝突を構造的に無くす（パネル実測~167px ≤ 内容域182px） */
+  .hero-inner { padding: var(--space-2) var(--gutter) 60px; }
+  .hero-panel { gap: var(--space-2); padding: var(--space-2); }
+  .hero-copy h1 { font-size: var(--fs-h2); }
+  /* 矢印はタブレット/SPでは出さない: パネル/カード(max 640-680px)が幅いっぱいに広がる帯では
+     左右16pxの白丸48pxが必ずキャラ・本文に重なる（402/640実測: こすくまくん本体・
+     「送料は全国一律500円」行頭に衝突）。操作UIがコンテンツに被らないのが公式EC標準 —
+     ナビはスワイプ＋ドット＋一時停止で完結する。≥901pxは左右余白≥110pxで矢印帯(16〜64px)と
+     非衝突のため据え置き（矢印ボタン自体・carousel.jsの配線は不変） */
+  .carousel-arrow { display: none; }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
   .guide-grid { grid-template-columns: repeat(2, 1fr); }
-  .footer-main { grid-template-columns: 1fr; }
-  .footer-boxes { grid-template-columns: repeat(2, 1fr); }
-  .product-detail { grid-template-columns: 1fr; }
+  .footer-boxes { grid-template-columns: repeat(3, 1fr); }
+  .product-detail { grid-template-columns: 1fr; row-gap: 30px; } /* 1カラム積み時のメディア↔情報の間隔 */
 }
 @media (max-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .card-actions { flex-direction: column; align-items: stretch; }
-  .card-actions .btn { width: 100%; padding: var(--space-2) var(--space-3); font-size: var(--fs-label); min-height: 40px; }
+  .section { padding-block: 48px; }
+  #news { padding-block: 48px 0; }
+  .section-head { margin-bottom: 24px; }
+  .section-head:has(.section-cap) h2 { font-size: 0.875rem; }
+  .section-cap { font-size: 1.25rem; /* 20px */ }
+  .info-head { margin-bottom: 24px; }
+  .info-box { padding: 36px 24px; }
+  .news-list time { font-size: 0.75rem; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 32px 12px; } /* 縦広め（ちいかわ型§6） */
+  /* カード内pad は DS §5 の SP 規格 8px（内寸を広げ「¥150,000（税込）」の2行折れを360px幅まで防ぐ） */
+  .product-body { padding: var(--space-2); }
+  /* 価格はサイズ不変（§4-1）。360px幅の3px不足だけ字間で吸収し1行を維持 */
+  .product-price { letter-spacing: -0.03em; }
+  /* SPの狭カードでは在庫一言「戻ってきたら、ここで言うよ」が2行に折り返す → 全カード2行分を予約して actions のYを揃える */
+  .product-body [data-stock-note] { min-height: 3.4em; }
+  .card-actions { grid-template-columns: 1fr; } /* 縦積み全幅 */
+  .card-actions .btn { width: 100%; padding: var(--space-2) var(--space-3); font-size: var(--fs-label); min-height: 44px; } /* DSタップ規格44px */
   .trust-strip { grid-template-columns: repeat(2, 1fr); }
-  .carousel-track { height: 380px; } /* ちいかわ実測値 */
+  .carousel { padding-top: 12px; }
+  /* SPのみ260px: パネルをコンパクト化（下記）した上で、下60pxを操作ストリップ
+     （gyro左・ドット中央・一時停止右）として空ける。商品カード上端は616px（874×72%=629px以内）を維持 */
+  .carousel-track { height: 260px; }
   .slide-card { inset: var(--space-3) var(--gutter); padding: var(--space-3); }
   .spot-card { gap: var(--space-2); }
   .spot-img { width: 34%; }
-  .hero-inner { padding: var(--space-3) var(--gutter); }
-  .hero-panel { padding: var(--space-3); gap: var(--space-2); }
+  /* パネル圧縮の本体は ≤900 の共通ブロック（hero-inner下60px予約 / パネルpad縮小 / h1=fs-h2）。
+     ここではSP固有のサイズだけ上書きする（文言は不変・サイズのみ） */
   #hero-kuma { width: 96px; }
-  .hero-cta { margin-top: var(--space-2); }
+  /* ヒーローCTAはSPでは縦40pxに詰める（250/260pxトラック内のパネル高さ予算のため。カード側は44px規格） */
+  .hero-cta { margin-top: var(--space-1); padding: var(--space-2) var(--space-4); min-height: 40px; font-size: var(--fs-label); }
+  /* ジャイロボタン: 操作ストリップの左端（ドット中央・一時停止右端と横並びで非重複） */
+  #gyro-btn { left: var(--gutter); right: auto; bottom: var(--space-2); }
   /* ちいかわ式モバイルヘッダー: ハンバーガー左・ロゴ中央・カート右（48px 1fr 48px） */
-  .site-header { grid-template-columns: 48px 1fr 48px; padding: var(--space-2) 15px; }
+  .site-header { grid-template-columns: 48px 1fr 48px; padding: 0 var(--header-pad-x); }
   .header-greeting { display: none; }
   .header-actions { display: contents; }
   .header-actions a.icon-btn { display: none; } /* Xボタンはフッターボックスにあるのでモバイルでは畳む */
-  .header-actions .icon-btn { padding: var(--space-1) var(--space-2); font-size: var(--fs-label); justify-self: center; }
+  /* ちいかわ本家の48px列はアイコンのみ（テキスト込みでは48px列に収まらず「レジ」がピル外にはみ出す）。
+     font-size:0 でボタン直下のラベル文字ノード（「レジ」「メニュー」）だけ畳む — ボタン名は aria-label が維持し、
+     .badge は自前の font-size(--fs-label) を持つため潰れない。gap:0 で幅0テキストとの隙間も消す */
+  .header-actions .icon-btn { padding: var(--space-2); font-size: 0; gap: 0; justify-self: center; }
   .header-actions #menu-btn { order: -1; justify-self: start; }
   .header-actions #cart-toggle { justify-self: end; }
-  .header-logo { justify-self: center; }
+  /* 402px実測: 中央1fr(244px)に対しロゴ内容が261pxで「公式」ピルが縦割れ+はみ出し。
+     gap 8→4 / 横pad 16→8 で24px詰めて237pxに収める（文字サイズは不変） */
+  .header-logo { justify-self: center; gap: var(--space-1); padding-inline: var(--space-2); }
   .header-logo img { width: 32px; height: 32px; }
   .header-logo .logo-text { font-size: var(--fs-small); white-space: nowrap; }
+  .footer-boxes { padding-block: 48px; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
   .footer-band { flex-direction: column; text-align: center; gap: var(--space-2); }
+  .footer-band #whimsy-kuma-anim { width: clamp(120px, 28vw, 160px); } /* 縮小のみ可・160px超の拡大は不可 */
+  .footer-main { padding-bottom: 50px; } /* フローティング要素なしのため75pxではなく50pxに丸め */
+  .footer-main ul { display: block; font-size: inherit; }
+  .footer-main li:not(:last-child)::after { content: none; }
+  .footer-main li:not(:last-child) { border-bottom: 1px dotted rgba(43, 33, 22, 0.25); }
+  .footer-main ul a { display: block; padding: 0.75em; text-align: center; }
+  .footer-main li:not(:has(a)) { padding: 0.75em 0; }
   #cart-drawer { max-width: 100vw; }
   .about-wrap { flex-direction: column; }
   .about-wrap .about-text { text-align: left; }
+  /* ── 商品詳細ページ（SP） ── */
+  .breadcrumb { font-size: 0.75rem; }
+  .detail-info h1 { font-size: 1.125rem; }
+  /* メイン画像はガター分フルブリード＋下30px（スワイプスライダー化は今回見送り） */
+  .detail-media .main-img { margin-inline: calc(-1 * var(--gutter)); margin-bottom: 30px; }
+  .detail-info .card-actions .btn { font-size: 0.875rem; min-height: 47px; }
+  #related { padding-block: 48px; } /* IDセレクタが .section の48px指定に勝ってしまうため明示 */
+  #related .section-head { margin-bottom: 24px; }
 }
 
 /* ── reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .btn, .toast, #shipping-meter-bar, .carousel-slide { transition: none; }
+  .btn, .toast, #shipping-meter-bar, .carousel-track { transition: none; }
 }

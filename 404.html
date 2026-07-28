@@ -17,20 +17,26 @@
   img { width: clamp(140px, 40vw, 220px); }
   h1 { font-size: var(--fs-h2); word-break: keep-all; line-break: strict; overflow-wrap: break-word; text-wrap: balance; }
   p { color: var(--ink-sub); line-break: strict; overflow-wrap: break-word; text-wrap: pretty; }
+  /* 句読点単位でしか折り返さないインラインブロック（main.css非読込のためここでも定義） */
+  .u-ib { display: inline-block; }
+  /* §6-2 Secondary（Primaryは「カートに入れる」「レジにすすむ」専用のためここでは使わない） */
   a.btn {
-    display: inline-block; margin-top: var(--space-2);
-    border: 2px solid var(--brown-dark); border-radius: var(--radius-m);
-    background: var(--honey); color: var(--ink); font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: var(--space-2); min-height: 44px;
+    border: 2px solid var(--ink); border-radius: var(--radius-m);
+    background: var(--surface); color: var(--ink); font-weight: 700;
     padding: var(--space-2) var(--space-4); text-decoration: none;
-    box-shadow: var(--press-shadow);
   }
+  a.btn:active { transform: translateY(2px); }
+  /* フォーカス可視化（§8-2） */
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <main>
-  <img src="/assets/gen/kuma-lost.webp" alt="地図を持って道に迷っているこすくまくん">
+  <img src="/assets/pose/lost.webp" alt="地図を持って道に迷っているこすくまくん">
   <h1>そのページ、ないよ</h1>
-  <p>ぼくもさっき探した。なかった。<br>ページを探す旅に出たまま、ぼくもまだ戻ってないよ</p>
+  <p>ぼくもさっき探した。なかった。<br><span class="u-ib">ページを探す旅に出たまま、</span><span class="u-ib">ぼくもまだ戻ってないよ</span></p>
   <a class="btn" href="/">おみせに戻る</a>
 </main>
 </body>

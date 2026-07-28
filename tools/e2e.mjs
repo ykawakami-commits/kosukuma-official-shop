@@ -16,6 +16,9 @@
 //  P1. 商品3ページ: h1・[data-price]（¥表記）・.detail-story（20文字以上）
 //  P2. / の #whimsy-line が非空 & data-time が day|evening|night
 //  P3. 全対象ページで価格表示に「税込」を含む（.tax 要素の存在）
+//  Q1-Q2. 最近チェック: 履歴空なら#checkedはhiddenのまま / 商品ページ実訪問で記録→
+//         トップに#productsと同構造カード（カート導線・在庫チップ込み）が生成されhydrateされる
+//  Q3. 商品ページにも#checked（トップと同一マークアップ）が描画され、いま見ている商品は履歴に出ない
 
 import puppeteer from 'puppeteer';
 import { SHOPIFY_CONFIG, PRODUCT_HANDLES } from '../js/config.js';
@@ -279,6 +282,83 @@ const canvas3d = await page.evaluate(() => {
   return { w: c?.width ?? 0, h: c?.height ?? 0 };
 });
 ok('H: 3Dこんぺいとう初期化（canvasバッファ設定済み）', canvas3d.w > 300, `${canvas3d.w}x${canvas3d.h}`);
+
+// ---- K: カルーセルが横スライド式（track flex + translateX 遷移の回帰検知） ----
+step = 'K-carousel';
+const slideCheck = await page.evaluate(async () => {
+  const track = document.querySelector('#hero-carousel .carousel-track');
+  if (!track) return { display: 'none', before: '', after: '' };
+  const display = getComputedStyle(track).display;
+  const before = getComputedStyle(track).transform;
+  document.querySelector('#hero-carousel .carousel-arrow.next')?.click();
+  await new Promise((r) => setTimeout(r, 700)); // 500ms遷移の完了待ち
+  const after = getComputedStyle(track).transform;
+  document.querySelector('#hero-carousel .carousel-arrow.prev')?.click(); // 後片付け: 1枚目へ戻す
+  return { display, before, after };
+});
+ok(
+  'K: カルーセル横スライド（trackがflex & translateXが変化）',
+  slideCheck.display === 'flex' && slideCheck.before !== slideCheck.after,
+  `display=${slideCheck.display} ${slideCheck.before} → ${slideCheck.after}`,
+);
+
+// ---- Q: 最近チェックした商品（空時hidden / 商品ページ実訪問→共通構造カード生成+hydrate） ----
+step = 'Q-checked';
+// F で /products/sticker.html を踏んで履歴が付いているので、一旦消して「空ならhidden」を検証
+await page.evaluate(() => localStorage.removeItem('kosukuma-checked'));
+await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
+const qEmpty = await page.evaluate(() => (
+  document.getElementById('checked')?.hidden === true
+  && (document.getElementById('checked-grid')?.children.length ?? -1) === 0
+));
+ok('Q1: #checked 履歴が空ならhiddenのまま', qEmpty);
+
+// 商品ページを実訪問（recordCheckedViewが履歴を記録）→ トップに戻り、
+// #products と同一構造のカード（カート導線・在庫チップ込み）が生成されShopifyでhydrateされること
+await page.goto(BASE + '/products/sticker.html', { waitUntil: 'networkidle2', timeout: 30000 });
+await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 60000 });
+const qCard = await page.waitForFunction(() => {
+  const card = document.querySelector('#checked:not([hidden]) #checked-grid .product-card[data-handle]');
+  if (!card) return null;
+  const btn = card.querySelector('[data-add-to-cart]');
+  const price = (card.querySelector('[data-price]')?.textContent ?? '').trim();
+  // hydration完了（variantId付与＋Shopify価格反映）まで待つ
+  if (!btn || btn.disabled || !btn.dataset.variantId || !price.includes('¥')) return null;
+  const structure = !!(
+    card.querySelector('a.product-media img')
+    && card.querySelector('.status-chip')
+    && card.querySelector('.product-name a')
+    && card.querySelector('.product-price .tax')
+    && card.querySelector('[data-stock-note]')
+    && card.querySelector('.card-actions .btn-ghost')
+    && card.querySelector('.restock-link')
+  );
+  return { structure, price };
+}, { timeout: 20000 }).then((h) => h.jsonValue()).catch(() => null);
+ok(
+  'Q2: 履歴あり→#productsと同構造カード生成+カート導線hydrate',
+  !!qCard?.structure && qCard.price.includes('780'),
+  qCard ? `price=${qCard.price} structure=${qCard.structure}` : 'カード未生成 or hydrate未完了',
+);
+
+// Q3: 商品ページにも最近チェック欄（トップと同一マークアップ）。いま見ている商品は履歴に出さない
+// 履歴にステッカーが入った状態でTシャツページへ → ステッカーのカードが出て、Tシャツ自身は出ない
+await page.goto(BASE + '/products/ultra-tshirt.html', { waitUntil: 'networkidle2', timeout: 30000 });
+const q3 = await page.waitForFunction(() => {
+  const section = document.getElementById('checked');
+  if (!section || section.hidden) return null;
+  const cards = [...document.querySelectorAll('#checked-grid .product-card[data-handle]')];
+  if (cards.length === 0) return null;
+  return { handles: cards.map((c) => c.dataset.handle) };
+}, { timeout: 15000 }).then((h) => h.jsonValue()).catch(() => null);
+ok(
+  'Q3: 商品ページの最近チェック欄（現在の商品は除外して描画）',
+  !!q3 && q3.handles.includes('こすくまくんステッカー') && !q3.handles.includes('tシャツ'),
+  q3 ? `handles=${q3.handles.join(',')}` : 'セクション非表示 or カード未生成',
+);
+
+// 後片付け: 履歴を消す（後続テストのページ前提を変えない）
+await page.evaluate(() => localStorage.removeItem('kosukuma-checked'));
 
 // ---- I: 対象ページの全リソース404ゼロ（ページ自体の到達性も含む） ----
 step = 'I-404';

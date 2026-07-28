@@ -30,14 +30,11 @@
 /assets/img/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 
-/assets/gen/*
+/assets/pose/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 
 /assets/pixel/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/assets/dot-illust/*
-  Cache-Control: public, max-age=2592000
 
 /assets/vendor/*
   Cache-Control: public, max-age=604800

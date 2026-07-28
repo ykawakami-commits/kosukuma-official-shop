@@ -1,10 +1,12 @@
 // js/fx/carousel.js — ヒーローカルーセル（ちいかわ式: 自動再生＋矢印＋ドット＋一時停止＋スワイプ）
+// 横スライド式: .carousel-track の translateX で切り替える（transitionはCSS側 500ms）
 // 購入導線に触れない装飾領域のみ。z-index階層表より上に出さない。
 const INTERVAL_MS = 6000;
 
 export function initCarousel(id) {
   const root = document.getElementById(id);
   if (!root) return;
+  const track = root.querySelector('.carousel-track');
   const slides = Array.from(root.querySelectorAll('.carousel-slide'));
   if (slides.length <= 1) return;
   const dotsWrap = root.querySelector('.carousel-dots');
@@ -24,7 +26,13 @@ export function initCarousel(id) {
   });
 
   function render() {
-    slides.forEach((s, i) => s.classList.toggle('is-active', i === index));
+    if (track) track.style.transform = `translateX(calc(-1 * ${index} * 100%))`;
+    slides.forEach((s, i) => {
+      s.classList.toggle('is-active', i === index);
+      // 旧 visibility:hidden の代替: 画面外スライドへのフォーカス/操作を封じる
+      // （overflow:hidden 内へのフォーカススクロールでトラックがずれる事故防止）
+      s.inert = i !== index;
+    });
     dots.forEach((d, i) => d.setAttribute('aria-current', i === index ? 'true' : 'false'));
   }
 
@@ -47,7 +55,7 @@ export function initCarousel(id) {
   pauseBtn?.addEventListener('click', () => {
     paused = !paused;
     pauseBtn.setAttribute('aria-pressed', String(paused));
-    pauseBtn.textContent = paused ? '▶' : 'II';
+    pauseBtn.classList.toggle('is-active', paused); // アイコンはCSSで切替（SVG2枚内包）
     pauseBtn.setAttribute('aria-label', paused ? '自動再生を再開する' : '自動再生を止める');
     start();
   });

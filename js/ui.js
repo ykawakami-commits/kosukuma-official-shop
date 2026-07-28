@@ -1,4 +1,4 @@
-// js/ui.js — 画面配線（ドロワー/トースト/hydration/reveal/サムネ切替）
+// js/ui.js — 画面配線（ドロワー/トースト/hydration/サムネ切替）
 // カートの真実は js/cart.js（Shopify Cart API）。ここでは表示と配線だけを行う。
 import { PRODUCT_HANDLES, FREE_SHIPPING_THRESHOLD_JPY } from './config.js';
 import { fetchProductsByHandles, formatMoney } from './storefront.js';
@@ -23,12 +23,6 @@ export function toast(message, ms = 3200) {
     setTimeout(() => el.remove(), 300);
   }, ms);
 }
-
-// ── 売り切れスタンプ文言（商品ごとの遊び。在庫情報そのものはShopifyが真実） ──
-const SOLDOUT_LABELS = {
-  'こすくまデコヘルメット': 'たびだっていったよ',
-};
-const soldoutLabel = (handle) => SOLDOUT_LABELS[handle] ?? 'うりきれちゃった';
 
 // ── ダイアログ（メニュー/カート共通） ──
 function initDialogs() {
@@ -64,14 +58,12 @@ function renderCart() {
   const checkout = document.getElementById('btn-checkout');
   const lines = c?.lines?.nodes ?? [];
 
-  // バッジ（ヘッダー＋スティッキー）
+  // バッジ（ヘッダー）
   const qty = c?.totalQuantity ?? 0;
-  for (const id of ['cart-count', 'sticky-cart-count']) {
-    const badge = document.getElementById(id);
-    if (badge) {
-      badge.textContent = String(qty);
-      badge.hidden = qty === 0;
-    }
+  const badge = document.getElementById('cart-count');
+  if (badge) {
+    badge.textContent = String(qty);
+    badge.hidden = qty === 0;
   }
 
   // 明細
@@ -150,7 +142,6 @@ function initCartDrawer() {
   if (!drawer) return;
   const open = () => { renderCart(); drawer.showModal(); };
   document.getElementById('cart-toggle')?.addEventListener('click', open);
-  document.getElementById('sticky-cart')?.addEventListener('click', open);
 
   const mutating = new Set(); // ライン単位の二重送信ガード
 
@@ -225,19 +216,17 @@ async function hydrateProducts() {
       if (priceEl && p.price) priceEl.textContent = formatMoney(p.price);
       const btn = el.querySelector('[data-add-to-cart]');
       const chip = el.querySelector('.status-chip');
-      const stamp = el.querySelector('[data-soldout-stamp]');
       const restock = el.querySelector('.restock-link');
       const note = el.querySelector('[data-stock-note]');
       if (chip) chip.hidden = false;
       if (p.availableForSale && p.variantId) {
         if (btn) { btn.disabled = false; btn.dataset.variantId = p.variantId; btn.textContent = 'カートに入れる'; }
         if (chip) { chip.textContent = 'あるよ'; chip.classList.add('is-instock'); }
-        if (stamp) stamp.hidden = true;
         if (restock) restock.hidden = true;
       } else {
+        // 状態表示は .status-chip（左上ピル）の1箇所のみ（DS §6-3 G7対策。スタンプ重複表示は全廃）
         if (btn) { btn.disabled = true; btn.textContent = 'うりきれ'; }
         if (chip) { chip.textContent = 'うりきれ'; chip.classList.add('is-soldout'); }
-        if (stamp) { stamp.hidden = false; stamp.textContent = soldoutLabel(p.handle); }
         if (restock) restock.hidden = false;
         if (note) note.textContent = '戻ってきたら、ここで言うよ';
       }
@@ -245,52 +234,109 @@ async function hydrateProducts() {
   }
 }
 
-// ── 最近チェックした商品（localStorage。商品ページで記録し、トップで表示） ──
-const CHECKED_KEY = 'kosukuma-checked';
-const CHECKED_META = {
-  'こすくまくんステッカー': { name: 'こすくまくんステッカー', slug: 'sticker', img: '/assets/img/kosukuma-sticker-main-480.webp' },
-  'tシャツ': { name: 'ウルトラプレミアムTシャツ', slug: 'ultra-tshirt', img: '/assets/img/kosukuma-ultra-tshirt-1-480.webp' },
-  'こすくまデコヘルメット': { name: 'こすくまデコヘルメット', slug: 'deco-helmet', img: '/assets/img/kosukuma-deco-helmet-480.webp' },
+// ── 商品カード共通テンプレ（index.html #products の静的カードと同一構造） ──
+// 最近チェック欄など JS 生成カードは必ずこれを使う（構造の単一情報源）。
+// - カート導線: [data-add-to-cart] は initAddButtons の委譲が拾い、js/cart.js の addLine を呼ぶ
+// - 価格/在庫: hydrateProducts が data-handle 一致で上書きする（フロントで金額計算しない）
+const escapeHTML = (s) => String(s).replace(/[&<>"']/g, (c) => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+const RESTOCK_MAILTO = 'mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B';
+
+// ── 折返し制御辞書（index.html #products の静的カードと同位置・同マークアップ） ──
+// .product-name は keep-all のため、<wbr> が無いと商品名全体が1語として
+// min-content 幅を押し広げ、402px 2カラムでカード中身ごと右端クリップされる。
+// 文言（こすくまくんの声）は不変 — 折返し点の注入のみを行う。
+// 辞書は「完全一致した既知の商品名/一言」にのみ信頼済み定数HTMLを返す。
+// 一致しない文字列（外部データ由来）は必ず escapeHTML を通す（XSS防止は不変）。
+const NAME_BREAK_HTML = {
+  'ウルトラプレミアムTシャツ': 'ウルトラ<wbr>プレミアム<wbr>Tシャツ',
+};
+const ONELINER_SEG_HTML = {
+  'はっても はがしても、ぼくはぼくだよ':
+    '<span class="u-ib">はっても はがしても、</span><span class="u-ib">ぼくはぼくだよ</span>',
+  '15万円。たかい？ ぼくもそう思うよ':
+    '<span class="u-ib">15万円。たかい？</span> <span class="u-ib">ぼくもそう思うよ</span>',
+  '頭はまもるよ。心はまもってくれないよ':
+    '<span class="u-ib">頭はまもるよ。</span><span class="u-ib">心はまもってくれないよ</span>',
 };
 
-function readChecked() {
-  try { return JSON.parse(localStorage.getItem(CHECKED_KEY) ?? '[]'); } catch { return []; }
+function productCardHTML({ url, name, img, oneliner = '' }) {
+  const u = escapeHTML(url);
+  const n = Object.hasOwn(NAME_BREAK_HTML, name) ? NAME_BREAK_HTML[name] : escapeHTML(name);
+  const one = Object.hasOwn(ONELINER_SEG_HTML, oneliner) ? ONELINER_SEG_HTML[oneliner] : escapeHTML(oneliner);
+  return `
+      <a class="product-media" href="${u}">
+        <img src="${escapeHTML(img)}" alt="${escapeHTML(name)}" loading="lazy">
+        <span class="status-chip" hidden></span>
+      </a>
+      <div class="product-body">
+        <h3 class="product-name"><a href="${u}">${n}</a></h3>
+        <p class="product-oneliner">${one}</p>
+        <p class="product-price"><span class="u-nw"><span data-price></span><span class="tax">（税込）</span></span></p>
+        <p data-stock-note></p>
+        <div class="card-actions">
+          <button class="btn btn-primary" type="button" data-add-to-cart>カートに入れる</button>
+          <a class="btn btn-ghost" href="${u}">くわしく</a>
+        </div>
+        <a class="restock-link" href="${RESTOCK_MAILTO}" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
+      </div>`;
 }
 
-// 商品ページ（.product-detail[data-handle]）で閲覧を記録
+// ── 最近チェックした商品（localStorage。商品ページで記録し、トップで表示） ──
+// エントリ形式: { handle, name, url, img, oneliner } — 商品ページ側で採取して保存するため
+// 固定辞書（旧CHECKED_META）は不要。商品を増やしても商品ページを作れば自動で履歴に出る。
+const CHECKED_KEY = 'kosukuma-checked';
+
+function readChecked() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CHECKED_KEY) ?? '[]');
+    if (!Array.isArray(raw)) return [];
+    // 外部データ（localStorage）は信用しない: 形とパスを検証して通す。
+    // 旧形式（handle文字列だけ）は表示メタが無いので読み捨て（次の閲覧で再記録される）
+    return raw.filter((e) =>
+      e && typeof e === 'object'
+      && typeof e.handle === 'string' && e.handle.length > 0
+      && typeof e.name === 'string' && e.name.length > 0
+      && typeof e.url === 'string' && e.url.startsWith('/products/')
+      && typeof e.img === 'string' && e.img.startsWith('/assets/'));
+  } catch { return []; }
+}
+
+// 商品ページ（.product-detail[data-handle]）で閲覧を記録（表示に必要なメタごと保存）
 function recordCheckedView() {
   const detail = document.querySelector('.product-detail[data-handle]');
   if (!detail) return;
   const handle = detail.dataset.handle;
-  const list = [handle, ...readChecked().filter((h) => h !== handle)].slice(0, 8);
+  const entry = {
+    handle,
+    name: detail.querySelector('h1')?.textContent.trim() || handle,
+    url: location.pathname,
+    // サムネ1枚目が480px版（カード表示に十分な軽さ）。無ければメイン画像
+    img: detail.querySelector('.detail-thumb img')?.getAttribute('src')
+      ?? document.getElementById('detail-main')?.getAttribute('src')
+      ?? '/assets/kosukuma/front.png',
+    oneliner: detail.querySelector('.detail-oneliner')?.textContent.trim() ?? '',
+  };
+  const list = [entry, ...readChecked().filter((e) => e.handle !== handle)].slice(0, 8);
   try { localStorage.setItem(CHECKED_KEY, JSON.stringify(list)); } catch { /* 保存できなくても画面は止めない */ }
 }
 
-// トップ（#checked-grid）に描画。空ならセクションごと非表示のまま
+// トップと商品ページの #checked-grid に描画。空ならセクションごと非表示のまま
 function renderCheckedItems() {
   const section = document.getElementById('checked');
   const grid = document.getElementById('checked-grid');
   if (!section || !grid) return;
-  const items = readChecked().filter((h) => CHECKED_META[h]);
+  // 商品ページでは「いま見ている商品」は履歴に出さない（直前の recordCheckedView で先頭に入るため）
+  const currentHandle = document.querySelector('.product-detail[data-handle]')?.dataset.handle ?? null;
+  // config.js の方針（PRODUCT_HANDLES に無い handle は売り場に出さない）を履歴にも適用
+  const items = readChecked().filter((e) => PRODUCT_HANDLES.includes(e.handle) && e.handle !== currentHandle);
   if (items.length === 0) return;
-  for (const handle of items) {
-    const meta = CHECKED_META[handle];
+  for (const entry of items) {
     const card = document.createElement('article');
     card.className = 'product-card';
-    card.dataset.handle = handle;
-    card.innerHTML = `
-      <a class="product-media" href="/products/${meta.slug}.html">
-        <img src="${meta.img}" alt="${meta.name}" loading="lazy">
-        <span class="status-chip" hidden></span>
-        <span data-soldout-stamp hidden></span>
-      </a>
-      <div class="product-body">
-        <h3 class="product-name"><a href="/products/${meta.slug}.html">${meta.name}</a></h3>
-        <p class="product-price"><span data-price></span><span class="tax">（税込）</span></p>
-        <div class="card-actions">
-          <a class="btn btn-ghost" href="/products/${meta.slug}.html">くわしく</a>
-        </div>
-      </div>`;
+    card.dataset.handle = entry.handle; // hydrateProducts がこの data-handle 一致で価格・在庫・カートボタンを上書き
+    card.innerHTML = productCardHTML(entry);
     grid.appendChild(card);
   }
   section.hidden = false;

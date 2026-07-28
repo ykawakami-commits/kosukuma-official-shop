@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/main.css">
 <script>
@@ -91,16 +91,16 @@
     <span class="logo-official">公式</span>
   </a>
   <div class="header-actions">
-    <a class="icon-btn" href="https://x.com/Kosu_dot_kuma" rel="noopener" aria-label="公式X">X</a>
+    <a class="icon-btn" href="https://x.com/Kosu_dot_kuma" rel="noopener" aria-label="公式X（旧Twitter）"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 4.5l15 15M19.5 4.5l-5 5.7M9.5 13.7l-5 5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>公式X</a>
     <button class="icon-btn" id="cart-toggle" type="button" aria-label="カートを開く">
-      <img src="/assets/gen/ui-icon-cart.webp" alt="" width="18" height="18">レジ<span class="badge" id="cart-count" hidden>0</span>
+      <svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9.5h14l-1.4 8.2a2.2 2.2 0 0 1-2.17 1.8H8.57a2.2 2.2 0 0 1-2.17-1.8L5 9.5Z M8.8 9.5V7.8a3.2 3.2 0 0 1 6.4 0v1.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>レジ<span class="badge" id="cart-count" hidden>0</span>
     </button>
-    <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く"><img src="/assets/gen/ui-icon-menu.webp" alt="" width="18" height="18">メニュー</button>
+    <button class="icon-btn" id="menu-btn" type="button" aria-label="メニューを開く"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>メニュー</button>
   </div>
 </header>
 
 <nav class="nav-band" aria-label="サイト内ナビゲーション">
-  <img class="nav-kuma" src="/assets/kosukuma/front.png" alt="" width="34" height="34">
+  <img class="nav-kuma" src="/assets/kosukuma/front.png" alt="" width="28" height="28">
   <ul>
     <li><a href="#products">売ってるもの</a></li>
     <li><a href="#news">お知らせ</a></li>
@@ -110,38 +110,41 @@
   </ul>
 </nav>
 
-<p class="notice-line">※発送は注文から3〜5営業日だよ※</p>
-
 <main id="main">
+  <p class="notice-line">※発送は注文から3〜5営業日だよ※</p>
+
   <!-- ヒーローカルーセル（ちいかわ式3枚。1枚目: 聖域の3D金平糖は .hero-fx 内の canvas にマウントされる） -->
-  <div class="carousel" id="hero-carousel">
+  <div class="carousel" id="hero-carousel" role="region" aria-roledescription="carousel" aria-label="お知らせとおすすめ">
     <div class="carousel-track">
       <section class="hero carousel-slide is-active" aria-label="キービジュアル">
         <div class="hero-fx">
           <canvas id="hero-3d-canvas"></canvas>
-          <button id="gyro-btn" type="button" hidden>かたむけてあそぶ</button>
         </div>
         <div class="hero-inner">
           <div class="hero-panel">
             <img id="hero-kuma" src="/assets/kosukuma/front.png" alt="こすくまくん" width="200" height="200">
             <div class="hero-copy">
-              <h1>こすくまくんのおみせ</h1>
-              <p class="hero-sub">ぼくがすきなものだけ置いてあるよ。むりに買わなくていいよ。ぼくもむりしてないから</p>
-              <a class="btn btn-primary hero-cta" href="#products">おみせを見る</a>
+              <h1>こすくまくんの<wbr>おみせ</h1>
+              <p class="hero-sub"><span class="u-ib">ぼくがすきなものだけ置いてあるよ。</span><span class="u-ib">むりに買わなくていいよ。</span><span class="u-ib">ぼくもむりしてないから</span></p>
+              <a class="btn btn-ghost hero-cta" href="#products">おみせを見る</a>
             </div>
           </div>
         </div>
+        <!-- ジャイロ許可ボタン: .hero-fx(z:1)の中だとスタッキング文脈ごと .hero-inner(z:10)の
+             裏に沈みタップ不能になるため、.hero 直下・.hero-inner の後に置く（DOM順で最前面）。
+             hero-3d.js は getElementById で参照するため初期化IFは不変 -->
+        <button id="gyro-btn" type="button" hidden>かたむけてあそぶ</button>
       </section>
 
       <section class="carousel-slide info-slide" aria-label="発送についてのお知らせ">
         <div class="slide-card">
           <h2 class="slide-title">発送についてのお知らせ</h2>
           <ul class="slide-list">
-            <li>発送は注文から3〜5営業日だよ。すこし待ってね</li>
-            <li>送料は全国一律500円。5,000円以上でタダになるよ</li>
-            <li>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ</li>
+            <li><span class="u-ib">発送は注文から3〜5営業日だよ。</span><span class="u-ib">すこし待ってね</span></li>
+            <li><span class="u-ib">送料は全国一律500円。</span><span class="u-ib">5,000円以上でタダになるよ</span></li>
+            <li><span class="u-ib">お問い合わせはメールで</span><span class="u-ib">24時間受け付けてるよ。</span><span class="u-ib">返事は営業日に、</span><span class="u-ib">中の人が書くよ</span></li>
           </ul>
-          <p class="slide-note">ぼくが歩いて届けるわけじゃないから、そのくらい待ってね</p>
+          <p class="slide-note"><span class="u-ib">ぼくが歩いて届けるわけじゃないから、</span><span class="u-ib">そのくらい待ってね</span></p>
         </div>
       </section>
 
@@ -150,17 +153,17 @@
           <img class="spot-img" src="/assets/img/kosukuma-sticker-main-480.webp" alt="こすくまくんステッカー">
           <div class="spot-copy">
             <h2 class="slide-title">ぼくのいちおし</h2>
-            <p>こすくまくんステッカー。はっても はがしても、ぼくはぼくだよ</p>
-            <p class="spot-price">¥780<span class="tax">（税込）</span></p>
+            <p><span class="u-ib">こすくまくんステッカー。</span><span class="u-ib">はっても はがしても、</span><span class="u-ib">ぼくはぼくだよ</span></p>
+            <p class="spot-price"><span class="u-nw">¥780<span class="tax">（税込）</span></span></p>
             <a class="btn btn-ghost" href="/products/sticker.html">くわしく見る</a>
           </div>
         </div>
       </section>
     </div>
-    <button class="carousel-arrow prev" type="button" aria-label="前のスライド">‹</button>
-    <button class="carousel-arrow next" type="button" aria-label="次のスライド">›</button>
+    <button class="carousel-arrow prev" type="button" aria-label="前のスライド"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="carousel-arrow next" type="button" aria-label="次のスライド"><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="carousel-dots" role="tablist" aria-label="スライド切り替え"></div>
-    <button class="carousel-pause" type="button" aria-label="自動再生を止める" aria-pressed="false">II</button>
+    <button class="carousel-pause" type="button" aria-label="自動再生を止める" aria-pressed="false"><svg class="icon-pause" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><rect x="2" y="1" width="3" height="10" fill="currentColor"/><rect x="7" y="1" width="3" height="10" fill="currentColor"/></svg><svg class="icon-play" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 1.2 10.8 6 2.5 10.8z" fill="currentColor"/></svg></button>
   </div>
 
   <!-- 商品一覧 -->
@@ -175,18 +178,17 @@
         <a class="product-media" href="/products/sticker.html">
           <img src="/assets/img/kosukuma-sticker-main-800.webp" srcset="/assets/img/kosukuma-sticker-main-480.webp 480w, /assets/img/kosukuma-sticker-main-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="こすくまくんステッカー" loading="lazy">
           <span class="status-chip" hidden></span>
-          <span data-soldout-stamp hidden></span>
         </a>
         <div class="product-body">
           <h3 class="product-name"><a href="/products/sticker.html">こすくまくんステッカー</a></h3>
-          <p class="product-oneliner">はっても はがしても、ぼくはぼくだよ</p>
-          <p class="product-price"><span data-price>¥780</span><span class="tax">（税込）</span></p>
+          <p class="product-oneliner"><span class="u-ib">はっても はがしても、</span><span class="u-ib">ぼくはぼくだよ</span></p>
+          <p class="product-price"><span class="u-nw"><span data-price>¥780</span><span class="tax">（税込）</span></span></p>
           <p data-stock-note></p>
           <div class="card-actions">
             <button class="btn btn-primary" type="button" data-add-to-cart>カートに入れる</button>
             <a class="btn btn-ghost" href="/products/sticker.html">くわしく</a>
           </div>
-          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
         </div>
       </article>
 
@@ -194,37 +196,35 @@
         <a class="product-media" href="/products/ultra-tshirt.html">
           <img src="/assets/img/kosukuma-ultra-tshirt-1-800.webp" srcset="/assets/img/kosukuma-ultra-tshirt-1-480.webp 480w, /assets/img/kosukuma-ultra-tshirt-1-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="ウルトラプレミアムTシャツ" loading="lazy">
           <span class="status-chip" hidden></span>
-          <span data-soldout-stamp hidden></span>
         </a>
         <div class="product-body">
-          <h3 class="product-name"><a href="/products/ultra-tshirt.html">ウルトラプレミアムTシャツ</a></h3>
-          <p class="product-oneliner">15万円。たかい？ ぼくもそう思うよ</p>
-          <p class="product-price"><span data-price>¥150,000</span><span class="tax">（税込）</span></p>
+          <h3 class="product-name"><a href="/products/ultra-tshirt.html">ウルトラ<wbr>プレミアム<wbr>Tシャツ</a></h3>
+          <p class="product-oneliner"><span class="u-ib">15万円。たかい？</span> <span class="u-ib">ぼくもそう思うよ</span></p>
+          <p class="product-price"><span class="u-nw"><span data-price>¥150,000</span><span class="tax">（税込）</span></span></p>
           <p data-stock-note></p>
           <div class="card-actions">
             <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
             <a class="btn btn-ghost" href="/products/ultra-tshirt.html">くわしく</a>
           </div>
-          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
         </div>
       </article>
 
       <article class="product-card" id="p-deco-helmet" data-handle="こすくまデコヘルメット">
-        <a class="product-media" href="/products/deco-helmet.html" data-img-fit="contain">
+        <a class="product-media" href="/products/deco-helmet.html">
           <img src="/assets/img/kosukuma-deco-helmet-800.webp" srcset="/assets/img/kosukuma-deco-helmet-480.webp 480w, /assets/img/kosukuma-deco-helmet-800.webp 800w" sizes="(max-width: 640px) 50vw, 33vw" alt="こすくまデコヘルメット" loading="lazy">
           <span class="status-chip" hidden></span>
-          <span data-soldout-stamp hidden></span>
         </a>
         <div class="product-body">
           <h3 class="product-name"><a href="/products/deco-helmet.html">こすくまデコヘルメット</a></h3>
-          <p class="product-oneliner">頭はまもるよ。心はまもってくれないよ</p>
-          <p class="product-price"><span data-price>¥109,000</span><span class="tax">（税込）</span></p>
+          <p class="product-oneliner"><span class="u-ib">頭はまもるよ。</span><span class="u-ib">心はまもってくれないよ</span></p>
+          <p class="product-price"><span class="u-nw"><span data-price>¥109,000</span><span class="tax">（税込）</span></span></p>
           <p data-stock-note></p>
           <div class="card-actions">
             <button class="btn btn-primary" type="button" data-add-to-cart disabled>うりきれ</button>
             <a class="btn btn-ghost" href="/products/deco-helmet.html">くわしく</a>
           </div>
-          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを聞いてみる</a>
+          <a class="restock-link" href="mailto:info@kosukuma.com?subject=%E5%86%8D%E5%85%A5%E8%8D%B7%E3%81%AE%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" hidden>再入荷のお知らせを<wbr>聞いてみる</a>
         </div>
       </article>
     </div>
@@ -239,6 +239,9 @@
     <div class="product-grid" id="checked-grid"></div>
   </section>
 
+  <!-- 世界の窓（§7-1）: ピクセル世界の露出はここと #faq→footer 間の2箇所だけ。テキスト・子要素なし -->
+  <div class="world-window" aria-hidden="true"></div>
+
   <!-- お知らせ（公式感: 日付＋内容の退屈なリスト） -->
   <section class="section" id="news">
     <div class="info-box">
@@ -247,9 +250,9 @@
         <p class="section-cap">INFORMATION</p>
       </div>
       <ul class="news-list">
-        <li><time datetime="2026-07-26">2026.07.26</time><p>おみせが新しくなったよ。ぼくもまだ見慣れてなくて、ときどき迷うよ</p></li>
-        <li><time datetime="2026-07-26">2026.07.26</time><p>発送は注文から3〜5営業日だよ。すこし待ってね</p></li>
-        <li><time datetime="2026-07-26">2026.07.26</time><p>お問い合わせはメールで24時間受け付けてるよ。返事は営業日に、中の人が書くよ（<a href="mailto:info@kosukuma.com">info@kosukuma.com</a>）</p></li>
+        <li><time datetime="2026-07-26">2026.07.26</time><p>おみせが新しくなったよ。ぼくもまだ見慣れてなくて、<span class="u-ib">ときどき迷うよ</span></p></li>
+        <li><time datetime="2026-07-26">2026.07.26</time><p>発送は注文から3〜5営業日だよ。<span class="u-ib">すこし待ってね</span></p></li>
+        <li><time datetime="2026-07-26">2026.07.26</time><p><span class="u-ib">お問い合わせはメールで</span><span class="u-ib">24時間受け付けてるよ。</span><span class="u-ib">返事は営業日に、</span><span class="u-ib">中の人が書くよ</span><span class="u-ib">（<a href="mailto:info@kosukuma.com">info@kosukuma.com</a>）</span></p></li>
       </ul>
     </div>
   </section>
@@ -261,20 +264,22 @@
     </div>
     <div class="about-wrap">
       <div class="about-anim" id="about-kaikai" aria-hidden="true"></div>
-      <p class="about-text">ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。……たぶんね</p>
+      <p class="about-text">ぼく、こすくまくん。25歳。西荻窪に住んでる。はちみつと昼寝がすき。むずかしいことはわからないけど、店だけはちゃんとやってるよ。<span class="u-ib">……たぶんね</span></p>
     </div>
   </section>
 
-  <!-- お買い物ガイド（標準EC・退屈） -->
+  <!-- お買い物ガイド（標準EC・退屈）
+       ※この4箱（送料/発送/返品/支払い）にはあえてイラストを入れない — キャラは機能を持つ場所のみ原則（DS §7-2-9）
+         ＋フッター4箱（各専用イラスト持ち）との重複回避のため据え置き。空きスロットではなく設計判断 -->
   <section class="section" id="guide">
     <div class="section-head">
       <h2>とどくまでの話</h2>
     </div>
     <div class="guide-grid">
-      <div class="guide-item"><h3>送料</h3><p>全国一律500円だよ。5,000円以上でタダになるよ</p></div>
-      <div class="guide-item"><h3>発送</h3><p>注文から3〜5営業日で送るよ。そのくらい待ってね</p></div>
-      <div class="guide-item"><h3>返品</h3><p>届いてから7日以内なら返品できるよ。詳しくは特商法のページを見てね</p></div>
-      <div class="guide-item"><h3>支払い</h3><p>Shopifyのページで支払うよ。ぼくはお金に触らない主義だよ</p></div>
+      <div class="guide-item"><h3>送料</h3><p>全国一律500円だよ。<span class="u-ib">5,000円以上で</span><span class="u-ib">タダになるよ</span></p></div>
+      <div class="guide-item"><h3>発送</h3><p>注文から3〜5営業日で送るよ。<span class="u-ib">そのくらい</span><span class="u-ib">待ってね</span></p></div>
+      <div class="guide-item"><h3>返品</h3><p>届いてから7日以内なら返品できるよ。詳しくは<span class="u-nw">特商法</span>のページを見てね</p></div>
+      <div class="guide-item"><h3>支払い</h3><p>Shopifyのページで<span class="u-ib">支払うよ。</span><span class="u-ib">ぼくは</span><span class="u-ib">お金に触らない</span><span class="u-ib">主義だよ</span></p></div>
     </div>
   </section>
 
@@ -285,7 +290,7 @@
     </div>
     <details class="faq-item">
       <summary>売り切れた商品は、また入るの？</summary>
-      <p class="faq-a">たぶんね。決まったらこの店の「お知らせ」で言うよ。約束はしないよ。ぼく、約束苦手だから</p>
+      <p class="faq-a">たぶんね。決まったらこの店の「お知らせ」で<span class="u-ib">言うよ。</span>約束はしないよ。ぼく、約束苦手だから</p>
     </details>
     <details class="faq-item">
       <summary>ギフト包装はできる？</summary>
@@ -293,32 +298,36 @@
     </details>
     <details class="faq-item">
       <summary>問い合わせはどこから？</summary>
-      <p class="faq-a"><a href="mailto:info@kosukuma.com">info@kosukuma.com</a> へメールしてね。24時間受け付けてるよ。返事は営業日に、中の人が書くよ</p>
+      <p class="faq-a"><a href="mailto:info@kosukuma.com">info@kosukuma.com</a> へメールしてね。<span class="u-ib">24時間受け付けてるよ。</span><span class="u-ib">返事は営業日に、</span><span class="u-ib">中の人が書くよ</span></p>
     </details>
     <details class="faq-item" id="contact">
       <summary>金平糖は売ってないの？</summary>
-      <p class="faq-a">ぼくのだよ。売り物じゃないよ。……わけてあげたいのは山々だけどね</p>
+      <p class="faq-a">ぼくのだよ。売り物じゃないよ。……<span class="u-ib">わけてあげたいのは山々だけどね</span></p>
     </details>
   </section>
 </main>
 
+<!-- 世界の窓（§7-1）2箇所目: #faq とフッターの間 -->
+<div class="world-window" aria-hidden="true"></div>
+
 <!-- フッター（ガイドボックス＋時間帯バンド＋公式情報） -->
 <footer>
+  <!-- 4箱それぞれ専用の新規生成イラスト（白 #ffffff ベタ焼き＝ box背景 --surface と継ぎ目ゼロ）。装飾画像のため alt=""（意味はラベル文字が担う） -->
   <div class="footer-boxes">
     <a class="footer-box" href="#guide">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-shipping.webp" alt="" width="56" height="56">
       <span>とどくまでの話</span>
     </a>
     <a class="footer-box" href="#faq">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-question.webp" alt="" width="56" height="56">
       <span>よくある質問</span>
     </a>
     <a class="footer-box" href="https://x.com/Kosu_dot_kuma" rel="noopener">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-sns.webp" alt="" width="56" height="56">
       <span>公式X</span>
     </a>
     <a class="footer-box" href="mailto:info@kosukuma.com">
-      <img src="/assets/kosukuma/front.png" alt="" width="48" height="48">
+      <img src="/assets/pose/box-mail.webp" alt="" width="56" height="56">
       <span>お問い合わせ</span>
     </a>
   </div>
@@ -348,14 +357,14 @@
       </ul>
     </div>
   </div>
-  <p class="footer-copy">© 2026 株式会社こす.くま ／ この店の言葉はぜんぶ、ぼくが言ってるよ。間違ってたらごめんね</p>
+  <p class="footer-copy">© 2026 <span class="u-nw">株式会社こす.くま</span> ／ <span class="u-ib">この店の言葉はぜんぶ、</span><span class="u-ib">ぼくが言ってるよ。</span><span class="u-ib">間違ってたらごめんね</span></p>
 </footer>
 
 <!-- メニュー -->
 <dialog id="menu-dialog" aria-label="メニュー">
   <div class="dialog-head">
     <h2>メニュー</h2>
-    <button class="icon-btn" type="button" data-close>とじる</button>
+    <button class="icon-btn" type="button" data-close><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>とじる</button>
   </div>
   <div class="dialog-body">
     <nav>
@@ -376,12 +385,12 @@
 <dialog id="cart-drawer" aria-label="カート">
   <div class="dialog-head">
     <h2>レジ</h2>
-    <button class="icon-btn" type="button" data-close>とじる</button>
+    <button class="icon-btn" type="button" data-close><svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>とじる</button>
   </div>
   <div class="dialog-body">
     <div class="cart-empty" hidden>
-      <img class="drawer-kuma" src="/assets/gen/kuma-register.webp" alt="レジ係のこすくまくん">
-      <p>まだ何も入ってないよ。ぼくの店、見るだけでもいいんだよ。ぼくもよくやる</p>
+      <img class="drawer-kuma" src="/assets/pose/register.webp" alt="レジ係のこすくまくん">
+      <p><span class="u-ib">まだ何も入ってないよ。</span><span class="u-ib">ぼくの店、</span><span class="u-ib">見るだけでもいいんだよ。</span><span class="u-ib">ぼくもよくやる</span></p>
     </div>
     <div id="cart-items"></div>
     <div id="shipping-meter" hidden>
