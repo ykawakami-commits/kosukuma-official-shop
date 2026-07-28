@@ -2,11 +2,15 @@
 import { initUI } from './ui.js';
 import { initWhimsy } from './fx/whimsy.js';
 import { initCarousel } from './fx/carousel.js';
+import { initReveal } from './fx/reveal.js';
 import { isMobile, prefersReducedMotion } from './fx/motion.js';
 
 initUI();
 const band = initWhimsy();
 initCarousel('hero-carousel');
+// スクロール出現（ちいかわ式）。initUI() の同期パートが「最近チェック」カードを
+// #checked-grid に生成し終えた後に呼ぶ（生成カードも対象に含めるための順序依存）
+initReveal();
 
 // コマアニメ遅延ロード（公式ルール: 同一アニメは1ページ1個まで）
 // prefers-reduced-motion 時はアニメを起動しない（静止画像のまま。前庭障害系 a11y）

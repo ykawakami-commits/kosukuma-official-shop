@@ -86,6 +86,12 @@ html[data-time="night"] {
   --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur-quick: 160ms;
   --dur-base: 280ms;
+  /* スクロール出現（ちいかわマーケット=Shopify Dawn scroll-trigger 実測値の移植。
+     js/fx/reveal.js が付与する .reveal / .is-visible（main.css）だけが参照する） */
+  --reveal-dur: 600ms;
+  --reveal-ease: cubic-bezier(0, 0, 0.3, 1); /* 強めの ease-out（実測一致） */
+  --reveal-distance: 20px;                   /* 実測 2rem @ root10px = 20px */
+  --reveal-stagger: 75ms;                    /* cascade要素のバッチ内index × 75ms */
 }
 /* ガター段階値（ブレークポイントは聖域の 640/900 のみ。js/fx/motion.js と同一値） */
 @media (max-width: 900px) {
