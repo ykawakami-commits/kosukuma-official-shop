@@ -10,6 +10,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawn, execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { ROOT, EditError, contentReport, saveEntry } from './content-engine.mjs';
@@ -19,6 +20,76 @@ const HOST = '127.0.0.1';
 const PORT = 8820;
 const EDIT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.join(EDIT_DIR, 'config.json');
+const KEY_PATH = path.join(EDIT_DIR, '.access-key');       // git管理外（.gitignore済み）
+const AUDIT_PATH = path.join(EDIT_DIR, 'audit.log');       // *.log は .gitignore 済み
+
+// ---- リモートアクセスキー ----
+// Cloudflare Tunnel 経由の外部アクセスは、このキーを知っている人だけ編集可能。
+// ローカル（トンネルを通らない 127.0.0.1 直アクセス）は従来どおりキー不要。
+// キーを無効化したい時は .access-key を削除して再起動（新キーが発行される）。
+function ensureAccessKey() {
+  try {
+    const k = fs.readFileSync(KEY_PATH, 'utf8').trim();
+    if (/^[0-9a-f]{32,64}$/.test(k)) return k;
+  } catch { /* 初回は未作成 */ }
+  const k = crypto.randomBytes(24).toString('hex');
+  fs.writeFileSync(KEY_PATH, k + '\n');
+  return k;
+}
+const ACCESS_KEY = ensureAccessKey();
+
+function safeEqual(a, b) {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+function parseCookies(req) {
+  const out = {};
+  for (const part of (req.headers.cookie || '').split(';')) {
+    const i = part.indexOf('=');
+    if (i > 0) out[part.slice(0, i).trim()] = part.slice(i + 1).trim();
+  }
+  return out;
+}
+
+// トンネル経由か（cloudflaredが付ける cf-connecting-ip で判定。ローカル直はヘッダ無し）
+const isRemote = (req) => Boolean(req.headers['cf-connecting-ip']);
+const clientIp = (req) => req.headers['cf-connecting-ip'] || req.socket.remoteAddress;
+
+// 認可済みなら true。未認可ならレスポンスを書いて false を返す
+function requireAuth(req, res, url) {
+  if (!isRemote(req)) return true; // ローカルは従来どおり
+  const qKey = url.searchParams.get('key');
+  if (qKey !== null) {
+    if (safeEqual(qKey, ACCESS_KEY)) {
+      // キー付きURLで来たら HttpOnly クッキーに移してクリーンなURLへ
+      res.writeHead(302, {
+        'set-cookie': `edit_key=${ACCESS_KEY}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=2592000`,
+        location: url.pathname || '/_edit',
+      });
+      res.end();
+      return false; // リダイレクト済み
+    }
+  } else if (safeEqual(parseCookies(req).edit_key || '', ACCESS_KEY)) {
+    return true;
+  }
+  res.writeHead(401, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+  res.end('<!doctype html><meta charset="utf-8"><title>アクセスキーが必要です</title>'
+    + '<body style="font-family:sans-serif;max-width:32em;margin:20vh auto;text-align:center">'
+    + '<h1 style="font-size:1.2rem">このページを開くにはアクセスキーが必要だよ</h1>'
+    + '<p>共有されたキー付きURL（…/_edit?key=XXXX）からアクセスしてね。</p></body>');
+  return false;
+}
+
+function auditLog(req, pathname) {
+  try {
+    fs.appendFileSync(AUDIT_PATH, JSON.stringify({
+      ts: new Date().toISOString(), ip: clientIp(req), remote: isRemote(req),
+      method: req.method, path: pathname,
+    }) + '\n');
+  } catch { /* 監査ログ失敗で本処理は止めない */ }
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -174,7 +245,55 @@ function stopJob() {
 
 // ---- APIルーティング ----
 
+// ---- チャット（編集ページ ⇄ このPCで待機するClaudeの直通窓口） ----
+// 仕組み: 送信は log.jsonl に追記されるだけ。Claude Code 側が tail -F で新着を監視し、
+// 返信を POST /_edit/api/chat/reply（ローカル専用）で書き込む。UIは3秒ポーリング。
+
+const CHAT_DIR = path.join(EDIT_DIR, 'chat');
+const CHAT_LOG = path.join(CHAT_DIR, 'log.jsonl');
+
+function appendChat(entry) {
+  fs.mkdirSync(CHAT_DIR, { recursive: true });
+  fs.appendFileSync(CHAT_LOG, JSON.stringify(entry) + '\n');
+  return entry;
+}
+
+function readChat(afterTs = 0, limit = 300) {
+  let lines = [];
+  try { lines = fs.readFileSync(CHAT_LOG, 'utf8').split('\n').filter(Boolean); } catch { return []; }
+  const out = [];
+  for (const l of lines) {
+    try { const e = JSON.parse(l); if (e.ts > afterTs) out.push(e); }
+    catch { /* 壊れた行はスキップ（表示を止めない） */ }
+  }
+  return out.slice(-limit);
+}
+
 async function handleApi(req, res, pathname, query) {
+  if (req.method === 'GET' && pathname === '/_edit/api/chat/log') {
+    return sendJson(res, 200, { messages: readChat(Number(query.get('after') || 0)) });
+  }
+  if (req.method === 'POST' && pathname === '/_edit/api/chat/send') {
+    const body = await readJsonBody(req);
+    const text = String(body.text || '').trim();
+    if (!text) throw new EditError('メッセージが空です');
+    if (text.length > 4000) throw new EditError('メッセージが長すぎます（4000文字まで）');
+    const entry = appendChat({
+      id: crypto.randomUUID(), ts: Date.now(), role: 'user',
+      name: String(body.name || '').trim().slice(0, 30) || 'ゲスト',
+      ip: clientIp(req), text,
+    });
+    return sendJson(res, 200, { ok: true, entry });
+  }
+  if (req.method === 'POST' && pathname === '/_edit/api/chat/reply') {
+    // 返信を書けるのはこのPC上のClaudeだけ（トンネル経由の書き込みは拒否）
+    if (isRemote(req)) throw new EditError('replyはローカル専用です');
+    const body = await readJsonBody(req);
+    const text = String(body.text || '').trim();
+    if (!text) throw new EditError('メッセージが空です');
+    const entry = appendChat({ id: crypto.randomUUID(), ts: Date.now(), role: 'assistant', name: 'Claude', text });
+    return sendJson(res, 200, { ok: true, entry });
+  }
   if (req.method === 'GET' && pathname === '/_edit/api/content') {
     return sendJson(res, 200, contentReport());
   }
@@ -239,6 +358,11 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
   const pathname = url.pathname;
   try {
+    // 編集UI・編集APIはリモート（トンネル経由）ならアクセスキー必須
+    if (pathname === '/_edit' || pathname.startsWith('/_edit/')) {
+      if (!requireAuth(req, res, url)) return;
+      if (req.method === 'POST') auditLog(req, pathname); // 書き込み系の監査証跡
+    }
     if (pathname === '/_edit' || pathname === '/_edit/') return sendFile(res, path.join(EDIT_DIR, 'ui.html'));
     if (pathname === '/_edit/ui.css') return sendFile(res, path.join(EDIT_DIR, 'ui.css'));
     if (pathname === '/_edit/ui.js') return sendFile(res, path.join(EDIT_DIR, 'ui.js'));
@@ -261,6 +385,7 @@ server.listen(PORT, HOST, () => {
   console.log(`│ 台帳: ${report.entries.length}件（OK ${report.entries.length - stale.length} / 要再スキャン ${stale.length}）`);
   for (const s of stale.slice(0, 10)) console.log(`│   要再スキャン: ${s.id} — ${s.problems.join(' / ')}`);
   console.log('│ ※ 起動時は検証のみ。ファイルは一切書き換えていません');
+  console.log(`│ リモート共有キー: ${ACCESS_KEY.slice(0, 6)}…（全文は tools/edit/.access-key）`);
   console.log('└──────────────────────────────────────────────');
 });
 

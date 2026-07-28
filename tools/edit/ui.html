@@ -17,6 +17,7 @@
     <button class="tab is-active" data-tab="text">テキスト</button>
     <button class="tab" data-tab="images">画像</button>
     <button class="tab" data-tab="deploy">デプロイ</button>
+    <button class="tab" data-tab="chat" id="tab-chat">チャット</button>
   </nav>
 </header>
 
@@ -48,6 +49,19 @@
       </div>
       <div class="deploy-info" id="deploy-info"></div>
       <pre class="deploy-log" id="deploy-log"></pre>
+    </div>
+
+    <!-- チャットタブ -->
+    <div class="pane pane-chat" id="pane-chat" hidden>
+      <p class="pane-hint">ここに書くと、開発担当のAI「Claude」（すのはらのPCで待機中）に直接届きます。返事もこの画面に出ます。文言の相談・直してほしい所・機能の要望など何でもどうぞ。</p>
+      <div id="chat-log" class="chat-log"><p class="loading">読み込み中…</p></div>
+      <form id="chat-form" class="chat-form">
+        <input type="text" id="chat-name" placeholder="なまえ（任意）" maxlength="30" autocomplete="name">
+        <div class="chat-input-row">
+          <textarea id="chat-text" placeholder="メッセージを書く…（Ctrl+Enterでも送信）" rows="3" required></textarea>
+          <button class="btn btn-primary" id="chat-send" type="submit">送信</button>
+        </div>
+      </form>
     </div>
   </section>
 

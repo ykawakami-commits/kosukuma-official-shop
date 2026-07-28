@@ -265,3 +265,55 @@ body {
   white-space: pre-wrap;
 }
 .toast.err { background: #b3261e; }
+
+/* ---- チャット（Claude直通） ---- */
+.pane-chat { display: flex; flex-direction: column; min-height: 0; }
+.chat-log {
+  flex: 1;
+  min-height: 200px;
+  overflow-y: auto;
+  background: #fdf9ec;
+  border: 2px solid #3a3226;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-msg { max-width: 85%; }
+.chat-msg.is-user { align-self: flex-end; }
+.chat-msg.is-claude { align-self: flex-start; }
+.chat-meta { font-size: 11px; color: #8a7d64; margin-bottom: 2px; }
+.chat-msg.is-user .chat-meta { text-align: right; }
+.chat-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #3a3226;
+  background: #fff;
+  line-height: 1.6;
+}
+.chat-msg.is-user .chat-body { background: #ffeef0; }
+.chat-msg.is-claude .chat-body { background: #fffbe8; }
+.chat-form { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.chat-form #chat-name { width: 180px; padding: 6px 8px; border: 1.5px solid #c9bda1; border-radius: 8px; }
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input-row textarea {
+  flex: 1;
+  resize: vertical;
+  padding: 8px 10px;
+  border: 1.5px solid #c9bda1;
+  border-radius: 8px;
+  font: inherit;
+  line-height: 1.5;
+}
+.tab.has-new::after {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #d0463f;
+  vertical-align: middle;
+}

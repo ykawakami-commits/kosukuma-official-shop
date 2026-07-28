@@ -67,6 +67,11 @@ $('#tabs').addEventListener('click', (e) => {
   $('#pane-text').hidden = tab !== 'text';
   $('#pane-images').hidden = tab !== 'images';
   $('#pane-deploy').hidden = tab !== 'deploy';
+  $('#pane-chat').hidden = tab !== 'chat';
+  if (tab === 'chat') {
+    $('#tab-chat').classList.remove('has-new');
+    scrollChatToBottom();
+  }
 });
 
 // ---- プレビュー操作 ----
@@ -621,8 +626,96 @@ async function loadDeployConfig() {
 // ---- 起動 ----
 
 setupPreview();
+// ---- チャット（Claude直通） ----
+
+const chatSeen = new Set();
+let chatLastTs = 0;
+let chatFirstLoad = true;
+
+function chatAtBottom() {
+  const el = $('#chat-log');
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+}
+
+function scrollChatToBottom() {
+  const el = $('#chat-log');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderChatMessage(m) {
+  const div = document.createElement('div');
+  div.className = `chat-msg ${m.role === 'assistant' ? 'is-claude' : 'is-user'}`;
+  const meta = document.createElement('div');
+  meta.className = 'chat-meta';
+  const when = new Date(m.ts).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  meta.textContent = `${m.role === 'assistant' ? '🐻 Claude' : m.name || 'ゲスト'}・${when}`;
+  const body = document.createElement('div');
+  body.className = 'chat-body';
+  body.textContent = m.text; // XSS防止: 必ずtextContent
+  div.append(meta, body);
+  return div;
+}
+
+async function pollChat() {
+  try {
+    // 同一msの取りこぼし防止に5秒巻き戻して取得し、idで重複排除
+    const res = await fetch(`/_edit/api/chat/log?after=${Math.max(0, chatLastTs - 5000)}`);
+    if (!res.ok) return;
+    const { messages } = await res.json();
+    const fresh = messages.filter((m) => m.id && !chatSeen.has(m.id));
+    if (fresh.length === 0) return;
+    const logEl = $('#chat-log');
+    if (chatFirstLoad) { logEl.innerHTML = ''; chatFirstLoad = false; }
+    const stick = chatAtBottom();
+    for (const m of fresh) {
+      chatSeen.add(m.id);
+      chatLastTs = Math.max(chatLastTs, m.ts);
+      logEl.appendChild(renderChatMessage(m));
+      if (m.role === 'assistant' && $('#pane-chat').hidden) $('#tab-chat').classList.add('has-new');
+    }
+    if (stick || $('#pane-chat').hidden === false) scrollChatToBottom();
+  } catch { /* オフライン中は静かに次のポーリングへ */ }
+}
+
+async function sendChat() {
+  const textEl = $('#chat-text');
+  const text = textEl.value.trim();
+  if (!text) return;
+  $('#chat-send').disabled = true;
+  try {
+    const res = await fetch('/_edit/api/chat/send', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text, name: $('#chat-name').value }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || '送信に失敗しました');
+    textEl.value = '';
+    await pollChat();
+    scrollChatToBottom();
+  } catch (e) {
+    toast(`送信できませんでした: ${e.message}`, true);
+  } finally {
+    $('#chat-send').disabled = false;
+    textEl.focus();
+  }
+}
+
+function setupChat() {
+  $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); sendChat(); });
+  $('#chat-text').addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendChat(); }
+  });
+  try { $('#chat-name').value = localStorage.getItem('edit-chat-name') || ''; } catch { /* 使えなくても支障なし */ }
+  $('#chat-name').addEventListener('change', () => {
+    try { localStorage.setItem('edit-chat-name', $('#chat-name').value); } catch { /* 同上 */ }
+  });
+  setInterval(pollChat, 3000);
+  pollChat();
+}
+
 setupSearch();
 loadContent();
 loadImages();
 loadDeployConfig();
 pollLog(); // 進行中ジョブがあれば拾う
+setupChat();
