@@ -1,0 +1,389 @@
+{
+  "_meta": {
+    "project": "kosukuma-official-shop",
+    "generatedAt": "2026-07-28T04:20:42.791Z",
+    "note": "こすくま静止画・商品写真・アイコンが入る全スロット。width/height はアセット実寸(px)。displaySize は主要な表示サイズ。コマアニメ（assets/kosukuma/anim/*）は指示により対象外。差し替え時は背景ベタ焼き色（bgHint）と一致させること（README: 背景は配置先トークン色ベタ焼き。PNGマスターは tools/gen-masters/）",
+    "excluded": [
+      "assets/kosukuma/anim/*（dance/kaikai/osirihurihuri/utouto コマアニメ — 対象外）",
+      "assets/3d/konpeito.glb（3Dモデル）",
+      "assets/vendor/*（three.js等）",
+      "assets直下のPNG/JPGマスター（kosukuma-product.png 等 — サイト未参照の生成元）",
+      "assets/pixel/bg-evening.png / bg-night.png（マスターPNG）"
+    ]
+  },
+  "slots": [
+    {
+      "id": "slot.header-logo",
+      "label": "ヘッダーロゴのこすくま",
+      "path": "assets/kosukuma/front.png",
+      "width": 596,
+      "height": 596,
+      "displaySize": "48x48",
+      "usedAt": [
+        "index.html header .header-logo",
+        "products/sticker.html header",
+        "products/ultra-tshirt.html header",
+        "products/deco-helmet.html header"
+      ],
+      "bgHint": "--paper #fdf9ec（.header-logo のピル背景）"
+    },
+    {
+      "id": "slot.nav-band-kuma",
+      "label": "ナビバンドのこすくま（装飾・alt空）",
+      "path": "assets/kosukuma/front.png",
+      "width": 596,
+      "height": 596,
+      "displaySize": "28x28（トップ）/ 34x34（商品ページ）",
+      "usedAt": [
+        "index.html .nav-band",
+        "products/*.html .nav-band"
+      ],
+      "bgHint": "--cream #fcfad2（.nav-band 背景）"
+    },
+    {
+      "id": "slot.hero-kuma",
+      "label": "ヒーローのこすくま",
+      "path": "assets/kosukuma/front.png",
+      "width": 596,
+      "height": 596,
+      "displaySize": "200x200",
+      "usedAt": [
+        "index.html #hero-kuma（.hero-panel 内）"
+      ],
+      "bgHint": "--paper #fdf9ec 固定（.hero-panel。sleeping.webp の焼き込み背景と一致）"
+    },
+    {
+      "id": "slot.hero-kuma-sleeping",
+      "label": "ヒーロー昼寝バリアント（1割の遊び）",
+      "path": "assets/pose/sleeping.webp",
+      "width": 600,
+      "height": 600,
+      "displaySize": "200x200",
+      "usedAt": [
+        "js/fx/whimsy.js initWhimsy()（Math.random()<0.1 で #hero-kuma を差し替え）"
+      ],
+      "bgHint": "--paper #fdf9ec ベタ焼き（hero-panel と継ぎ目ゼロ前提）"
+    },
+    {
+      "id": "slot.footer-band-kuma",
+      "label": "フッターバンドのこすくま（昼・朝）",
+      "path": "assets/kosukuma/front.png",
+      "width": 596,
+      "height": 596,
+      "displaySize": "clamp(160px, 24vw, 240px)",
+      "usedAt": [
+        "index.html #whimsy-kuma-img",
+        "products/*.html #whimsy-kuma-img"
+      ],
+      "bgHint": "--band-bg 昼 #f5edc4 / 夕 #f2e3c0 / 夜 #efe9d8（時間帯トークン切替。夜は utouto コマアニメに交代し画像は hidden）"
+    },
+    {
+      "id": "slot.footer-band-campfire",
+      "label": "フッターバンド夕方バリアント（焚き火）",
+      "path": "assets/pose/campfire.webp",
+      "width": 600,
+      "height": 600,
+      "displaySize": "clamp(160px, 24vw, 240px)",
+      "usedAt": [
+        "js/fx/whimsy.js initWhimsy()（evening帯で #whimsy-kuma-img.src を差し替え）"
+      ],
+      "bgHint": "夕方の --band-bg #f2e3c0 ベタ焼き"
+    },
+    {
+      "id": "slot.footer-box-shipping",
+      "label": "フッター箱: とどくまでの話",
+      "path": "assets/pose/box-shipping.webp",
+      "width": 384,
+      "height": 384,
+      "displaySize": "56x56",
+      "usedAt": [
+        "index.html .footer-boxes",
+        "products/*.html .footer-boxes"
+      ],
+      "bgHint": "--surface #ffffff ベタ焼き（.footer-box 背景と継ぎ目ゼロ必須）"
+    },
+    {
+      "id": "slot.footer-box-question",
+      "label": "フッター箱: よくある質問",
+      "path": "assets/pose/box-question.webp",
+      "width": 384,
+      "height": 384,
+      "displaySize": "56x56",
+      "usedAt": [
+        "index.html .footer-boxes",
+        "products/*.html .footer-boxes"
+      ],
+      "bgHint": "--surface #ffffff ベタ焼き"
+    },
+    {
+      "id": "slot.footer-box-sns",
+      "label": "フッター箱: 公式X",
+      "path": "assets/pose/box-sns.webp",
+      "width": 384,
+      "height": 384,
+      "displaySize": "56x56",
+      "usedAt": [
+        "index.html .footer-boxes",
+        "products/*.html .footer-boxes"
+      ],
+      "bgHint": "--surface #ffffff ベタ焼き"
+    },
+    {
+      "id": "slot.footer-box-mail",
+      "label": "フッター箱: お問い合わせ",
+      "path": "assets/pose/box-mail.webp",
+      "width": 384,
+      "height": 384,
+      "displaySize": "56x56",
+      "usedAt": [
+        "index.html .footer-boxes",
+        "products/*.html .footer-boxes"
+      ],
+      "bgHint": "--surface #ffffff ベタ焼き"
+    },
+    {
+      "id": "slot.cart-empty-register",
+      "label": "カート空のレジ係こすくま",
+      "path": "assets/pose/register.webp",
+      "width": 600,
+      "height": 600,
+      "displaySize": "96px幅",
+      "usedAt": [
+        "index.html #cart-drawer .cart-empty",
+        "products/*.html #cart-drawer .cart-empty"
+      ],
+      "bgHint": "--paper #fdf9ec（カートダイアログ背景）ベタ焼き"
+    },
+    {
+      "id": "slot.product-guide-kuma",
+      "label": "商品詳細の案内係こすくま",
+      "path": "assets/pose/guide.webp",
+      "width": 600,
+      "height": 600,
+      "displaySize": "96px幅",
+      "usedAt": [
+        "products/sticker.html .detail-kuma",
+        "products/ultra-tshirt.html .detail-kuma",
+        "products/deco-helmet.html .detail-kuma"
+      ],
+      "bgHint": "--paper #fdf9ec（ページ地）ベタ焼き"
+    },
+    {
+      "id": "slot.404-lost",
+      "label": "404の迷子こすくま",
+      "path": "assets/pose/lost.webp",
+      "width": 600,
+      "height": 600,
+      "displaySize": "clamp(140px, 40vw, 220px)",
+      "usedAt": [
+        "404.html main img"
+      ],
+      "bgHint": "--paper #fdf9ec（404はtokens.cssのみ読込・bodyが--paper）ベタ焼き"
+    },
+    {
+      "id": "slot.cartline-fallback",
+      "label": "カート明細の画像フォールバック",
+      "path": "assets/kosukuma/front.png",
+      "width": 596,
+      "height": 596,
+      "displaySize": "64x64",
+      "usedAt": [
+        "js/ui.js renderCart()（Shopify画像が無い明細のsrcフォールバック）"
+      ],
+      "bgHint": "--cream #fcfad2（.cart-line img 背景）"
+    },
+    {
+      "id": "slot.photo-sticker-main",
+      "label": "商品写真: ステッカー メイン",
+      "path": "assets/img/kosukuma-sticker-main-800.webp",
+      "width": 800,
+      "height": 600,
+      "displaySize": "srcset 480/800、詳細メイン1280",
+      "variants": [
+        "assets/img/kosukuma-sticker-main-480.webp (480x360)",
+        "assets/img/kosukuma-sticker-main-1280.webp (1280x960)"
+      ],
+      "usedAt": [
+        "index.html #p-sticker カード",
+        "index.html いちおしスライド .spot-img（480）",
+        "products/sticker.html メイン画像（1280）＋サムネ1",
+        "products/ultra-tshirt.html 関連カード",
+        "products/deco-helmet.html 関連カード",
+        "products/sticker.html og:image（1280）",
+        "index.html JSON-LD image（800）"
+      ],
+      "bgHint": "カード: --surface #ffffff / 詳細メイン・spot: --cream #fcfad2（object-fit:contain）"
+    },
+    {
+      "id": "slot.photo-sticker-pack",
+      "label": "商品写真: ステッカー パッケージ",
+      "path": "assets/img/kosukuma-sticker-pack-800.webp",
+      "width": 800,
+      "height": 800,
+      "variants": [
+        "assets/img/kosukuma-sticker-pack-480.webp (480x480)"
+      ],
+      "usedAt": [
+        "products/sticker.html サムネ2（クリックでメイン表示）"
+      ],
+      "bgHint": "--cream #fcfad2（.main-img / .detail-thumb 背景）"
+    },
+    {
+      "id": "slot.photo-sticker-street",
+      "label": "商品写真: ステッカー 街貼り",
+      "path": "assets/img/kosukuma-sticker-street-800.webp",
+      "width": 800,
+      "height": 804,
+      "variants": [
+        "assets/img/kosukuma-sticker-street-480.webp (480x483)"
+      ],
+      "usedAt": [
+        "products/sticker.html サムネ3"
+      ],
+      "bgHint": "--cream #fcfad2"
+    },
+    {
+      "id": "slot.photo-ultra-1",
+      "label": "商品写真: ウルトラプレミアムTシャツ 1",
+      "path": "assets/img/kosukuma-ultra-tshirt-1-800.webp",
+      "width": 800,
+      "height": 533,
+      "variants": [
+        "assets/img/kosukuma-ultra-tshirt-1-480.webp (480x320)",
+        "assets/img/kosukuma-ultra-tshirt-1-1280.webp (1280x853)"
+      ],
+      "usedAt": [
+        "index.html #p-ultra-tshirt カード",
+        "products/ultra-tshirt.html メイン（1280）＋サムネ1",
+        "products/sticker.html 関連カード",
+        "products/deco-helmet.html 関連カード",
+        "products/ultra-tshirt.html og:image（1280）",
+        "index.html JSON-LD image（800）"
+      ],
+      "bgHint": "カード: --surface #ffffff / 詳細メイン: --cream #fcfad2"
+    },
+    {
+      "id": "slot.photo-ultra-2",
+      "label": "商品写真: ウルトラプレミアムTシャツ 2",
+      "path": "assets/img/kosukuma-ultra-tshirt-2-800.webp",
+      "width": 800,
+      "height": 533,
+      "variants": [
+        "assets/img/kosukuma-ultra-tshirt-2-480.webp (480x320)",
+        "assets/img/kosukuma-ultra-tshirt-2-1280.webp (1280x853)"
+      ],
+      "usedAt": [
+        "products/ultra-tshirt.html サムネ2"
+      ],
+      "bgHint": "--cream #fcfad2"
+    },
+    {
+      "id": "slot.photo-deco-helmet",
+      "label": "商品写真: こすくまデコヘルメット",
+      "path": "assets/img/kosukuma-deco-helmet-800.webp",
+      "width": 800,
+      "height": 1000,
+      "variants": [
+        "assets/img/kosukuma-deco-helmet-480.webp (480x600)"
+      ],
+      "usedAt": [
+        "index.html #p-deco-helmet カード",
+        "products/deco-helmet.html メイン（800・data-img-fit=contain）＋サムネ",
+        "products/sticker.html 関連カード",
+        "products/ultra-tshirt.html 関連カード",
+        "products/deco-helmet.html og:image（800）",
+        "index.html JSON-LD image（800）"
+      ],
+      "bgHint": "カード: --surface #ffffff / 詳細メイン: --cream #fcfad2（縦長のためcontain指定）"
+    },
+    {
+      "id": "slot.og-image-top",
+      "label": "トップOGP画像",
+      "path": "assets/og.webp",
+      "width": 1200,
+      "height": 630,
+      "usedAt": [
+        "index.html og:image"
+      ],
+      "bgHint": "SNSカード用（assets/og.png 1200x630 は同内容のPNGマスター・サイト未参照）"
+    },
+    {
+      "id": "slot.favicon",
+      "label": "ファビコン",
+      "path": "favicon-32.png",
+      "width": 32,
+      "height": 32,
+      "usedAt": [
+        "index.html",
+        "products/*.html",
+        "404.html"
+      ],
+      "bgHint": "透過（ブラウザタブ）"
+    },
+    {
+      "id": "slot.apple-touch-icon",
+      "label": "Appleタッチアイコン",
+      "path": "apple-touch-icon.png",
+      "width": 180,
+      "height": 180,
+      "usedAt": [
+        "index.html",
+        "products/*.html（404は未参照）"
+      ],
+      "bgHint": "iOSホーム画面（角丸マスクされる）"
+    },
+    {
+      "id": "slot.icon-512",
+      "label": "512アイコン（予備）",
+      "path": "icon-512.png",
+      "width": 512,
+      "height": 512,
+      "usedAt": [
+        "現在HTML未参照（PWA/manifest用の予備）"
+      ],
+      "bgHint": "-"
+    },
+    {
+      "id": "slot.pixel-bg-day",
+      "label": "ドット絵世界背景（昼）",
+      "path": "assets/pixel/bg-day-768.webp",
+      "width": 768,
+      "height": 512,
+      "variants": [
+        "assets/pixel/bg-day-1536.webp (1536x1024, 2x)"
+      ],
+      "usedAt": [
+        "css/tokens.css --page-bg → css/main.css body::before（全ページ固定背景。露出はヒーローと .world-window の窓のみ。404はmain.css未読込のため出ない）"
+      ],
+      "bgHint": "image-rendering: pixelated で拡大表示"
+    },
+    {
+      "id": "slot.pixel-bg-evening",
+      "label": "ドット絵世界背景（夕）",
+      "path": "assets/pixel/bg-evening-768.webp",
+      "width": 768,
+      "height": 512,
+      "variants": [
+        "assets/pixel/bg-evening-1536.webp (1536x1024)"
+      ],
+      "usedAt": [
+        "現在CSS未参照（data-time=evening 用に生成済み・未配線）"
+      ],
+      "bgHint": "-"
+    },
+    {
+      "id": "slot.pixel-bg-night",
+      "label": "ドット絵世界背景（夜）",
+      "path": "assets/pixel/bg-night-768.webp",
+      "width": 768,
+      "height": 512,
+      "variants": [
+        "assets/pixel/bg-night-1536.webp (1536x1024)"
+      ],
+      "usedAt": [
+        "現在CSS未参照（data-time=night 用に生成済み・未配線）"
+      ],
+      "bgHint": "-"
+    }
+  ]
+}

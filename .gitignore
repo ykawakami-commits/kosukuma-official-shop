@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+*.log
+tools/_*
+tools/edit/backups/
+tools/edit/.access-key
+tools/edit/chat/

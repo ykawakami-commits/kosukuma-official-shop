@@ -1,0 +1,87 @@
+/* legal.css — 法定情報の静的ページ（/legal/*.html）専用 */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--honey-deep); text-decoration: underline; } /* honey-deep on paper = 5.36 AA（§3-2） */
+/* フォーカス可視化（§8-2）: legalページは main.css 非読込のためここでも定義 */
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ── 日本語改行制御（§4-1。main.css 非読込のためここでも定義） ──
+   見出しは文節単位+行長均し。本文は禁則強化（長音・小書き仮名の行頭落ち防止）+ぶら下がり回避 */
+.legal-main h1, .legal-main h2 {
+  word-break: keep-all;
+  word-break: auto-phrase; /* Chrome漸進強化。非対応は keep-all + <wbr> で折る */
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.legal-main p, .legal-main li, .legal-main td {
+  /* auto-phrase は本文にも掛ける（行頭助詞・「追跡番号」等の語中分断の根絶）。
+     非対応ブラウザは normal のまま（keep-all フォールバックは本文には置かない） */
+  word-break: auto-phrase;
+  line-break: strict;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+/* 途中分断禁止トークン（住所の建物名等）の結合 */
+.u-nw { white-space: nowrap; }
+
+.legal-header {
+  border-bottom: var(--line-hair);
+  padding: var(--space-3) var(--gutter);
+}
+.legal-home {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 900;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.legal-main {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--gutter) var(--space-7);
+}
+.legal-main h1 { font-size: 1.5rem; font-weight: 900; margin-bottom: var(--space-4); }
+.legal-main h2 { font-size: 1.05rem; font-weight: 700; margin: var(--space-4) 0 var(--space-2); }
+.legal-main p, .legal-main li { font-size: 0.9rem; color: var(--ink-sub); }
+.legal-main ul { padding-left: 1.4em; }
+
+.legal-main table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.legal-main th, .legal-main td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); /* 表罫も墨系に一元化 */
+  vertical-align: top;
+}
+.legal-main th {
+  white-space: nowrap; background: var(--cream); width: 34%; font-weight: 700;
+  word-break: keep-all; line-break: strict; /* SPの折返し時（下のmedia）は <wbr> の文節境界のみで折る */
+}
+.legal-main td { color: var(--ink-sub); }
+
+.legal-back { margin-top: var(--space-5); }
+.legal-back a { font-weight: 700; }
+
+.legal-footer {
+  border-top: var(--line-hair);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-sub);
+  padding: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .legal-main th { white-space: normal; width: 30%; }
+}

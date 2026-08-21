@@ -1,0 +1,102 @@
+/* css/tokens.css — デザイントークン（色/余白/z-index — 唯一の真実。生値ハードコード禁止） */
+:root {
+  /* 色 — こすくまパレット v1.0（design-system.md §3-3。ちいかわ実測色 全廃） */
+  --paper: #fdf9ec;
+  --cream: #fcfad2;          /* こすくま体色 */
+  --cream-deep: #f5edc4;
+  --surface: #ffffff;
+  --ink: #2b2116;
+  --ink-sub: #6c5d4b;
+  --honey: #f5b73a;          /* 塗り専用・2px ink枠必須 */
+  --honey-deep: #8a5f00;     /* 文字・リンク用 */
+  --wood: #6b4a2c;
+  --moss: #4c6a3e;
+  --moss-soft: #e6edda;
+  --notice: #a63b22;
+  --disabled-bg: #ece5d2;
+  --disabled-text: #675c4d;
+  --disabled-border: #c9c0aa;
+  --band-bg: #f5edc4;
+  --band-ink: var(--ink);
+  /* 影・押し込み（色付き影全廃 → 墨の気配のみ） */
+  --shadow-card: 0 2px 0 rgba(43, 33, 22, 0.05), 0 10px 24px rgba(43, 33, 22, 0.08);
+  --shadow-pop: 0 4px 0 rgba(43, 33, 22, 0.08), 0 16px 36px rgba(43, 33, 22, 0.12);
+  --press-shadow: 0 3px 0 var(--ink);
+  --press-shadow-down: 0 1px 0 var(--ink);
+  --line-brand: 2px solid var(--ink);
+  --line-hair: 1px solid rgba(43, 33, 22, 0.12);
+  /* 全面背景（ドット絵の世界）。露出はヒーロー領域と .world-window の「窓」に限定（§7-1）。
+     コンテンツゾーンは各自が不透明背景（--paper/--cream系）を持つ — 半透明ヴェールは廃止 */
+  --page-bg: image-set(
+    url("/assets/pixel/bg-day-768.webp") 1x,
+    url("/assets/pixel/bg-day-1536.webp") 2x
+  );
+}
+/* 時間帯切替はキャラクターバンド（--band-bg）のみ。文字は常に --ink（§3-1 band-bg）。
+   実測コントラスト: ink on #f2e3c0 = 12.41 / ink on #efe9d8 = 13.00（ともにAAA） */
+html[data-time="evening"] {
+  --band-bg: #f2e3c0;
+  --band-ink: var(--ink);
+}
+html[data-time="night"] {
+  --band-bg: #efe9d8;
+  --band-ink: var(--ink);
+}
+:root {
+  /* 字 */
+  --font-body: "M PLUS Rounded 1c", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-num: "M PLUS Rounded 1c", sans-serif;
+  --fs-hero: clamp(1.75rem, 1.1rem + 2.2vw, 2.4rem); /* デスクトップでh1が1行に収まる上限 */
+  --fs-h2: clamp(1.4rem, 1.1rem + 1.6vw, 2rem);
+  --fs-h3: 1.15rem;
+  --fs-body: 1rem;
+  --fs-small: 0.85rem;
+  --fs-label: 0.72rem;
+  --fs-price: 1.3rem;
+  --fs-announce: 0.9375rem;
+  /* 余白 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 28px;
+  --space-5: 44px;
+  --space-6: 64px;
+  --space-7: 72px;
+  --gutter: 50px;
+  --content-max: 1400px;
+  /* ヘッダー帯（お知らせバー/ナビバンド — 後続パッケージが参照） */
+  --announce-h: 44px; /* min-height参照（.announce-bar）— SPの折返し2行は自然に伸びる */
+  --navband-h: 45px;
+  --header-pad-x: 15px;
+  --header-h: 70px;
+  /* 角丸 */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  /* z-index階層表（厳格。この順より上に出さない。購入UIは聖域） */
+  --z-fx: 1;
+  --z-content: 10;
+  --z-header: 100;
+  --z-sticky: 200;
+  --z-drawer: 500;
+  --z-modal: 600;
+  --z-toast: 700;
+  /* ブレークポイント: 640px / 900px 固定（js/fx/motion.js と同一値・単一情報源。@mediaは変数不可のため各所に直書き） */
+  /* モーション */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-quick: 160ms;
+  --dur-base: 280ms;
+  /* スクロール出現（ちいかわマーケット=Shopify Dawn scroll-trigger 実測値の移植。
+     js/fx/reveal.js が付与する .reveal / .is-visible（main.css）だけが参照する） */
+  --reveal-dur: 600ms;
+  --reveal-ease: cubic-bezier(0, 0, 0.3, 1); /* 強めの ease-out（実測一致） */
+  --reveal-distance: 20px;                   /* 実測 2rem @ root10px = 20px */
+  --reveal-stagger: 75ms;                    /* cascade要素のバッチ内index × 75ms */
+}
+/* ガター段階値（ブレークポイントは聖域の 640/900 のみ。js/fx/motion.js と同一値） */
+@media (max-width: 900px) {
+  :root { --gutter: 20px; }
+}
+@media (max-width: 640px) {
+  :root { --gutter: 15px; }
+}

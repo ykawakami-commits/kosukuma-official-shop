@@ -1,0 +1,23 @@
+{
+  "_comment": "編集サーバ（tools/edit/server.mjs）のデプロイ設定。README.md「### デプロイ」節から自動検出したCloudflare Pages直接アップロード方式。",
+  "detectedFrom": "README.md L75: npx wrangler pages deploy . --project-name=kosukuma-official-shop --branch=main --commit-dirty=true（--branch=main以外はPreviewへ）。プレビュープロジェクト名は kosukuma-shop-v2-preview.pages.dev のURLから同定",
+  "e2e": {
+    "command": "npm run e2e -- http://127.0.0.1:8820",
+    "note": "編集サーバ自身(127.0.0.1:8820)を対象に受け入れ基準E2Eを実行。全PASSのときだけデプロイに進む"
+  },
+  "deploy": {
+    "preview": {
+      "label": "プレビュー環境",
+      "url": "https://kosukuma-shop-v2-preview.pages.dev",
+      "command": "npx wrangler pages deploy . --project-name=kosukuma-shop-v2-preview --branch=main --commit-dirty=true",
+      "enabled": true
+    },
+    "production": {
+      "label": "本番環境",
+      "url": "https://kosukuma-official-shop.pages.dev",
+      "command": "npx wrangler pages deploy . --project-name=kosukuma-official-shop --branch=main --commit-dirty=true",
+      "enabled": false,
+      "note": "READMEの鉄則『デプロイは必ずgitにコミットしてから』のため、renewal-v2（コミット禁止中）からの本番デプロイは編集UIからは実行できません。本番に出す時はコミット後に上のコマンドをターミナルで実行してください"
+    }
+  }
+}
